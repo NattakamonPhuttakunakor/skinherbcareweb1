@@ -44,35 +44,10 @@ async function startServer() {
       app.use(morgan("dev"));
     }
 
-    // --- CORS ---
-    // เพิ่ม www. เข้าไปเผื่อบางที Netlify redirect มา
-    const allowedOrigins = [
-      "http://localhost:5000",
-      "http://localhost:3000",
-      "http://127.0.0.1:5500",
-      "http://127.0.0.1:5501",
-      process.env.FRONTEND_URL,
-      "https://skinherbcare.netlify.app",
-      "https://www.skinherbcare.netlify.app"
-    ].filter(Boolean);
-
+    // --- CORS (แก้ไขใหม่: อนุญาตหมด ตัดปัญหา GitHub Pages เข้าไม่ได้) ---
     app.use(
       cors({
-        origin: function (origin, callback) {
-          // อนุญาต requests ที่ไม่มี origin (เช่น mobile apps หรือ curl requests)
-          if (!origin) return callback(null, true);
-          
-          if (
-            allowedOrigins.indexOf(origin) !== -1 ||
-            process.env.NODE_ENV === "development"
-          ) {
-            callback(null, true);
-          } else {
-            console.log("Blocked by CORS:", origin); // Log เพื่อดูว่าใครโดนบล็อก
-            callback(new Error("Not allowed by CORS"));
-          }
-        },
-        credentials: true,
+        origin: '*', // 🚩 แก้เป็น * เพื่อให้ GitHub Pages และทุกที่เข้าถึงได้แน่นอน
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
       })
@@ -83,7 +58,6 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // --- Static Files ---
-    // 🚩 แก้ไข: ลบ .. ออก เพราะ server.js น่าจะอยู่ที่ root folder แล้ว
     app.use(express.static(path.join(__dirname, "public")));
     app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -138,7 +112,7 @@ async function startServer() {
       console.log("\n" + "=".repeat(50));
       console.log(`🚀 Server running at http://localhost:${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`🌐 CORS enabled for: ${allowedOrigins.join(", ")}`);
+      console.log(`🌐 CORS enabled for: ALL ORIGINS (*)`); // แจ้งสถานะใหม่
       console.log("✅ Ready to serve requests...");
       console.log("=".repeat(50) + "\n");
     });

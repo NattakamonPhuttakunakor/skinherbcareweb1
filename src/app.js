@@ -31,18 +31,13 @@ async function startServer() {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
-    // --- 1. ตั้งค่า CORS ---
+    // --- 1. ตั้งค่า CORS (แก้ใหม่: เปิดรับทุกเว็บ) ---
     app.use(
       cors({
-        origin: [
-          "http://localhost:5000", // Backend
-          "http://localhost:3000", // Frontend Local
-          "http://127.0.0.1:5500", // Live Server (VS Code)
-          "https://skinherbcare.netlify.app" // ✅ เว็บ Netlify ของคุณ (แก้ชื่อให้ถูกต้อง)
-        ],
+        origin: '*', // 🚩 อนุญาตทั้งหมด (แก้ปัญหา GitHub Pages เข้าไม่ได้)
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        allowedHeaders: ["Content-Type", "Authorization"]
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
       })
     );
 
@@ -50,6 +45,7 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true }));
 
     // --- 2. Serve Static Files ---
+    // (สมมติว่า server.js อยู่ใน folder src ให้ถอยกลับไป 1 ขั้นเพื่อหา public)
     app.use(express.static(path.join(__dirname, "../public")));
     app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
@@ -62,7 +58,13 @@ async function startServer() {
 
     // --- 4. หน้าแรก (Root Route) ---
     app.get("/", (req, res) => {
-      res.sendFile(path.join(__dirname, "../public", "index.html"));
+      // พยายามส่งไฟล์ index.html ถ้าหาไม่เจอให้ส่งข้อความบอก
+      const indexHtmlPath = path.join(__dirname, "../public", "index.html");
+      res.sendFile(indexHtmlPath, (err) => {
+          if (err) {
+              res.send("API Server is running... (Cannot find index.html in public folder)");
+          }
+      });
     });
 
     // --- 5. Start Server ---
@@ -70,6 +72,7 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
       console.log("📊 Database connected successfully!");
+      console.log("🌐 CORS enabled for: ALL ORIGINS (*)");
       console.log("✅ Ready to serve requests...");
     });
   } catch (error) {
