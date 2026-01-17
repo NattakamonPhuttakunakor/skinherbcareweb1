@@ -6,14 +6,16 @@ import {
 } from '../controllers/analysisController.js';
 
 const router = express.Router();
-const API_URL = process.env.PREDICT_API_URL;
-const API_KEY = process.env.API_KEY;
 
-// ADMIN
+// ❌ ลบตัวแปรที่ไม่ได้ใช้ออก (API_KEY ควรไปอยู่ในไฟล์ Controller ครับ)
+
+// --- ADMIN Routes ---
 router.get('/sales', getSalesData);
 router.get('/categories', getCategoryData);
 
-// USER
+// --- USER Routes ---
+// 🚩 จุดสำคัญ: ชื่อ Route คือ "/diagnose"
+// ดังนั้น URL เต็มๆ คือ: https://skinherbcareweb1.onrender.com/api/analysis/diagnose
 router.post('/diagnose', diagnoseSymptoms);
 
 export default router;

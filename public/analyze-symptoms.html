@@ -155,14 +155,13 @@
                 วิเคราะห์
             </button>
             
-            <div id="results-container" class="mt-6 bg-gray-50 p-4 rounded-lg min-h-[100px] border border-gray-200">
-                <p class="text-gray-500 text-center mt-4">ผลลัพธ์จะแสดงที่นี่...</p>
-            </div>
+            <div id="results-container" class="mt-6 bg-gray-50 p-4 rounded-lg min-h-[100px] border border-gray-200 hidden">
+                </div>
         </div>
     </main>
 
     <script>
-        // กำหนด URL ของ Server บน Render
+        // ✅ URL ของ Server (Render)
         const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -178,46 +177,58 @@
                     return;
                 }
 
-                // แสดงสถานะ Loading
+                // 1. เริ่มสถานะ Loading
                 analyzeBtn.disabled = true;
                 analyzeBtn.innerText = 'กำลังวิเคราะห์...';
+                resultsContainer.classList.remove('hidden');
+                
+                // สร้าง Loading Spinner
                 resultsContainer.innerHTML = `
                     <div class="text-center py-4">
                         <svg class="animate-spin h-8 w-8 text-green-600 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <p class="text-gray-500">AI กำลังประมวลผล...</p>
+                        <p id="loading-text" class="text-gray-500">AI กำลังประมวลผล...</p>
                     </div>`;
 
+                // 2. ตั้งเวลาเตือนถ้า Render ตื่นช้า (เกิน 5 วินาที)
+                const longWaitTimeout = setTimeout(() => {
+                    const loadingText = document.getElementById('loading-text');
+                    if (loadingText) {
+                        loadingText.innerText = 'Server กำลังตื่น (อาจใช้เวลา 1-2 นาทีในครั้งแรก)... กรุณารอสักครู่';
+                        loadingText.classList.add('text-orange-500');
+                    }
+                }, 5000);
+
                 try {
-                    // ดึง Token จาก LocalStorage (กรณีที่ต้องล็อกอินก่อนใช้งาน)
                     const token = localStorage.getItem('token');
 
-                    const response = await fetch(`${API_BASE_URL}/api/analysis/diagnose`, {
+                    // ⚠️ สำคัญ: ตรวจสอบ Route ให้ตรงกับ backend
+                    // ปกติจะเป็น /analyze หรือ /diagnose (ลองเปลี่ยนเป็น /analyze ดูก่อน)
+                    const response = await fetch(`${API_BASE_URL}/api/analysis/analyze`, { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            // ส่ง Token ไปด้วย ถ้าไม่มีก็จะเป็น null (backend บางตัวอาจไม่บังคับ)
                             'Authorization': token ? `Bearer ${token}` : ''
                         },
                         body: JSON.stringify({ symptoms: symptoms })
                     });
+                    
+                    clearTimeout(longWaitTimeout); // ยกเลิกการเตือนถ้ารับข้อมูลได้แล้ว
 
                     const data = await response.json();
 
                     if (response.ok) {
-                        // --- แสดงผลลัพธ์เมื่อสำเร็จ ---
-                        // ปรับแต่งการแสดงผลตามข้อมูลที่ Backend ส่งกลับมา
-                        // สมมติว่า Backend ส่งกลับมาเป็น { result: "...", products: [...] }
+                        // --- แสดงผลลัพธ์ ---
                         let htmlContent = `
                             <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
                                 <h3 class="font-bold text-green-800 text-lg mb-2">🌿 ผลการวิเคราะห์</h3>
-                                <p class="text-gray-700">${data.result || data.message || JSON.stringify(data)}</p>
+                                <p class="text-gray-700">${data.result || data.message || "วิเคราะห์เสร็จสิ้น"}</p>
                             </div>
                         `;
 
-                        // ถ้ามีรายการสินค้าแนะนำส่งกลับมาด้วย
+                        // ถ้ามีสินค้าแนะนำ
                         if (data.recommendedProducts && data.recommendedProducts.length > 0) {
                             htmlContent += `<h4 class="font-bold text-gray-800 mt-4 mb-2">สมุนไพรที่แนะนำ:</h4><ul class="list-disc pl-5">`;
                             data.recommendedProducts.forEach(prod => {
@@ -229,15 +240,23 @@
                         resultsContainer.innerHTML = htmlContent;
 
                     } else {
-                        throw new Error(data.message || 'เกิดข้อผิดพลาดในการวิเคราะห์');
+                        // กรณี Backend ตอบกลับมาแต่เป็น Error (เช่น 400, 401, 500)
+                        throw new Error(data.message || `เกิดข้อผิดพลาด (${response.status})`);
                     }
 
                 } catch (error) {
+                    clearTimeout(longWaitTimeout);
                     console.error('Analysis Error:', error);
+                    
+                    let errorMsg = error.message;
+                    if(errorMsg.includes("Failed to fetch")) {
+                        errorMsg = "ไม่สามารถเชื่อมต่อ Server ได้ (Server อาจจะหลับอยู่ หรือเน็ตหลุด)";
+                    }
+
                     resultsContainer.innerHTML = `
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                             <strong class="font-bold">เกิดข้อผิดพลาด!</strong>
-                            <span class="block sm:inline">${error.message}</span>
+                            <span class="block sm:inline">${errorMsg}</span>
                         </div>`;
                 } finally {
                     analyzeBtn.disabled = false;
