@@ -73,9 +73,11 @@
     </div>
 
     <script>
-        
-        const API_BASE_URL = 'https://skinherbcareweb1.netlify.app'; 
-        
+        // 👇👇👇 แก้ตรงนี้ครับ! เอาลิงก์จาก Render มาใส่ 👇👇👇
+        // ตัวอย่าง: 'https://my-backend.onrender.com' (ห้ามมี / ต่อท้าย)
+        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com'; 
+        // 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+
         document.addEventListener('DOMContentLoaded', () => {
             const registerForm = document.getElementById('registerForm');
             const passwordInput = document.getElementById('password');
@@ -121,7 +123,7 @@
                 const password = passwordInput.value;
 
                 try {
-                    // ใช้ API_BASE_URL ที่เราประกาศไว้ด้านบน
+                    // ใช้ API_BASE_URL เชื่อมต่อ
                     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
