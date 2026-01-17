@@ -51,7 +51,7 @@
     </div>
     
     <script>
-        
+        // ✅ ลิงก์ Backend ถูกต้องแล้ว
         const API_BASE_URL = 'https://skinherbcareweb1.onrender.com'; 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -88,10 +88,13 @@
 
                     if (response.ok && data.success) {
                         // --- Login สำเร็จ ---
+                        // เก็บ Token ไว้ใช้งาน
                         localStorage.setItem('token', data.token);
+                        // เก็บข้อมูล User ไว้แสดงผล
                         localStorage.setItem('user', JSON.stringify(data.user || data)); 
                         
-                        // Redirect
+                        // Redirect ไปตามบทบาท (Role)
+                        // ** อย่าลืมสร้างไฟล์ admin-dashboard.html และ user-dashboard.html ด้วยนะครับ **
                         window.location.href = data.role === 'admin' ? '/admin-dashboard.html' : '/user-dashboard.html';
                     } else {
                         // --- Login ไม่สำเร็จ ---
