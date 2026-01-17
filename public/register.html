@@ -73,6 +73,9 @@
     </div>
 
     <script>
+        
+        const API_BASE_URL = 'https://skinherbcareweb1.netlify.app/analyze-symptoms'; 
+
         document.addEventListener('DOMContentLoaded', () => {
             const registerForm = document.getElementById('registerForm');
             const passwordInput = document.getElementById('password');
@@ -109,24 +112,24 @@
                 submitBtn.disabled = true;
                 submitBtn.innerText = 'กำลังบันทึกข้อมูล...';
 
-                // ✅ 1. ดึงค่าจากฟอร์มให้ครบ (รวม age, occupation)
+                // ดึงค่าจากฟอร์ม
                 const firstName = document.getElementById('firstName').value.trim();
                 const lastName = document.getElementById('lastName').value.trim();
-                const age = document.getElementById('age').value;             // เพิ่ม
-                const occupation = document.getElementById('occupation').value.trim(); // เพิ่ม
+                const age = document.getElementById('age').value;
+                const occupation = document.getElementById('occupation').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const password = passwordInput.value;
 
                 try {
-                    // ✅ 2. ส่งข้อมูล (ใช้ Path สั้นๆ เพื่อให้มันไม่งงเรื่อง Port 3000/5000)
-                    const response = await fetch('/api/auth/register', {
+                    // ใช้ API_BASE_URL ที่เราประกาศไว้ด้านบน
+                    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             firstName, 
                             lastName, 
-                            age,         // ส่งอายุไป
-                            occupation,  // ส่งอาชีพไป
+                            age, 
+                            occupation, 
                             email, 
                             password 
                         }),

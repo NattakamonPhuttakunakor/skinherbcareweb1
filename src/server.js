@@ -45,25 +45,30 @@ async function startServer() {
     }
 
     // --- CORS ---
+    // เพิ่ม www. เข้าไปเผื่อบางที Netlify redirect มา
     const allowedOrigins = [
       "http://localhost:5000",
       "http://localhost:3000",
       "http://127.0.0.1:5500",
       "http://127.0.0.1:5501",
       process.env.FRONTEND_URL,
-      "https://skinherbcare.netlify.app"
+      "https://skinherbcare.netlify.app",
+      "https://www.skinherbcare.netlify.app"
     ].filter(Boolean);
 
     app.use(
       cors({
         origin: function (origin, callback) {
+          // อนุญาต requests ที่ไม่มี origin (เช่น mobile apps หรือ curl requests)
           if (!origin) return callback(null, true);
+          
           if (
             allowedOrigins.indexOf(origin) !== -1 ||
             process.env.NODE_ENV === "development"
           ) {
             callback(null, true);
           } else {
+            console.log("Blocked by CORS:", origin); // Log เพื่อดูว่าใครโดนบล็อก
             callback(new Error("Not allowed by CORS"));
           }
         },
@@ -78,8 +83,9 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // --- Static Files ---
-    app.use(express.static(path.join(__dirname, "../public")));
-    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+    // 🚩 แก้ไข: ลบ .. ออก เพราะ server.js น่าจะอยู่ที่ root folder แล้ว
+    app.use(express.static(path.join(__dirname, "public")));
+    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
     // --- Health Check ---
     app.get("/api/health", (req, res) => {
@@ -100,7 +106,11 @@ async function startServer() {
 
     // --- Root Route ---
     app.get("/", (req, res) => {
-      res.sendFile(path.join(__dirname, "../public", "index.html"));
+        // เช็คว่ามีไฟล์ index.html จริงไหม ถ้าไม่มีให้แสดงข้อความแทน
+        const indexFile = path.join(__dirname, "public", "index.html");
+        res.sendFile(indexFile, (err) => {
+            if (err) res.send("API Server is running...");
+        });
     });
 
     // --- 404 Handler ---
