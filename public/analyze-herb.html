@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ค้นหาข้อมูลจากรูปสมุนไพร - SkinHerbCare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ======= พื้นฐานและธีมหลัก ======= */
+    @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
+
+    :root {
+      --bg-gradient-start: #e0f2f1;
+      --bg-gradient-end: #dcfce7;
+      --card-bg: rgba(255, 255, 255, 0.5);
+      --blur-strength: 15px;
+      --border-color: rgba(255, 255, 255, 0.2);
+      --primary-text: #064e3b;
+      --secondary-text: #1f2937;
+    }
+
+    body {
+      font-family: "Sarabun", sans-serif;
+      background-image: linear-gradient(160deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--primary-text);
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    /* ======= ใบไม้ตกแต่งพื้นหลัง ======= */
+    body::before {
+      content: "🌿";
+      position: fixed;
+      bottom: -50px;
+      left: -50px;
+      font-size: 250px;
+      color: rgba(255, 255, 255, 0.5);
+      transform: rotate(-30deg);
+      z-index: -1;
+    }
+    body::after {
+      content: "🌿";
+      position: fixed;
+      top: -80px;
+      right: -80px;
+      font-size: 300px;
+      color: rgba(255, 255, 255, 0.4);
+      transform: rotate(20deg);
+      z-index: -1;
+    }
+
+    /* ======= Navbar แบบโปร่งใส glass ======= */
+    .top-nav {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 15px 40px;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary-text);
+      text-decoration: none;
+    }
+    .auth-links {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .auth-links a {
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      color: var(--primary-text);
+      transition: all 0.3s ease;
+    }
+    .login-btn:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* ======= กล่องแสดงภาพ ======= */
+    .preview-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 200px;
+      border: 2px dashed #d1d5db;
+      border-radius: 0.75rem;
+      background-color: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      color: #6b7280;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    .preview-box:hover {
+      border-color: #16a34a;
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+  <!-- Navbar -->
+  <nav class="top-nav">
+    <div class="nav-container">
+      <a href="/" class="logo">🌿 SkinHerbCare</a>
+      <div class="auth-links">
+        <a href="/" class="login-btn">Home</a>
+        <a href="/login.html" class="login-btn">Log In</a>
+        <a href="/register.html" class="login-btn">Sign Up</a>
+        <div class="profile-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex flex-col items-center min-h-[calc(100vh-4rem)] px-4 py-12">
+    <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg p-8 border border-gray-200">
+      <a href="/user-dashboard.html" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        กลับไปหน้าแดชบอร์ด
+      </a>
+
+      <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">ค้นหาข้อมูลจากรูปสมุนไพร</h1>
+      <p class="text-gray-600 text-center mb-6">อัปโหลดภาพสมุนไพรเพื่อให้ AI ช่วยวิเคราะห์ข้อมูลและสรรพคุณ</p>
+
+      <div id="image-preview-box" class="preview-box">
+        <span>ภาพตัวอย่างจะแสดงที่นี่</span>
+      </div>
+
+      <input
+        id="herb-image-upload"
+        type="file"
+        accept="image/*"
+        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"
+      />
+
+      <button
+        id="analyze-herb-btn"
+        class="w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition"
+      >
+        ค้นหา
+      </button>
+
+      <div id="results-container" class="mt-6 bg-gray-50/80 backdrop-blur-sm p-4 rounded-lg min-h-[100px]">
+        <p>ผลลัพธ์จะแสดงที่นี่...</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/analyze-herb.js"></script>
+
+  <!-- Preview Image Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const imageInput = document.getElementById("herb-image-upload");
+      const previewBox = document.getElementById("image-preview-box");
+      const defaultText = "<span>ภาพตัวอย่างจะแสดงที่นี่</span>";
+
+      imageInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewBox.innerHTML = defaultText;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

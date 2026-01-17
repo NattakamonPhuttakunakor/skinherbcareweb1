@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิเคราะห์จากอาการ - SkinHerbCare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+
+    <style>
+        /* พื้นหลังเริ่มต้น */
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f0fdf4;
+            background-image: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+        }
+
+        /* --- การตั้งค่าพื้นฐานเพิ่มเติม --- */
+        @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
+
+        :root {
+            --bg-gradient-start: #e0f2f1;
+            --bg-gradient-end: #dcfce7;
+            --card-bg: rgba(255, 255, 255, 0.5);
+            --blur-strength: 15px;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --primary-text: #064e3b;
+            --secondary-text: #1f2937;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-gradient-start);
+            background-image: linear-gradient(160deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--primary-text);
+            position: relative;
+        }
+
+        /* ใบไม้ตกแต่ง */
+        body::before {
+            content: '🌿';
+            position: fixed;
+            bottom: -50px;
+            left: -50px;
+            font-size: 250px;
+            color: rgba(255, 255, 255, 0.5);
+            transform: rotate(-30deg);
+            z-index: -1;
+        }
+        body::after {
+            content: '🌿';
+            position: fixed;
+            top: -80px;
+            right: -80px;
+            font-size: 300px;
+            color: rgba(255, 255, 255, 0.4);
+            transform: rotate(20deg);
+            z-index: -1;
+        }
+
+        /* Navbar แบบ glass effect */
+        .top-nav {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 40px;
+            position: sticky;
+            width: 100%;
+            top: 0;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-text);
+            text-decoration: none;
+        }
+
+        .auth-links {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .auth-links a {
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: var(--primary-text);
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- Navbar ใหม่ -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="logo">🌿 SkinHerbCare</a>
+            <div class="auth-links">
+                <a href="/" class="login-btn">Home</a>
+                <a href="/login.html" class="login-btn">Log In</a>
+                <a href="/register.html" class="login-btn">Sign Up</a>
+                <div class="profile-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- เนื้อหาหลัก -->
+    <main class="flex flex-col items-center min-h-[calc(100vh-4rem)] px-4 py-12">
+        <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg p-8 border border-gray-200">
+            <a href="/user-dashboard.html" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                กลับไปหน้าแดชบอร์ด
+            </a>
+
+            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">วิเคราะห์จากอาการ</h1>
+            <p class="text-gray-600 text-center mb-6">บอกอาการหรือปัญหาผิวที่คุณกังวล เพื่อให้ AI แนะนำสมุนไพรที่เหมาะสม</p>
+
+            <textarea id="symptom-input" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" rows="4" placeholder="เช่น: มีปัญหาสิวอักเสบ ผิวแห้ง และรอยแดง..."></textarea>
+            
+            <button id="analyze-symptom-btn" class="mt-4 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition">
+                วิเคราะห์
+            </button>
+            
+            <div id="results-container" class="mt-6 bg-gray-50 p-4 rounded-lg min-h-[100px]">
+                <p>ผลลัพธ์จะแสดงที่นี่...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/analyze-symptoms.js"></script>
+</body>
+</html>
