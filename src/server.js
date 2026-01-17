@@ -25,6 +25,7 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   try {
+    // เชื่อมต่อ Database (ถ้า Connect ไม่ได้ Server จะไม่เริ่มทำงาน)
     console.log("🔄 Connecting to database...");
     await connectDB();
     console.log("✅ Database connected successfully!");
@@ -44,10 +45,10 @@ async function startServer() {
       app.use(morgan("dev"));
     }
 
-    // --- CORS (แก้ไขใหม่: อนุญาตหมด ตัดปัญหา GitHub Pages เข้าไม่ได้) ---
+    // --- CORS (จุดสำคัญ: อนุญาตหมด * เพื่อแก้ปัญหา GitHub Pages) ---
     app.use(
       cors({
-        origin: '*', // 🚩 แก้เป็น * เพื่อให้ GitHub Pages และทุกที่เข้าถึงได้แน่นอน
+        origin: '*', // ✅ อนุญาตทุกโดเมน (แก้ปัญหาติดแดง 100%)
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
       })
@@ -58,33 +59,28 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // --- Static Files ---
-    app.use(express.static(path.join(__dirname, "public")));
-    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    app.use(express.static(path.join(__dirname, "../public"))); // แก้ path ให้ชี้ไป public นอก folder src ถ้าจำเป็น
+    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-    // --- Health Check ---
+    // --- Health Check (เอาไว้เช็คว่า Server ตื่นหรือยัง) ---
     app.get("/api/health", (req, res) => {
       res.json({
         status: "ok",
-        message: "Server is running",
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || "development"
+        message: "Server is running correctly",
+        timestamp: new Date().toISOString()
       });
     });
 
     // --- API Routes ---
     app.use("/api/auth", authRoutes);
-    app.use("/api/analysis", analysisRoutes);
+    app.use("/api/analysis", analysisRoutes); // 👉 URL จะเป็น /api/analysis/diagnose
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
 
-    // --- Root Route ---
+    // --- Root Route (แสดงข้อความหน้าแรก) ---
     app.get("/", (req, res) => {
-        // เช็คว่ามีไฟล์ index.html จริงไหม ถ้าไม่มีให้แสดงข้อความแทน
-        const indexFile = path.join(__dirname, "public", "index.html");
-        res.sendFile(indexFile, (err) => {
-            if (err) res.send("API Server is running...");
-        });
+        res.send("✅ SkinHerbCare API is Running! (Ready for requests)");
     });
 
     // --- 404 Handler ---
@@ -111,24 +107,16 @@ async function startServer() {
     const server = app.listen(PORT, () => {
       console.log("\n" + "=".repeat(50));
       console.log(`🚀 Server running at http://localhost:${PORT}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`🌐 CORS enabled for: ALL ORIGINS (*)`); // แจ้งสถานะใหม่
+      console.log(`🌐 CORS enabled for: ALL ORIGINS (*)`);
       console.log("✅ Ready to serve requests...");
       console.log("=".repeat(50) + "\n");
     });
 
-    // Graceful shutdown
-    process.on("SIGTERM", () => {
-      console.log("👋 SIGTERM received, closing server gracefully...");
-      server.close(() => {
-        console.log("✅ Server closed");
-        process.exit(0);
-      });
-    });
   } catch (error) {
     console.error("\n" + "=".repeat(50));
     console.error("❌ Failed to start server:");
     console.error(error.message);
+    console.error("Make sure MONGO_URI is set in Render Environment Variables");
     console.error("=".repeat(50) + "\n");
     process.exit(1);
   }
