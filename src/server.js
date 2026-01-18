@@ -24,6 +24,7 @@ import analysisRoutes from "./routes/analysis.js";
 import herbRoutes from "./routes/herbs.js";
 import diseaseRoutes from "./routes/diseases.js";
 import adminRoutes from "./routes/admin.js";
+import geminiRoutes from "./routes/gemini.js";
 
 // 🔥 แก้ __dirname สำหรับ ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -87,6 +88,7 @@ async function startServer() {
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
+    app.use("/api/gemini", geminiRoutes);
 
     // ==========================================
     // 🌐 FRONTEND ROUTES
