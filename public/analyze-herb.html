@@ -172,12 +172,39 @@
           📁 เลือกรูปจากเครื่อง
         </button>
         <button id="camera-btn" class="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">
-          📷 ถ่ายภาพจากกล้อง
+          📷 เปิดกล้อง
         </button>
       </div>
 
-      <div id="image-preview-box" class="preview-box">
-        <span>ภาพตัวอย่างจะแสดงที่นี่</span>
+      <!-- 📹 Camera Mode Section -->
+      <div id="camera-mode" class="hidden mb-6">
+        <video id="video-stream" width="100%" height="auto" style="border-radius: 12px; background: #000; max-height: 400px;" autoplay playsinline></video>
+        <div class="flex gap-3 mt-4 justify-center">
+          <button id="capture-btn" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+            ✓ ถ่ายภาพ
+          </button>
+          <button id="close-camera-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">
+            ✕ ปิดกล้อง
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Preview and Retake -->
+      <div id="capture-mode" class="hidden mb-6">
+        <div id="image-preview-box" class="preview-box"><span>ภาพจะแสดงที่นี่</span></div>
+        <div class="flex gap-3 justify-center">
+          <button id="use-capture-btn" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+            ✓ ใช้รูปนี้
+          </button>
+          <button id="retake-btn" class="px-6 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition">
+            🔄 ถ่ายใหม่
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload Mode -->
+      <div id="upload-mode" class="mb-6">
+        <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
       </div>
 
       <input
@@ -185,15 +212,6 @@
         type="file"
         accept="image/*"
         class="hidden block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"
-      />
-
-      <!-- ✅ Camera Input (hidden) -->
-      <input
-        id="herb-camera-input"
-        type="file"
-        accept="image/*"
-        capture="environment"
-        class="hidden"
       />
 
       <button
@@ -211,48 +229,170 @@
 
   <script src="/js/analyze-herb.js"></script>
 
-  <!-- Preview Image Script -->
+  <!-- Camera Implementation Script -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const imageInput = document.getElementById("herb-image-upload");
-      const cameraInput = document.getElementById("herb-camera-input");
-      const previewBox = document.getElementById("image-preview-box");
-      const uploadBtn = document.getElementById("upload-btn");
-      const cameraBtn = document.getElementById("camera-btn");
-      const defaultText = "<span>ภาพตัวอย่างจะแสดงที่นี่</span>";
+    const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+    let currentImageBlob = null;
+    let videoStreamObj = null;
 
-      // ✅ ปุ่มเลือกรูปจากเครื่อง
-      uploadBtn.addEventListener("click", () => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const imageInput = document.getElementById('herb-image-upload');
+      const uploadBtn = document.getElementById('upload-btn');
+      const cameraBtn = document.getElementById('camera-btn');
+      const videoElement = document.getElementById('video-stream');
+      const captureBtn = document.getElementById('capture-btn');
+      const closeCameraBtn = document.getElementById('close-camera-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      const useCaptureBtn = document.getElementById('use-capture-btn');
+      const cameraModeDiv = document.getElementById('camera-mode');
+      const captureModeDiv = document.getElementById('capture-mode');
+      const uploadModeDiv = document.getElementById('upload-mode');
+      const previewBoxUpload = document.getElementById('image-preview-box-upload');
+      const previewBox = document.getElementById('image-preview-box');
+      const analyzeBtn = document.getElementById('analyze-herb-btn');
+
+      // 🎥 Switch to Upload Mode
+      uploadBtn.addEventListener('click', async () => {
+        await stopCamera();
+        uploadModeDiv.classList.remove('hidden');
+        cameraModeDiv.classList.add('hidden');
+        captureModeDiv.classList.add('hidden');
         imageInput.click();
       });
 
-      // ✅ ปุ่มถ่ายภาพจากกล้อง
-      cameraBtn.addEventListener("click", () => {
-        cameraInput.click();
+      // 🎥 Switch to Camera Mode
+      cameraBtn.addEventListener('click', async () => {
+        uploadModeDiv.classList.add('hidden');
+        captureModeDiv.classList.add('hidden');
+        cameraModeDiv.classList.remove('hidden');
+        await startCamera(videoElement);
       });
 
-      // ✅ ฟังก์ชันแสดงภาพตัวอย่าง
-      const handleImageSelect = (file) => {
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-          };
-          reader.readAsDataURL(file);
-        } else {
-          previewBox.innerHTML = defaultText;
+      // 🎥 Start Camera
+      async function startCamera(videoElement) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false
+          });
+          videoStreamObj = stream;
+          videoElement.srcObject = stream;
+          videoElement.play();
+        } catch (err) {
+          console.error('กล้องไม่พร้อม:', err);
+          alert('ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต');
+          cameraModeDiv.classList.add('hidden');
         }
-      };
+      }
 
-      imageInput.addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        handleImageSelect(file);
+      // 🎥 Stop Camera
+      async function stopCamera() {
+        if (videoStreamObj) {
+          videoStreamObj.getTracks().forEach(track => track.stop());
+          videoStreamObj = null;
+        }
+      }
+
+      // 📷 Capture Image from Video
+      captureBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(videoElement, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          currentImageBlob = blob;
+          previewBox.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Captured">`;
+          cameraModeDiv.classList.add('hidden');
+          captureModeDiv.classList.remove('hidden');
+        });
       });
 
-      cameraInput.addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        handleImageSelect(file);
+      // 🔄 Retake Photo
+      retakeBtn.addEventListener('click', async () => {
+        captureModeDiv.classList.add('hidden');
+        cameraModeDiv.classList.remove('hidden');
+        await startCamera(videoElement);
       });
+
+      // ✓ Use Captured Photo
+      useCaptureBtn.addEventListener('click', () => {
+        stopCamera();
+        uploadModeDiv.classList.add('hidden');
+        cameraModeDiv.classList.add('hidden');
+        captureModeDiv.classList.add('hidden');
+      });
+
+      // ✕ Close Camera
+      closeCameraBtn.addEventListener('click', async () => {
+        await stopCamera();
+        cameraModeDiv.classList.add('hidden');
+        uploadModeDiv.classList.remove('hidden');
+      });
+
+      // 📁 Upload Image
+      imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          currentImageBlob = file;
+          const reader = new FileReader();
+          reader.onload = (e) => previewBoxUpload.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Analyze Button - send to backend
+      analyzeBtn.addEventListener('click', async () => {
+        if (!currentImageBlob) {
+          alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
+          return;
+        }
+
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = '⏳ กำลังค้นหา...';
+
+        const formData = new FormData();
+        formData.append('image', currentImageBlob, 'photo.jpg');
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/gemini/analyze-herb-image`, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+          const resultsContainer = document.getElementById('results-container');
+
+          if (data.success) {
+            resultsContainer.innerHTML = `
+              <div class="bg-green-100 border-l-4 border-green-600 p-4">
+                <h3 class="font-bold text-lg text-green-800">${data.result}</h3>
+                <p class="text-green-700 text-sm mt-2">${data.advice || 'ข้อมูลเพิ่มเติมจากระบบ'}</p>
+              </div>
+            `;
+          } else {
+            resultsContainer.innerHTML = `
+              <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
+                ❌ ${data.message || 'เกิดข้อผิดพลาด'}
+              </div>
+            `;
+          }
+        } catch (err) {
+          console.error('Error:', err);
+          document.getElementById('results-container').innerHTML = `
+            <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
+              ❌ เกิดข้อผิดพลาด: ${err.message}
+            </div>
+          `;
+        } finally {
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = 'ค้นหา';
+        }
+      });
+
+      // Show upload mode by default
+      uploadModeDiv.classList.remove('hidden');
     });
   </script>
 </body>
