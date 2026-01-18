@@ -219,22 +219,36 @@
 
                     const data = await response.json();
 
-                    if (response.ok) {
+                    if (response.ok && data.success) {
                         // --- แสดงผลลัพธ์ ---
+                        const diseaseData = data.data;
+                        
                         let htmlContent = `
                             <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
-                                <h3 class="font-bold text-green-800 text-lg mb-2">🌿 ผลการวิเคราะห์</h3>
-                                <p class="text-gray-700">${data.result || data.message || "วิเคราะห์เสร็จสิ้น"}</p>
+                                <h3 class="font-bold text-green-800 text-lg mb-3">🧬 ผลการวิเคราะห์</h3>
+                                
+                                <div class="mb-3">
+                                    <p class="text-gray-700"><strong>โรคที่คาดว่าเป็น:</strong> ${diseaseData.disease || 'ไม่ชัดเจน'}</p>
+                                    <p class="text-gray-700"><strong>ความมั่นใจ:</strong> ${Math.round((diseaseData.confidence || 0) * 100)}%</p>
+                                </div>
+                                
+                                <div class="bg-white p-3 rounded border border-gray-200 mb-3">
+                                    <p class="text-gray-700"><strong>คำแนะนำ:</strong> ${diseaseData.advice || 'แนะนำให้ปรึกษาแพทย์'}</p>
+                                </div>
                             </div>
                         `;
 
-                        // ถ้ามีสินค้าแนะนำ
-                        if (data.recommendedProducts && data.recommendedProducts.length > 0) {
-                            htmlContent += `<h4 class="font-bold text-gray-800 mt-4 mb-2">สมุนไพรที่แนะนำ:</h4><ul class="list-disc pl-5">`;
-                            data.recommendedProducts.forEach(prod => {
-                                htmlContent += `<li class="text-gray-700">${prod.name || prod}</li>`;
+                        // ถ้ามีสมุนไพรแนะนำ
+                        if (diseaseData.herbs && diseaseData.herbs.length > 0) {
+                            htmlContent += `
+                                <div class="mt-4">
+                                    <h4 class="font-bold text-gray-800 mb-2">🌿 สมุนไพรที่แนะนำ:</h4>
+                                    <ul class="list-disc pl-5 space-y-1">
+                            `;
+                            diseaseData.herbs.forEach(herb => {
+                                htmlContent += `<li class="text-gray-700">${herb}</li>`;
                             });
-                            htmlContent += `</ul>`;
+                            htmlContent += `</ul></div>`;
                         }
 
                         resultsContainer.innerHTML = htmlContent;
