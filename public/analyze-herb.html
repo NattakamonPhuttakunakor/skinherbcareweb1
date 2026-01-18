@@ -164,7 +164,17 @@
       </a>
 
       <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">ค้นหาข้อมูลจากรูปสมุนไพร</h1>
-      <p class="text-gray-600 text-center mb-6">อัปโหลดภาพสมุนไพรเพื่อให้ AI ช่วยวิเคราะห์ข้อมูลและสรรพคุณ</p>
+      <p class="text-gray-600 text-center mb-6">อัปโหลดภาพสมุนไพร หรือถ่ายภาพจากกล้องเพื่อให้ AI ช่วยวิเคราะห์ข้อมูลและสรรพคุณ</p>
+
+      <!-- ✅ ปุ่มเลือกวิธี -->
+      <div class="flex gap-4 mb-6 justify-center">
+        <button id="upload-btn" class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+          📁 เลือกรูปจากเครื่อง
+        </button>
+        <button id="camera-btn" class="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">
+          📷 ถ่ายภาพจากกล้อง
+        </button>
+      </div>
 
       <div id="image-preview-box" class="preview-box">
         <span>ภาพตัวอย่างจะแสดงที่นี่</span>
@@ -174,7 +184,16 @@
         id="herb-image-upload"
         type="file"
         accept="image/*"
-        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"
+        class="hidden block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"
+      />
+
+      <!-- ✅ Camera Input (hidden) -->
+      <input
+        id="herb-camera-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        class="hidden"
       />
 
       <button
@@ -196,11 +215,24 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const imageInput = document.getElementById("herb-image-upload");
+      const cameraInput = document.getElementById("herb-camera-input");
       const previewBox = document.getElementById("image-preview-box");
+      const uploadBtn = document.getElementById("upload-btn");
+      const cameraBtn = document.getElementById("camera-btn");
       const defaultText = "<span>ภาพตัวอย่างจะแสดงที่นี่</span>";
 
-      imageInput.addEventListener("change", function (event) {
-        const file = event.target.files[0];
+      // ✅ ปุ่มเลือกรูปจากเครื่อง
+      uploadBtn.addEventListener("click", () => {
+        imageInput.click();
+      });
+
+      // ✅ ปุ่มถ่ายภาพจากกล้อง
+      cameraBtn.addEventListener("click", () => {
+        cameraInput.click();
+      });
+
+      // ✅ ฟังก์ชันแสดงภาพตัวอย่าง
+      const handleImageSelect = (file) => {
         if (file) {
           const reader = new FileReader();
           reader.onload = function (e) {
@@ -210,6 +242,16 @@
         } else {
           previewBox.innerHTML = defaultText;
         }
+      };
+
+      imageInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        handleImageSelect(file);
+      });
+
+      cameraInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        handleImageSelect(file);
       });
     });
   </script>
