@@ -9,7 +9,7 @@ import morgan from "morgan";
 // อ่านค่า .env
 dotenv.config();
 
-// 🔥 [ส่วนที่เพิ่ม] ระบบกันตาย: ถ้าไม่มี API_KEY ให้ใส่ค่าหลอกทันที (Server จะได้ไม่ระเบิด)
+// 🔥 ระบบกันตาย: ถ้าไม่มี API_KEY ให้ใส่ค่าหลอกทันที
 if (!process.env.API_KEY) {
     console.log("⚠️ Warning: API_KEY missing. Using dummy key to prevent crash.");
     process.env.API_KEY = "123456_dummy_key_for_startup";
@@ -50,7 +50,7 @@ async function startServer() {
       app.use(morgan("dev"));
     }
 
-    // --- CORS (อนุญาตหมด เพื่อแก้ปัญหา GitHub Pages) ---
+    // --- CORS ---
     app.use(
       cors({
         origin: '*', 
@@ -63,8 +63,7 @@ async function startServer() {
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-    // --- Static Files ---
-    // ชี้ไปที่โฟลเดอร์ public (ปรับ path ให้ชัวร์ว่าเจอ)
+    // --- Static Files (สำคัญมาก: บอกให้ Server รู้จักโฟลเดอร์เก็บรูปและหน้าเว็บ) ---
     app.use(express.static(path.join(__dirname, "../public"))); 
     app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
@@ -72,23 +71,50 @@ async function startServer() {
     app.get("/api/health", (req, res) => {
       res.json({
         status: "ok",
-        message: "Server is running (API Key bypassed)",
+        message: "Server is running",
         timestamp: new Date().toISOString()
       });
     });
 
     // --- API Routes ---
     app.use("/api/auth", authRoutes);
-    // 🚩 URL จริงคือ: https://.../api/analysis/analyze (เช็คชื่อในไฟล์ route ด้วยนะครับ)
     app.use("/api/analysis", analysisRoutes); 
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
 
-    // --- Root Route ---
+    // ==========================================
+    // 🌐 FRONTEND ROUTES (ส่วนที่เพิ่มมาใหม่)
+    // ==========================================
+
+    // 1. หน้าแรก (Home Page)
     app.get("/", (req, res) => {
-        res.send("✅ SkinHerbCare API is Running with Auto-Fix Mode!");
+        // ให้เปิดไฟล์ home.html เป็นหน้าแรก
+        res.sendFile(path.join(__dirname, "../public/home.html"));
     });
+
+    // 2. เผื่อคนพิมพ์ /home
+    app.get("/home", (req, res) => {
+        res.sendFile(path.join(__dirname, "../public/home.html"));
+    });
+
+    // 3. หน้าเข้าสู่ระบบ (Login)
+    app.get("/login", (req, res) => {
+        res.sendFile(path.join(__dirname, "../public/login.html"));
+    });
+
+    // 4. หน้าสมัครสมาชิก (Sign Up)
+    app.get("/signup", (req, res) => {
+        res.sendFile(path.join(__dirname, "../public/signup.html"));
+    });
+
+    // 5. หน้าวิเคราะห์โรค (Analysis)
+    // *หมายเหตุ: ถ้าไฟล์หน้าวิเคราะห์ชื่อ index.html ให้ใช้ index.html*
+    app.get("/analysis", (req, res) => {
+        res.sendFile(path.join(__dirname, "../public/index.html")); 
+    });
+
+    // ==========================================
 
     // --- 404 Handler ---
     app.use((req, res) => {
@@ -114,7 +140,6 @@ async function startServer() {
     const server = app.listen(PORT, () => {
       console.log("\n" + "=".repeat(50));
       console.log(`🚀 Server running at http://localhost:${PORT}`);
-      console.log(`🔑 API Key Status: ${process.env.API_KEY === "123456_dummy_key_for_startup" ? "Using Dummy Key" : "Loaded from Env"}`);
       console.log("✅ Ready to serve requests...");
       console.log("=".repeat(50) + "\n");
     });
