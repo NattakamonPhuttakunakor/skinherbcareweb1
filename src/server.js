@@ -9,6 +9,12 @@ import morgan from "morgan";
 // อ่านค่า .env
 dotenv.config();
 
+// 🔥 [ส่วนที่เพิ่ม] ระบบกันตาย: ถ้าไม่มี API_KEY ให้ใส่ค่าหลอกทันที (Server จะได้ไม่ระเบิด)
+if (!process.env.API_KEY) {
+    console.log("⚠️ Warning: API_KEY missing. Using dummy key to prevent crash.");
+    process.env.API_KEY = "123456_dummy_key_for_startup";
+}
+
 // Import Database
 import connectDB from "./config/db.js";
 
@@ -25,7 +31,6 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   try {
-    // เชื่อมต่อ Database (ถ้า Connect ไม่ได้ Server จะไม่เริ่มทำงาน)
     console.log("🔄 Connecting to database...");
     await connectDB();
     console.log("✅ Database connected successfully!");
@@ -45,10 +50,10 @@ async function startServer() {
       app.use(morgan("dev"));
     }
 
-    // --- CORS (จุดสำคัญ: อนุญาตหมด * เพื่อแก้ปัญหา GitHub Pages) ---
+    // --- CORS (อนุญาตหมด เพื่อแก้ปัญหา GitHub Pages) ---
     app.use(
       cors({
-        origin: '*', // ✅ อนุญาตทุกโดเมน (แก้ปัญหาติดแดง 100%)
+        origin: '*', 
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
       })
@@ -59,28 +64,30 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // --- Static Files ---
-    app.use(express.static(path.join(__dirname, "../public"))); // แก้ path ให้ชี้ไป public นอก folder src ถ้าจำเป็น
+    // ชี้ไปที่โฟลเดอร์ public (ปรับ path ให้ชัวร์ว่าเจอ)
+    app.use(express.static(path.join(__dirname, "../public"))); 
     app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-    // --- Health Check (เอาไว้เช็คว่า Server ตื่นหรือยัง) ---
+    // --- Health Check ---
     app.get("/api/health", (req, res) => {
       res.json({
         status: "ok",
-        message: "Server is running correctly",
+        message: "Server is running (API Key bypassed)",
         timestamp: new Date().toISOString()
       });
     });
 
     // --- API Routes ---
     app.use("/api/auth", authRoutes);
-    app.use("/api/analysis", analysisRoutes); // 👉 URL จะเป็น /api/analysis/diagnose
+    // 🚩 URL จริงคือ: https://.../api/analysis/analyze (เช็คชื่อในไฟล์ route ด้วยนะครับ)
+    app.use("/api/analysis", analysisRoutes); 
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
 
-    // --- Root Route (แสดงข้อความหน้าแรก) ---
+    // --- Root Route ---
     app.get("/", (req, res) => {
-        res.send("✅ SkinHerbCare API is Running! (Ready for requests)");
+        res.send("✅ SkinHerbCare API is Running with Auto-Fix Mode!");
     });
 
     // --- 404 Handler ---
@@ -107,7 +114,7 @@ async function startServer() {
     const server = app.listen(PORT, () => {
       console.log("\n" + "=".repeat(50));
       console.log(`🚀 Server running at http://localhost:${PORT}`);
-      console.log(`🌐 CORS enabled for: ALL ORIGINS (*)`);
+      console.log(`🔑 API Key Status: ${process.env.API_KEY === "123456_dummy_key_for_startup" ? "Using Dummy Key" : "Loaded from Env"}`);
       console.log("✅ Ready to serve requests...");
       console.log("=".repeat(50) + "\n");
     });
@@ -122,5 +129,4 @@ async function startServer() {
   }
 }
 
-// Run the server
 startServer();

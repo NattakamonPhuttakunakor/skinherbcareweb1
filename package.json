@@ -1,5 +1,5 @@
 {
-  "name": "skinherbcare",
+  "name": "skinherbcare-api",
   "version": "1.0.0",
   "description": "ระบบตรวจจับสมุนไพรและวิเคราะห์โรคผิวหนัง",
   "main": "src/server.js",
@@ -21,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
