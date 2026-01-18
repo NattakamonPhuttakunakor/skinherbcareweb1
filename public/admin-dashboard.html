@@ -10,6 +10,33 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; }
     </style>
+    <script>
+        // ✅ ตรวจสอบว่าเป็น Admin หรือไม่
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!token) {
+                alert('❌ กรุณาเข้าสู่ระบบก่อน');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr || '{}');
+            
+            if (user.role !== 'admin') {
+                alert('❌ เฉพาะแอดมินเท่านั้นที่เข้าได้');
+                window.location.href = '/user-dashboard.html';
+                return;
+            }
+
+            // แสดงชื่อ Admin
+            const adminName = document.getElementById('admin-name');
+            if (adminName && user.firstName) {
+                adminName.textContent = `👤 ${user.firstName} ${user.lastName || ''}`;
+            }
+        });
+    </script>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
@@ -18,6 +45,7 @@
             <div class="p-6 text-2xl font-bold text-green-700 border-b">
                 <a href="/">🌿 SkinHerbCare</a>
                 <span class="block text-sm text-gray-500">Admin Panel</span>
+                <span id="admin-name" class="block text-xs text-gray-600 mt-2">Loading...</span>
             </div>
             <nav class="flex-1 p-4 space-y-2">
                 <a href="/admin-dashboard.html" class="flex items-center px-4 py-2 text-white bg-green-600 rounded-lg">
@@ -114,5 +142,21 @@
     <script src="/js/main.js"></script>
     <script src="/js/admin.js"></script>
     <script src="/js/analysis.js"></script>
+
+    <!-- Logout Handler -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = '/login.html';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
