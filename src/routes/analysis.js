@@ -14,8 +14,11 @@ router.get('/sales', getSalesData);
 router.get('/categories', getCategoryData);
 
 // --- USER Routes ---
-// 🚩 จุดสำคัญ: ชื่อ Route คือ "/diagnose"
-// ดังนั้น URL เต็มๆ คือ: https://skinherbcareweb1.onrender.com/api/analysis/diagnose
+// 🚩 จุดสำคัญ: ชื่อ Route คือ "/diagnose" และ "/analyze"
+// ดังนั้น URL เต็มๆ คือ: 
+// - https://skinherbcareweb1.onrender.com/api/analysis/diagnose
+// - https://skinherbcareweb1.onrender.com/api/analysis/analyze
 router.post('/diagnose', diagnoseSymptoms);
+router.post('/analyze', diagnoseSymptoms); // Alias for /diagnose
 
 export default router;
