@@ -61,7 +61,7 @@
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 15px 40px;
+            padding: 12px 16px;
             position: sticky;
             width: 100%;
             top: 0;
@@ -74,31 +74,36 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary-text);
             text-decoration: none;
+            white-space: nowrap;
         }
         .auth-links {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .auth-links a {
             text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
         .login-btn:hover {
             background-color: rgba(255, 255, 255, 0.4);
         }
         .profile-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid var(--border-color);
@@ -108,16 +113,38 @@
             cursor: pointer;
         }
 
+        @media (max-width: 640px) {
+            .top-nav {
+                padding: 10px 12px;
+            }
+            .logo {
+                font-size: 1rem;
+            }
+            .auth-links a {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+            }
+        }
+
         /* 🌿 กล่องแสดงเนื้อหาหลัก */
         .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(var(--blur-strength));
-            border-radius: 24px;
-            padding: 30px 40px;
+            border-radius: 20px;
+            padding: 20px 24px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             text-align: center;
             max-width: 600px;
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .main-card {
+                border-radius: 24px;
+                padding: 30px 40px;
+            }
+        }
             width: 100%;
         }
 
@@ -161,49 +188,49 @@
     </nav>
 
     <!-- 🌿 ส่วนเนื้อหาหลัก -->
-    <main class="flex flex-col items-center justify-center px-4 py-12">
+    <main class="flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-12">
         <div class="main-card">
-            <h1 class="text-3xl font-bold mb-2">วิเคราะห์รูปโรคผิวหนัง</h1>
-            <p class="text-gray-700 mb-6">อัปโหลดภาพถ่ายผิว หรือถ่ายภาพจากกล้องเพื่อรับการวิเคราะห์เบื้องต้นจาก AI</p>
+            <h1 class="text-2xl sm:text-3xl font-bold mb-2">วิเคราะห์รูปโรคผิวหนัง</h1>
+            <p class="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">อัปโหลดภาพถ่ายผิว หรือถ่ายภาพจากกล้องเพื่อรับการวิเคราะห์เบื้องต้นจาก AI</p>
 
             <!-- ✅ ปุ่มเลือกวิธี -->
-            <div class="flex gap-4 mb-6 justify-center">
-                <button id="upload-btn" class="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 justify-center">
+                <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
                     📁 เลือกรูปจากเครื่อง
                 </button>
-                <button id="camera-btn" class="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">
+                <button id="camera-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition text-sm sm:text-base">
                     📷 เปิดกล้อง
                 </button>
             </div>
 
             <!-- 📹 Camera Mode Section -->
-            <div id="camera-mode" class="hidden mb-6">
+            <div id="camera-mode" class="hidden mb-4 sm:mb-6">
                 <video id="video-stream" width="100%" height="auto" style="border-radius: 12px; background: #000; max-height: 400px;" autoplay playsinline></video>
-                <div class="flex gap-3 mt-4 justify-center">
-                    <button id="capture-btn" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4 justify-center">
+                    <button id="capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
                         ✓ ถ่ายภาพ
                     </button>
-                    <button id="close-camera-btn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">
+                    <button id="close-camera-btn" class="px-4 sm:px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
                         ✕ ปิดกล้อง
                     </button>
                 </div>
             </div>
 
             <!-- Image Preview and Retake -->
-            <div id="capture-mode" class="hidden mb-6">
+            <div id="capture-mode" class="hidden mb-4 sm:mb-6">
                 <div id="image-preview-box" class="preview-box"><span>ภาพจะแสดงที่นี่</span></div>
-                <div class="flex gap-3 justify-center">
-                    <button id="use-capture-btn" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition">
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+                    <button id="use-capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
                         ✓ ใช้รูปนี้
                     </button>
-                    <button id="retake-btn" class="px-6 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition">
+                    <button id="retake-btn" class="px-4 sm:px-6 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition text-sm sm:text-base">
                         🔄 ถ่ายใหม่
                     </button>
                 </div>
             </div>
 
             <!-- Upload Mode -->
-            <div id="upload-mode" class="mb-6">
+            <div id="upload-mode" class="mb-4 sm:mb-6">
                 <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
             </div>
 
@@ -213,7 +240,7 @@
                           file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
 
             <button id="analyze-disease-btn"
-                    class="w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition">
+                    class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95">
                 วิเคราะห์
             </button>
 

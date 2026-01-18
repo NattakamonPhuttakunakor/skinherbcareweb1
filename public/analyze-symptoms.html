@@ -64,7 +64,7 @@
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 15px 40px;
+            padding: 12px 16px;
             position: sticky;
             width: 100%;
             top: 0;
@@ -78,28 +78,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
 
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary-text);
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .auth-links {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .auth-links a {
             text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.85rem;
             color: var(--primary-text);
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .login-btn:hover {
@@ -107,8 +112,8 @@
         }
 
         .profile-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid var(--border-color);
@@ -116,6 +121,20 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+        }
+
+        /* Mobile responsive navbar */
+        @media (max-width: 640px) {
+            .top-nav {
+                padding: 10px 12px;
+            }
+            .logo {
+                font-size: 1.1rem;
+            }
+            .auth-links a {
+                padding: 5px 8px;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -137,25 +156,25 @@
         </div>
     </nav>
 
-    <main class="flex flex-col items-center min-h-[calc(100vh-4rem)] px-4 py-12">
-        <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg p-8 border border-gray-200">
-            <a href="/user-dashboard.html" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <main class="flex flex-col items-center min-h-[calc(100vh-4rem)] px-3 sm:px-4 py-6 sm:py-12">
+        <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-8 border border-gray-200">
+            <a href="/user-dashboard.html" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-4 sm:mb-6 text-sm sm:text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 กลับไปหน้าแดชบอร์ด
             </a>
 
-            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">วิเคราะห์จากอาการ</h1>
-            <p class="text-gray-600 text-center mb-6">บอกอาการหรือปัญหาผิวที่คุณกังวล เพื่อให้ AI แนะนำสมุนไพรที่เหมาะสม</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">วิเคราะห์จากอาการ</h1>
+            <p class="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">บอกอาการหรือปัญหาผิวที่คุณกังวล เพื่อให้ AI แนะนำสมุนไพรที่เหมาะสม</p>
 
-            <textarea id="symptom-input" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" rows="4" placeholder="เช่น: มีปัญหาสิวอักเสบ ผิวแห้ง และรอยแดง..."></textarea>
+            <textarea id="symptom-input" class="w-full p-3 text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition" rows="4" placeholder="เช่น: มีปัญหาสิวอักเสบ ผิวแห้ง และรอยแดง..."></textarea>
             
-            <button id="analyze-symptom-btn" class="mt-4 w-full px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition">
+            <button id="analyze-symptom-btn" class="mt-4 w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95">
                 วิเคราะห์
             </button>
             
-            <div id="results-container" class="mt-6 bg-gray-50 p-4 rounded-lg min-h-[100px] border border-gray-200 hidden">
+            <div id="results-container" class="mt-6 bg-gray-50 p-3 sm:p-4 rounded-lg min-h-[100px] border border-gray-200 hidden text-sm sm:text-base">
                 </div>
         </div>
     </main>
