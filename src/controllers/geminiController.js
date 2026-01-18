@@ -33,13 +33,107 @@ export const suggestHerbs = async (req, res) => {
     }
 };
 
-// สำหรับ analyzeDiseaseImage และ analyzeHerbImage ต้องใช้ model: "gemini-pro-vision" (หรือ gemini-1.5-flash) 
-// และต้องแปลงไฟล์รูปภาพเป็น base64 ก่อนส่งไปหา API (logic จะซับซ้อนขึ้นเล็กน้อย)
-// แนะนำให้แก้ suggestHerbs ให้ผ่านก่อนครับ
-export const analyzeDiseaseImage = (req, res) => {
-    res.json({ success: true, message: 'ฟีเจอร์วิเคราะห์รูปภาพกำลังอยู่ระหว่างการพัฒนา' });
+// สำหรับ analyzeDiseaseImage และ analyzeHerbImage ต้องใช้ model: "gemini-1.5-flash" 
+// และต้องแปลงไฟล์รูปภาพเป็น base64 ก่อนส่งไปหา API
+export const analyzeDiseaseImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
+        }
+
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ success: false, message: "API Key not found" });
+        }
+
+        const imageBuffer = fs.readFileSync(req.file.path);
+        const base64Image = imageBuffer.toString('base64');
+        const mimeType = req.file.mimetype;
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `วิเคราะห์รูปภาพผิวหนังนี้ และให้ความเห็นว่า:
+1. มีอาการผิวหนังแบบไหน
+2. โรคที่คาดว่าเป็นคืออะไร
+3. สมุนไพรไทยที่แนะนำในการรักษา 2-3 ชนิด พร้อมวิธีใช้
+ตอบในรูป JSON โดยมี keys: "diagnosis", "disease", "confidence", "herbs", "advice"`;
+
+        const result = await model.generateContent([
+            {
+                inlineData: {
+                    data: base64Image,
+                    mimeType: mimeType,
+                },
+            },
+            prompt,
+        ]);
+
+        const response = await result.response;
+        const text = response.text();
+
+        const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleanedText);
+
+        // ลบไฟล์ upload ชั่วคราว
+        fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
+
+        res.json({ success: true, data: data });
+
+    } catch (error) {
+        console.error("Gemini Disease Analysis Error:", error);
+        if (req.file) fs.unlink(req.file.path, (err) => {});
+        res.status(500).json({ success: false, message: "ไม่สามารถวิเคราะห์รูปภาพได้ในขณะนี้" });
+    }
 };
 
-export const analyzeHerbImage = (req, res) => {
-    res.json({ success: true, message: 'ฟีเจอร์วิเคราะห์รูปภาพสมุนไพรกำลังอยู่ระหว่างการพัฒนา' });
+export const analyzeHerbImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
+        }
+
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ success: false, message: "API Key not found" });
+        }
+
+        const imageBuffer = fs.readFileSync(req.file.path);
+        const base64Image = imageBuffer.toString('base64');
+        const mimeType = req.file.mimetype;
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `วิเคราะห์รูปภาพสมุนไพรนี้ และให้ความเห็นว่า:
+1. ชื่อสมุนไพรคืออะไร
+2. มีประโยชน์ต่อสุขภาพผิวหนังอย่างไร
+3. วิธีใช้และปริมาณที่แนะนำ
+4. ข้อควรระวังและข้อห้าม
+ตอบในรูป JSON โดยมี keys: "name", "scientificName", "benefits", "usage", "precautions"`;
+
+        const result = await model.generateContent([
+            {
+                inlineData: {
+                    data: base64Image,
+                    mimeType: mimeType,
+                },
+            },
+            prompt,
+        ]);
+
+        const response = await result.response;
+        const text = response.text();
+
+        const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleanedText);
+
+        // ลบไฟล์ upload ชั่วคราว
+        fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
+
+        res.json({ success: true, data: data });
+
+    } catch (error) {
+        console.error("Gemini Herb Analysis Error:", error);
+        if (req.file) fs.unlink(req.file.path, (err) => {});
+        res.status(500).json({ success: false, message: "ไม่สามารถวิเคราะห์รูปภาพได้ในขณะนี้" });
+    }
 };

@@ -112,9 +112,29 @@ async function startServer() {
         res.sendFile(path.join(publicPath, "register.html"));
     });
 
+    // 4.1 Alias สำหรับ /register.html
+    app.get("/register", (req, res) => {
+        res.sendFile(path.join(publicPath, "register.html"));
+    });
+
     // 5. หน้าวิเคราะห์โรค (Analysis)
     app.get("/analysis", (req, res) => {
         res.sendFile(path.join(publicPath, "analyze-disease.html")); 
+    });
+
+    // 5.1 หน้าวิเคราะห์อาการ
+    app.get("/analyze-symptoms", (req, res) => {
+        res.sendFile(path.join(publicPath, "analyze-symptoms.html"));
+    });
+
+    // 5.2 หน้าวิเคราะห์สมุนไพร
+    app.get("/analyze-herb", (req, res) => {
+        res.sendFile(path.join(publicPath, "analyze-herb.html"));
+    });
+
+    // 5.3 หน้าวิเคราะห์โรคจากรูป
+    app.get("/analyze-disease", (req, res) => {
+        res.sendFile(path.join(publicPath, "analyze-disease.html"));
     });
 
     // ==========================================
