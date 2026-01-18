@@ -104,9 +104,16 @@
     </div>
 
 <script>
+const API_BASE_URL = 'https://skinherbcareweb1.onrender.com'; // ✅ Backend URL
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('registerForm');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const age = document.getElementById('age');
+    const occupation = document.getElementById('occupation');
+    const email = document.getElementById('email');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
     const passwordError = document.getElementById('passwordError');
@@ -137,13 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerText = 'กำลังบันทึกข้อมูล...';
 
         try {
-            const response = await fetch('/.netlify/functions/register', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     firstName: firstName.value.trim(),
                     lastName: lastName.value.trim(),
-                    age: age.value,
+                    age: parseInt(age.value),
                     occupation: occupation.value.trim(),
                     email: email.value.trim(),
                     password: password.value
