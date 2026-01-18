@@ -57,7 +57,7 @@ body::after {
   position: sticky;
   top: 0;
   width: 100%;
-  padding: 15px 40px;
+  padding: 12px 20px;
   backdrop-filter: blur(10px);
   background: rgba(255,255,255,0.35);
   border-bottom: 1px solid var(--border-color);
@@ -70,27 +70,33 @@ body::after {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .logo {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   text-decoration: none;
   color: var(--primary-text);
+  white-space: nowrap;
 }
 
 .auth-links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .auth-links a {
   text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
   font-weight: 600;
   color: var(--primary-text);
+  font-size: 0.95rem;
 }
 
 .auth-links a:hover {
@@ -213,16 +219,6 @@ header p {
 
 /* 📱 Mobile */
 @media (max-width: 768px) {
-  .nav-container {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .auth-links {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
   .main-card {
     padding: 25px 20px;
     border-radius: 20px;
@@ -239,19 +235,41 @@ header p {
   }
 }
 
-/* 📱 Small Mobile */
-@media (max-width: 480px) {
-  .logo {
-    font-size: 1.3rem;
+@media (max-width: 640px) {
+  .top-nav {
+    padding: 10px 12px;
   }
 
-  header h1 {
-    font-size: 1.3rem;
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .auth-links {
+    justify-content: center;
+    width: 100%;
+    gap: 6px;
   }
 
   .auth-links a {
-    font-size: 0.9rem;
-    padding: 6px 14px;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+  }
+
+  .profile-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* 📱 Small Mobile */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 0.95rem;
   }
 
   .feature-content h3 {
