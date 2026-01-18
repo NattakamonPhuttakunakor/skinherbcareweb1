@@ -26,7 +26,7 @@
             <a href="/admin-dashboard.html" class="flex items-center gap-4 px-4 py-3 hover:bg-[#FFC107]/20 text-gray-300 rounded-xl font-semibold transition">
                 <div class="w-6 text-center"><i class="fa-solid fa-arrow-left"></i></div> <span>กลับไป Dashboard</span>
             </a>
-            <a href="/add_herb.html" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
+            <a href="#" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
                 <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>เพิ่มสมุนไพร</span>
             </a>
         </nav>
@@ -51,23 +51,23 @@
                     <div class="space-y-6">
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">ชื่อสมุนไพร (ไทย) *</label>
-                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ขมิ้นชัน, ว่านหางจระเข้">
+                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ขมิ้นชัน">
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">ชื่อวิทยาศาสตร์</label>
+                            <label class="block text-[#111C44] font-bold mb-2">ชื่อวิทยาศาสตร์ (Scientific Name)</label>
                             <input type="text" id="input-eng" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น Curcuma longa">
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">คำอธิบาย *</label>
-                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="บอกลักษณะและความพิเศษของสมุนไพร"></textarea>
+                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="รายละเอียดทั่วไป"></textarea>
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">สรรพคุณ</label>
-                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ลดอักเสบ, ฆ่าเชื้อแบคทีเรีย"></textarea>
+                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ลดการอักเสบ, ฆ่าเชื้อแบคทีเรีย (คั่นด้วยจุลภาค หรือขึ้นบรรทัดใหม่)"></textarea>
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">วิธีการใช้</label>
-                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="บอกวิธีการใช้สมุนไพร"></textarea>
+                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="วิธีการนำไปใช้รักษา"></textarea>
                         </div>
                     </div>
                     <div class="mt-8 flex justify-center">
@@ -78,30 +78,25 @@
                 </div>
 
                 <div id="step-2-content" class="hidden">
-                    <div class="space-y-4">
-                        <div class="bg-white/50 rounded-xl p-4 border border-white">
-                            <label class="block text-[#111C44] font-bold mb-4">โรคผิวหนังที่ใช้รักษาได้</label>
-                            <div class="space-y-3 max-h-60 overflow-y-auto pr-2" id="disease-list">
-                                <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="สะเก็ดเงิน" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">สะเก็ดเงิน</span></label>
-                                <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="กลากเกลื้อน" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">กลากเกลื้อน</span></label>
-                                <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="งูสวัด" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">งูสวัด</span></label>
-                                <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="สิว" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">สิว</span></label>
-                                <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="ฝ้ากระ" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">ฝ้ากระ</span></label>
+                    <div class="bg-white/50 rounded-xl p-4 mb-6 border border-white">
+                        <label class="block text-[#111C44] font-bold mb-4">โรคผิวหนังที่ใช้รักษาได้</label>
+                        <div class="space-y-3 max-h-60 overflow-y-auto pr-2" id="disease-list">
+                            <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="สะเก็ดเงิน" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">สะเก็ดเงิน</span></label>
+                            <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="กลากเกลื้อน" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">กลากเกลื้อน</span></label>
+                            <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="งูสวัด" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">งูสวัด</span></label>
+                            <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="สิว" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">สิว</span></label>
+                            <label class="flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer"><input type="checkbox" value="ฝ้ากระ" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">ฝ้ากระ</span></label>
                             </div>
-                        </div>
+                    </div>
 
-                        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-inner">
-                            <label class="block text-[#111C44] font-bold mb-3">✅ ตรวจสอบข้อมูลของคุณ</label>
-                            <div class="space-y-3 text-sm">
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-bold text-gray-700">ชื่อสมุนไพร:</span>
-                                    <span id="review-name" class="text-gray-600 ml-2">-</span>
-                                </div>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-bold text-gray-700">สรรพคุณ:</span>
-                                    <span id="review-properties" class="text-gray-600 ml-2">-</span>
-                                </div>
-                            </div>
+                    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-inner">
+                        <label class="block text-[#111C44] font-bold mb-3">เพิ่มรูปภาพสมุนไพร</label>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+                        <div id="file-list-container" class="space-y-2 mb-3"></div>
+                        <div class="text-center mt-4">
+                            <button onclick="document.getElementById('image-upload').click()" class="text-blue-500 hover:text-blue-700 underline text-sm cursor-pointer">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ
+                            </button>
                         </div>
                     </div>
 
@@ -119,40 +114,150 @@
         <div class="bg-[#6EE7B7] p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center relative transform scale-90 transition-transform duration-300" id="modal-card">
             <h2 class="text-xl font-bold text-[#064E3B] mb-2">✅ บันทึกข้อมูลสำเร็จ!</h2>
             <div class="text-3xl font-extrabold text-[#111C44] my-4 drop-shadow-sm" id="modal-herb-name">-</div>
-            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">กลับไปยัง Admin</button>
+            <p class="text-sm text-gray-700 mb-4">ข้อมูลถูกบันทึกลงในฐานข้อมูลเรียบร้อยแล้ว</p>
+            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">กลับไปยัง Admin Dashboard</button>
         </div>
     </div>
 
     <script>
+        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
         const step1 = document.getElementById('step-1-content');
         const step2 = document.getElementById('step-2-content');
         const circle1 = document.getElementById('circle-1');
         const circle2 = document.getElementById('circle-2');
         const modal = document.getElementById('success-modal');
         const modalCard = document.getElementById('modal-card');
-        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+        const fileListContainer = document.getElementById('file-list-container');
+        
+        let uploadedImageBase64 = null; // เก็บรูปภาพเป็น Base64
 
-        // ตรวจสอบการเข้าสู่ระบบ
+        // 1. ตรวจสอบการ Login (Auth Check)
         window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบก่อน');
+                alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
                 window.location.href = '/login.html';
             }
         });
 
-        function goToStep2() {
-            const name = document.getElementById('input-name').value.trim();
-            const desc = document.getElementById('input-desc').value.trim();
+        // 2. จัดการรูปภาพ (File Handling)
+        function handleFiles(files) {
+            if (!files.length) return;
+            fileListContainer.innerHTML = '';
+            
+            const file = files[0]; // เอาแค่ไฟล์แรก
+            const reader = new FileReader();
 
-            if (!name || !desc) {
-                alert('❌ กรุณากรอกชื่อสมุนไพรและคำอธิบายให้ครบ');
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result; // เก็บ Base64 ไว้ส่ง API
+                
+                // แสดงชื่อไฟล์และตัวอย่างเล็กๆ
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${e.target.result}" class="w-10 h-10 object-cover rounded-md">
+                        <span class="text-gray-700 text-sm truncate max-w-[150px]">${file.name}</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500"></i>
+                `;
+                fileListContainer.appendChild(fileItem);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // 3. ฟังก์ชันบันทึกข้อมูลไปยัง Server (Save Logic)
+        async function saveDataToServer() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
                 return;
             }
 
-            // Update review
-            document.getElementById('review-name').textContent = name;
-            document.getElementById('review-properties').textContent = document.getElementById('input-prop').value || '(ไม่มี)';
+            // ดึงค่าจาก Form
+            const name = document.getElementById('input-name').value.trim();
+            const scientificName = document.getElementById('input-eng').value.trim();
+            const description = document.getElementById('input-desc').value.trim();
+            const propertiesInput = document.getElementById('input-prop').value.trim();
+            const usage = document.getElementById('input-usage').value.trim();
+
+            // ดึงค่าจาก Checkbox โรค
+            const diseases = [];
+            document.querySelectorAll('#disease-list input:checked').forEach((checkbox) => {
+                diseases.push(checkbox.value);
+            });
+
+            // ตรวจสอบข้อมูลจำเป็น
+            if (!name || !description) {
+                alert('❌ กรุณากรอกชื่อสมุนไพรและคำอธิบาย');
+                goToStep1();
+                return;
+            }
+
+            // แปลงสรรพคุณเป็น Array
+            const properties = propertiesInput
+                ? propertiesInput.split(/[\n,]+/).map(p => p.trim()).filter(p => p)
+                : [];
+
+            // UI Loading
+            const finishBtn = document.getElementById('finish-btn');
+            finishBtn.disabled = true;
+            finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
+
+            try {
+                // ส่งข้อมูลไป API
+                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        scientificName,
+                        description,
+                        properties,
+                        usage,
+                        diseases, // ส่งโรคที่เลือกไปด้วย
+                        image: uploadedImageBase64 // ส่งรูปภาพไปด้วย
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // สำเร็จ: แสดง Modal
+                    document.getElementById('modal-herb-name').textContent = name;
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        modalCard.classList.remove('scale-90');
+                        modalCard.classList.add('scale-100');
+                    }, 10);
+                } else {
+                    // ไม่สำเร็จ
+                    alert(`❌ เกิดข้อผิดพลาด: ${data.error || 'ไม่ทราบสาเหตุ'}`);
+                    finishBtn.disabled = false;
+                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+                finishBtn.disabled = false;
+                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+            }
+        }
+
+        // Navigation Functions
+        function goToAdmin() {
+            window.location.href = '/admin-dashboard.html';
+        }
+
+        function goToStep2() {
+            const name = document.getElementById('input-name').value.trim();
+            if(!name) { alert('กรุณากรอกชื่อสมุนไพร'); return; }
 
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
@@ -165,77 +270,6 @@
             step1.classList.remove('hidden');
             circle2.classList.add('bg-white/50', 'text-gray-500', 'border-gray-400');
             circle2.classList.remove('bg-[#A5F3BC]', 'text-[#111C44]', 'border-[#111C44]');
-        }
-
-        async function saveDataToServer() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบก่อน');
-                window.location.href = '/login.html';
-                return;
-            }
-
-            const name = document.getElementById('input-name').value.trim();
-            const scientificName = document.getElementById('input-eng').value.trim();
-            const description = document.getElementById('input-desc').value.trim();
-            const propertiesInput = document.getElementById('input-prop').value.trim();
-            const usage = document.getElementById('input-usage').value.trim();
-
-            if (!name || !description) {
-                alert('❌ กรุณากรอกชื่อสมุนไพรและคำอธิบาย');
-                return;
-            }
-
-            // Convert properties to array
-            const properties = propertiesInput
-                ? propertiesInput.split(/[\n,]+/).map(p => p.trim()).filter(p => p)
-                : [];
-
-            const finishBtn = document.getElementById('finish-btn');
-            finishBtn.disabled = true;
-            finishBtn.innerHTML = '⏳ กำลังบันทึก...';
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        name,
-                        scientificName,
-                        description,
-                        properties,
-                        usage
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    document.getElementById('modal-herb-name').textContent = name;
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                        modal.classList.remove('opacity-0');
-                        modalCard.classList.remove('scale-90');
-                        modalCard.classList.add('scale-100');
-                    }, 10);
-                } else {
-                    alert(`❌ เกิดข้อผิดพลาด: ${data.error || 'ไม่ทราบสาเหตุ'}`);
-                    finishBtn.disabled = false;
-                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์');
-                finishBtn.disabled = false;
-                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
-            }
-        }
-
-        function goToAdmin() {
-            window.location.href = '/admin-dashboard.html';
         }
     </script>
 </body>

@@ -26,8 +26,8 @@
             <a href="/admin-dashboard.html" class="flex items-center gap-4 px-4 py-3 hover:bg-[#FFC107]/20 text-gray-300 rounded-xl font-semibold transition">
                 <div class="w-6 text-center"><i class="fa-solid fa-arrow-left"></i></div> <span>กลับไป Dashboard</span>
             </a>
-            <a href="/add_disease.html" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
-                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>เพิ่มโรค</span>
+            <a href="#" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
+                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>เพิ่มโรคผิวหนัง</span>
             </a>
         </nav>
     </aside>
@@ -51,15 +51,19 @@
                     <div class="space-y-6">
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">ชื่อโรคผิวหนัง *</label>
-                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น สิว, ผื่นแดง, เกลื้อน">
+                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+                        <div>
+                            <label class="block text-[#111C44] font-bold mb-2">ชื่อภาษาอังกฤษ</label>
+                            <input type="text" id="input-eng" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400">
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">คำอธิบาย *</label>
-                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="บอกลักษณะและสัญญาณของโรค"></textarea>
+                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"></textarea>
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">อาการของโรค</label>
-                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น คัน, ผื่น, บวม"></textarea>
+                            <label class="block text-[#111C44] font-bold mb-2">อาการ</label>
+                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น คัน, ผื่นแดง (คั่นด้วยคอมม่า หรือขึ้นบรรทัดใหม่)"></textarea>
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">สมุนไพรที่ใช้รักษา</label>
@@ -82,7 +86,7 @@
                         </div>
                         <div>
                             <label class="block text-[#111C44] font-bold mb-2">วิธีการใช้สมุนไพร</label>
-                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="บอกวิธีการใช้สมุนไพร"></textarea>
+                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"></textarea>
                         </div>
                     </div>
                     <div class="mt-8 flex justify-center">
@@ -93,31 +97,20 @@
                 </div>
 
                 <div id="step-2-content" class="hidden">
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-inner">
-                            <label class="block text-[#111C44] font-bold mb-3">✅ ตรวจสอบข้อมูลของคุณ</label>
-                            <div class="space-y-3 text-sm">
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-bold text-gray-700">ชื่อโรค:</span>
-                                    <span id="review-name" class="text-gray-600 ml-2">-</span>
-                                </div>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-bold text-gray-700">อาการ:</span>
-                                    <span id="review-symptoms" class="text-gray-600 ml-2">-</span>
-                                </div>
-                                <div class="p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-bold text-gray-700">สมุนไพร:</span>
-                                    <span id="review-medicines" class="text-gray-600 ml-2">-</span>
-                                </div>
-                            </div>
+                    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-inner">
+                        <label class="block text-[#111C44] font-bold mb-3">เพิ่มรูปภาพประกอบ (ถ้ามี)</label>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+                        <div id="file-list-container" class="space-y-2 mb-3"></div>
+                        <div class="text-center mt-4">
+                            <button onclick="document.getElementById('image-upload').click()" class="text-blue-500 hover:text-blue-700 underline text-sm cursor-pointer">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> เลือกรูปภาพ
+                            </button>
                         </div>
-
-                        <div id="file-list-container" class="space-y-2"></div>
                     </div>
 
                     <div class="mt-8 flex justify-between gap-4">
-                        <button onclick="goToStep1()" class="flex-1 bg-[#CBD5E1] text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition"><i class="fa-solid fa-angles-left"></i> ย้อนกลับ</button>
-                        <button id="finish-btn" onclick="saveDataToServer()" class="flex-1 bg-[#86EFAC] hover:bg-green-400 text-[#064E3B] py-3 rounded-xl font-bold shadow-md transition"><i class="fa-solid fa-check"></i> เสร็จสิ้น</button>
+                        <button onclick="goToStep1()" class="flex-1 bg-[#CBD5E1] text-gray-700 py-3 rounded-xl font-bold"><i class="fa-solid fa-angles-left"></i> ย้อนกลับ</button>
+                        <button id="finish-btn" onclick="saveDataToServer()" class="flex-1 bg-[#86EFAC] hover:bg-green-400 text-[#064E3B] py-3 rounded-xl font-bold shadow-md"><i class="fa-solid fa-check"></i> ยืนยันข้อมูล</button>
                     </div>
                 </div>
 
@@ -129,7 +122,7 @@
         <div class="bg-[#6EE7B7] p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center relative transform scale-90 transition-transform duration-300" id="modal-card">
             <h2 class="text-xl font-bold text-[#064E3B] mb-2">✅ บันทึกข้อมูลสำเร็จ!</h2>
             <div class="text-3xl font-extrabold text-[#111C44] my-4 drop-shadow-sm" id="modal-herb-name">-</div>
-            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">กลับไปยัง Admin</button>
+            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">กลับไปหน้า Dashboard</button>
         </div>
     </div>
 
@@ -140,9 +133,14 @@
         const circle2 = document.getElementById('circle-2');
         const modal = document.getElementById('success-modal');
         const modalCard = document.getElementById('modal-card');
+        const fileListContainer = document.getElementById('file-list-container');
+        
+        // Config Server URL
         const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+        
+        let uploadedImageBase64 = null; // ตัวแปรเก็บรูปภาพแบบ Base64
 
-        // ตรวจสอบการเข้าสู่ระบบ
+        // ตรวจสอบ Token เมื่อโหลดหน้า
         window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -151,25 +149,37 @@
             }
         });
 
+        // จัดการไฟล์รูปภาพ
+        function handleFiles(files) {
+            if (!files.length) return;
+            fileListContainer.innerHTML = '';
+            
+            // Convert to Base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-300';
+            fileItem.innerHTML = `<span class="text-gray-600 text-sm truncate pr-2"><i class="fa-regular fa-image mr-2 text-blue-500"></i>${files[0].name}</span>`;
+            fileListContainer.appendChild(fileItem);
+        }
+
         function goToStep2() {
             const name = document.getElementById('input-name').value.trim();
             const desc = document.getElementById('input-desc').value.trim();
 
             if (!name || !desc) {
-                alert('❌ กรุณากรอกชื่อโรคและคำอธิบายให้ครบ');
+                alert('❌ กรุณากรอกชื่อโรคและคำอธิบายให้ครบถ้วน');
                 return;
             }
 
-            // Update review
-            document.getElementById('review-name').textContent = name;
-            document.getElementById('review-symptoms').textContent = document.getElementById('input-prop').value || '(ไม่มี)';
-            
-            const checkboxes = document.querySelectorAll('#disease-list input[type="checkbox"]:checked');
-            const medicines = Array.from(checkboxes).map(cb => cb.value).join(', ') || '(ไม่เลือก)';
-            document.getElementById('review-medicines').textContent = medicines;
-
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
+            
+            // Update UI Circles
             circle2.classList.remove('bg-white/50', 'text-gray-500', 'border-gray-400');
             circle2.classList.add('bg-[#A5F3BC]', 'text-[#111C44]', 'border-[#111C44]');
         }
@@ -177,6 +187,8 @@
         function goToStep1() {
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
+            
+            // Revert UI Circles
             circle2.classList.add('bg-white/50', 'text-gray-500', 'border-gray-400');
             circle2.classList.remove('bg-[#A5F3BC]', 'text-[#111C44]', 'border-[#111C44]');
         }
@@ -184,47 +196,60 @@
         async function saveDataToServer() {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบก่อน');
+                alert('❌ กรุณาเข้าสู่ระบบใหม่');
                 window.location.href = '/login.html';
                 return;
             }
 
+            // 1. เตรียมข้อมูล
             const name = document.getElementById('input-name').value.trim();
+            const engName = document.getElementById('input-eng').value.trim();
             const description = document.getElementById('input-desc').value.trim();
             const symptomsInput = document.getElementById('input-prop').value.trim();
             const usage = document.getElementById('input-usage').value.trim();
 
-            if (!name || !description) {
-                alert('❌ กรุณากรอกชื่อโรคและคำอธิบาย');
-                return;
-            }
-
-            // Convert symptoms to array
+            // แปลงอาการเป็น Array (ตาม Logic เดิมที่ Server น่าจะต้องการ)
             const symptoms = symptomsInput
                 ? symptomsInput.split(/[\n,]+/).map(s => s.trim()).filter(s => s)
                 : [];
 
+            // เก็บรายการสมุนไพรที่เลือก
+            const medicines = [];
+            document.querySelectorAll('#disease-list input[type="checkbox"]:checked').forEach((cb) => {
+                medicines.push(cb.value);
+            });
+
+            // สร้าง Payload ข้อมูลที่จะส่ง
+            const payload = {
+                name,
+                engName,       // (เพิ่มใหม่)
+                description,
+                symptoms,
+                medicines,     // (เพิ่มใหม่)
+                usage,         // (เพิ่มใหม่)
+                image: uploadedImageBase64 // ส่งรูปไปด้วย (ถ้า Backend รับได้)
+            };
+
+            // UI Loading
             const finishBtn = document.getElementById('finish-btn');
             finishBtn.disabled = true;
-            finishBtn.innerHTML = '⏳ กำลังบันทึก...';
+            finishBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
 
             try {
+                // 2. ยิง API
                 const response = await fetch(`${API_BASE_URL}/api/diseases`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        symptoms
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
+                    // สำเร็จ: โชว์ Modal
                     document.getElementById('modal-herb-name').textContent = name;
                     modal.classList.remove('hidden');
                     setTimeout(() => {
@@ -233,15 +258,16 @@
                         modalCard.classList.add('scale-100');
                     }, 10);
                 } else {
-                    alert(`❌ เกิดข้อผิดพลาด: ${data.error || 'ไม่ทราบสาเหตุ'}`);
+                    // ไม่สำเร็จ
+                    alert(`❌ เกิดข้อผิดพลาด: ${data.error || 'บันทึกข้อมูลไม่สำเร็จ'}`);
                     finishBtn.disabled = false;
-                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ยืนยันข้อมูล';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์');
+                alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
                 finishBtn.disabled = false;
-                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ยืนยันข้อมูล';
             }
         }
 
