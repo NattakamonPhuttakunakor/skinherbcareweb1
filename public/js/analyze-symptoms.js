@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
             '<p class="text-gray-500 text-center">กำลังประมวลผล กรุณารอสักครู่...</p>';
 
         try {
-            // ✅ API ที่ถูกต้อง
-            const res = await fetch('http://localhost:5000/api/analysis/diagnose', {
+            // ✅ API ที่ถูกต้อง (ใช้ relative URL เพื่อให้ทำงานบน localhost และ Render)
+            const res = await fetch('/api/analysis/diagnose', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
