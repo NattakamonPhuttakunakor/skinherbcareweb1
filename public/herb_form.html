@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkinHerb Care - จัดการข้อมูลสมุนไพร</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #111C44;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid white;
+            background-color: #FFFFFF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            outline: none;
+            color: #334155;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        
+        /* Checkbox Style for Dropdown */
+        .custom-checkbox input:checked + div {
+            background-color: #111C44;
+            border-color: #111C44;
+        }
+        .custom-checkbox input:checked + div i {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-[#8ecae6] flex h-screen overflow-hidden"> 
+
+    <aside class="w-64 bg-[#111C44] text-white flex flex-col flex-shrink-0 z-20 shadow-2xl">
+        <div class="p-6 flex items-center justify-center border-b border-gray-700/30">
+            <div class="text-2xl font-bold tracking-wide">
+                <span class="text-green-400"><i class="fa-solid fa-leaf"></i></span> 
+                SKINHERB<span class="font-light">CARE</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center mt-6 mb-8">
+            <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden bg-yellow-400">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jureeporn&backgroundColor=111c44" alt="Admin" class="w-full h-full object-cover rounded-full">
+            </div>
+            <h3 class="mt-3 text-lg font-medium">Jureeporn zz</h3>
+            <p class="text-xs text-gray-400">Admin</p>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-3">
+            <div class="text-xs text-gray-400 uppercase font-semibold pl-2 mb-2">Features</div>
+            
+            <a href="admin.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                <div class="w-6 text-center"><i class="fa-solid fa-table-columns"></i></div>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md transition-transform hover:scale-105">
+                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div>
+                <span>สมุนไพร</span>
+            </a>
+
+            <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                <div class="w-6 text-center"><i class="fa-solid fa-virus"></i></div>
+                <span>โรคผิวหนัง</span>
+            </a>
+        </nav>
+
+        <div class="p-4 mt-auto">
+            <button class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg font-medium">
+                <i class="fa-solid fa-power-off"></i> <span>Log Out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 bg-[#dbeafe] h-screen overflow-y-auto relative rounded-l-[30px] ml-[-15px] z-10 p-6 lg:px-12 lg:py-8 shadow-inner">
+        
+        <header class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-[#111C44]"><i class="fa-solid fa-bars text-2xl"></i></button>
+                <h1 class="text-2xl font-bold text-[#111C44]">จัดการข้อมูลสมุนไพร</h1>
+            </div>
+            <div class="text-[#111C44] text-2xl cursor-pointer"><i class="fa-solid fa-bars"></i></div>
+        </header>
+
+        <div class="bg-white/60 backdrop-blur-sm rounded-[20px] shadow-sm p-8 max-w-3xl mx-auto mb-24 border border-white/50">
+            
+            <form action="#" method="POST" class="space-y-5">
+                
+                <div>
+                    <label class="form-label">ชื่อสมุนไพร</label>
+                    <input type="text" class="form-input" placeholder="">
+                </div>
+
+                <div>
+                    <label class="form-label">ชื่อภาษาอังกฤษ</label>
+                    <input type="text" class="form-input" placeholder="">
+                </div>
+
+                <div>
+                    <label class="form-label">คำอธิบาย</label>
+                    <textarea rows="6" class="form-input resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">สรรพคุณ</label>
+                    <textarea rows="5" class="form-input resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">วิธีการใช้</label>
+                    <textarea rows="8" class="form-input resize-none"></textarea>
+                </div>
+
+                <div class="relative group" id="disease-dropdown-container">
+                    <label class="form-label">โรคผิวหนังที่รักษาได้</label>
+                    
+                    <button type="button" onclick="toggleDropdown()" class="w-full bg-white text-left px-4 py-3 rounded-xl shadow-sm flex justify-between items-center outline-none border border-transparent focus:border-blue-500 transition-all">
+                        <span class="text-gray-500">เลือกโรคผิวหนัง</span>
+                        <i class="fa-solid fa-caret-down text-gray-700 text-xl"></i>
+                    </button>
+
+                    <div id="disease-list" class="hidden absolute w-full mt-2 bg-white/90 backdrop-blur-md rounded-xl shadow-xl z-50 p-2 border border-white max-h-60 overflow-y-auto">
+                        <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">สะเก็ดเงิน</span>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">กลากเกลื้อน</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">เริม</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">งูสวัด</span>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">สิว</span>
+                        </label>
+
+                         <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">ฝ้ากระ</span>
+                        </label>
+
+                         <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">ผื่นแพ้จากสารเคมี</span>
+                        </label>
+                        
+                         <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">ผิวหนังอักเสบ</span>
+                        </label>
+
+                         <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">ลมพิษ</span>
+                        </label>
+                        
+                         <label class="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer custom-checkbox">
+                            <input type="checkbox" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs hidden"></i>
+                            </div>
+                            <span class="text-gray-700">ผมร่วง</span>
+                        </label>
+                        
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">รูปภาพสมุนไพร</label>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-transparent flex flex-col items-center justify-center min-h-[120px]">
+                        <div class="text-center text-gray-500">
+                            <i class="fa-regular fa-image text-3xl mb-2 opacity-50"></i>
+                            <div class="text-sm">
+                                เพิ่มรูปภาพ <a href="#" class="text-[#4285F4] underline hover:text-blue-700 font-medium">กดที่นี่</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="fixed bottom-0 right-0 left-0 lg:left-64 p-6 bg-gradient-to-t from-[#dbeafe] via-[#dbeafe] to-transparent pointer-events-none flex justify-center gap-4 z-30">
+            <div class="pointer-events-auto flex gap-4 w-full max-w-xl">
+                <button class="flex-1 bg-[#D1D5DB] hover:bg-gray-400 text-[#374151] font-medium py-3 rounded-2xl shadow-sm transition-colors text-lg">
+                    ยกเลิก
+                </button>
+                <button class="flex-1 bg-[#A5F3BC] hover:bg-[#86efac] text-[#14532d] font-medium py-3 rounded-2xl shadow-md transition-colors border border-green-200 text-lg">
+                    บันทึกการเปลี่ยนแปลง
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function toggleDropdown() {
+            const list = document.getElementById('disease-list');
+            list.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(e) {
+            const container = document.getElementById('disease-dropdown-container');
+            if (!container.contains(e.target)) {
+                document.getElementById('disease-list').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

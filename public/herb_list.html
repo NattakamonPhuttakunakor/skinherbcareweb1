@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkinHerb Care - รายชื่อสมุนไพร</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F4F7FE] flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-[#111C44] text-white flex flex-col flex-shrink-0 z-20 hidden lg:flex">
+        <div class="p-6 flex items-center justify-center border-b border-gray-700/30">
+            <div class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                <span class="text-green-400"><i class="fa-solid fa-leaf"></i></span> 
+                <div>SKINHERB<span class="font-light">CARE</span></div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col items-center mt-6 mb-8">
+            <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jureeporn&backgroundColor=111c44" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-3 text-lg font-medium">Jureeporn zz</h3>
+            <p class="text-xs text-gray-400">Admin</p>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-3 mt-4">
+            
+            <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                <div class="w-6 text-center group-hover:text-yellow-400 transition-colors"><i class="fa-solid fa-table-columns"></i></div> 
+                <span>Dashboard</span>
+            </a>
+
+            <a href="herb_list.html" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-bold shadow-md transform scale-[1.02]">
+                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> 
+                <span>สมุนไพร</span>
+            </a>
+
+            <a href="disease_list.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                <div class="w-6 text-center group-hover:text-blue-400 transition-colors"><i class="fa-solid fa-virus"></i></div> 
+                <span>โรคผิวหนัง</span>
+            </a>
+        </nav>
+        
+        <div class="p-4 mt-auto">
+            <button onclick="logout()" class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold">
+                <i class="fa-solid fa-power-off"></i> <span>Log Out</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#A5F3BC]/20 to-[#60a5fa]/10 z-0"></div>
+
+        <div class="relative z-10 px-8 py-5 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-white/60">
+            <h1 class="text-2xl font-bold text-[#111C44] flex items-center gap-3">
+                <i class="fa-solid fa-book-open"></i> รายชื่อสมุนไพร
+            </h1>
+            <div class="flex gap-3">
+                 <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-[#111C44] font-medium text-sm">Online</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative z-10 p-8 flex-1 overflow-y-auto">
+            
+            <a href="add_herb.html" class="block w-full bg-[#2B3674] hover:bg-[#1f2858] text-white text-lg font-bold py-4 rounded-2xl shadow-lg text-center transition-transform hover:scale-[1.01] mb-6 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-plus text-2xl"></i> เพิ่มสมุนไพร
+            </a>
+
+            <div class="bg-white rounded-3xl shadow-sm p-6 min-h-[500px]">
+                <h2 class="text-xl font-bold text-[#111C44] mb-6">สมุนไพรทั้งหมด</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-gray-400 text-sm border-b border-gray-100">
+                                <th class="pb-4 text-left font-medium pl-4">ชื่อสมุนไพร</th>
+                                <th class="pb-4 text-center font-medium">สถานะ</th>
+                                <th class="pb-4 text-center font-medium">อัปเดตล่าสุด</th>
+                                <th class="pb-4 text-center font-medium">การจัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="herb-table-body" class="text-[#2B3674]">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ข้อมูลจำลอง (Mockup Data)
+        const staticData = [
+            { name: 'กระเทียม', date: '28/04/2022' },
+            { name: 'โหระพา', date: '30/04/2022' },
+            { name: 'ว่านหางจระเข้', date: '28/06/2022' },
+            { name: 'พลูคาว', date: '28/04/2022' },
+            { name: 'แตงกวา', date: '28/04/2022' },
+            { name: 'เปลือกมังคุด', date: '28/04/2022' }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('herb-table-body');
+            
+            // 1. ตรวจสอบว่ามีข้อมูลใหม่จากหน้า Add หรือไม่ (LocalStorage)
+            const storedData = localStorage.getItem('previewHerbData');
+            
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                // เพิ่มแถวข้อมูลใหม่
+                addTableRow(tableBody, data.name, today, true, 'new-item-row');
+            }
+
+            // 2. โหลดข้อมูลเดิม (Static)
+            staticData.forEach((item, index) => {
+                addTableRow(tableBody, item.name, item.date, false, `static-row-${index}`);
+            });
+        });
+
+        function addTableRow(container, name, date, isNew, rowId) {
+            const tr = document.createElement('tr');
+            tr.id = rowId;
+            tr.className = `hover:bg-gray-50 transition-colors border-b border-gray-100/50 ${isNew ? 'bg-blue-50/40' : ''}`;
+            
+            const newBadge = isNew ? '<span class="ml-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-md animate-pulse shadow-sm">New</span>' : '';
+
+            tr.innerHTML = `
+                <td class="py-4 pl-4 font-bold flex items-center">
+                    ${name} ${newBadge}
+                </td>
+                <td class="py-4 text-center"><span class="bg-[#E6F9F0] text-[#05CD99] px-3 py-1 rounded-full text-xs font-bold">เผยแพร่</span></td>
+                <td class="py-4 text-center text-sm">${date}</td>
+                <td class="py-4 text-center">
+                    <button onclick="viewDetail(this, '${rowId}', '${name}', ${isNew})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
+                    <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                    <button onclick="deleteItem(this, '${rowId}', ${isNew})" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
+                </td>
+            `;
+            container.appendChild(tr);
+        }
+
+        // --- Action Functions ---
+        function deleteItem(btn, rowId, isNew) {
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "ต้องการลบข้อมูลนี้ใช่หรือไม่",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ลบเลย'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const row = document.getElementById(rowId);
+                    row.style.display = 'none'; // ซ่อนแถว
+                    if (isNew) localStorage.removeItem('previewHerbData');
+                    Swal.fire('ลบสำเร็จ!', '', 'success');
+                }
+            })
+        }
+
+        function editItem(name) {
+            Swal.fire({
+                title: 'แก้ไขข้อมูล',
+                text: `ต้องการแก้ไข ${name} ใช่หรือไม่?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ไปหน้าแก้ไข'
+            }).then((result) => {
+                if (result.isConfirmed) window.location.href = 'add_herb.html';
+            });
+        }
+
+        function viewDetail(btn, rowId, name, isNew) {
+            if(isNew) {
+                window.location.href = 'herb_detail.html';
+            } else {
+                Swal.fire('ข้อมูลตัวอย่าง', 'นี่เป็นข้อมูล Mockup ยังไม่มีหน้ารายละเอียดจริง', 'info');
+            }
+        }
+        
+        function logout() {
+            Swal.fire({
+                title: 'ออกจากระบบ',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ใช่'
+            }).then((result) => {
+                 if(result.isConfirmed) Swal.fire('Logged Out', '', 'success');
+            });
+        }
+    </script>
+</body>
+</html>
