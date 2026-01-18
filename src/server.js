@@ -25,9 +25,14 @@ import herbRoutes from "./routes/herbs.js";
 import diseaseRoutes from "./routes/diseases.js";
 import adminRoutes from "./routes/admin.js";
 
-// แก้ __dirname สำหรับ ES Modules
+// 🔥 แก้ __dirname สำหรับ ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// 🔥 แก้ Path ให้ถอยกลับไป 1 ชั้น เพื่อหา folder public และ uploads 
+// (เพราะ server.js อยู่ใน src/ แต่ public กับ uploads อยู่ที่ root)
+const publicPath = path.join(__dirname, "../public");
+const uploadPath = path.join(__dirname, "../uploads");
 
 async function startServer() {
   try {
@@ -63,10 +68,9 @@ async function startServer() {
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-    // --- Static Files (แก้ Path ให้หาเจอใน Root Folder) ---
-    // หมายเหตุ: ตัด ../ ออก เพราะไฟล์ server.js อยู่ชั้นเดียวกับโฟลเดอร์ public
-    app.use(express.static(path.join(__dirname, "public"))); 
-    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    // --- Static Files (ใช้ publicPath และ uploadPath ที่แก้ไปแล้ว) ---
+    app.use(express.static(publicPath)); 
+    app.use("/uploads", express.static(uploadPath));
 
     // --- Health Check ---
     app.get("/api/health", (req, res) => {
@@ -90,28 +94,27 @@ async function startServer() {
 
     // 1. หน้าแรก (Home Page)
     app.get("/", (req, res) => {
-        res.sendFile(path.join(__dirname, "public/home.html"));
+        res.sendFile(path.join(publicPath, "index.html"));
     });
 
     // 2. เผื่อคนพิมพ์ /home
     app.get("/home", (req, res) => {
-        res.sendFile(path.join(__dirname, "public/home.html"));
+        res.sendFile(path.join(publicPath, "index.html"));
     });
 
     // 3. หน้าเข้าสู่ระบบ (Login)
     app.get("/login", (req, res) => {
-        res.sendFile(path.join(__dirname, "public/login.html"));
+        res.sendFile(path.join(publicPath, "login.html"));
     });
 
     // 4. หน้าสมัครสมาชิก (Sign Up)
     app.get("/signup", (req, res) => {
-        res.sendFile(path.join(__dirname, "public/signup.html"));
+        res.sendFile(path.join(publicPath, "register.html"));
     });
 
     // 5. หน้าวิเคราะห์โรค (Analysis)
     app.get("/analysis", (req, res) => {
-        // เช็คชื่อไฟล์หน้าวิเคราะห์ของคุณให้ดีว่าเป็น index.html หรือ analysis.html
-        res.sendFile(path.join(__dirname, "public/index.html")); 
+        res.sendFile(path.join(publicPath, "analyze-disease.html")); 
     });
 
     // ==========================================
