@@ -243,10 +243,12 @@
                             htmlContent += `
                                 <div class="mt-4">
                                     <h4 class="font-bold text-gray-800 mb-2">🌿 สมุนไพรที่แนะนำ:</h4>
-                                    <ul class="list-disc pl-5 space-y-1">
+                                    <ul class="list-disc pl-5 space-y-2">
                             `;
                             diseaseData.herbs.forEach(herb => {
-                                htmlContent += `<li class="text-gray-700">${herb}</li>`;
+                                const herbName = typeof herb === 'string' ? herb : herb.name;
+                                const effectiveness = herb.effectiveness ? ` (${herb.effectiveness})` : '';
+                                htmlContent += `<li class="text-gray-700"><strong>${herbName}</strong>${effectiveness}</li>`;
                             });
                             htmlContent += `</ul></div>`;
                         }

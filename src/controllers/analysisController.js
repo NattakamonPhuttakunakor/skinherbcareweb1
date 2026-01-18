@@ -2,6 +2,7 @@
 
 import Disease from '../models/Disease.js';
 import Herb from '../models/Herb.js';
+import HerbDiseaseRelation from '../models/HerbDiseaseRelation.js';
 
 /**
  * ================================
@@ -136,13 +137,35 @@ export const diagnoseSymptoms = async (req, res) => {
       });
     }
 
-    // 5. ดึงสมุนไพรที่เกี่ยวข้อง (สมุนไพรที่อาจช่วยรักษาโรคนี้)
-    const relatedHerbs = await Herb.find({
-      $or: [
-        { properties: { $in: bestMatch.symptoms || [] } },
-        { description: { $regex: bestMatch.name, $options: 'i' } }
-      ]
-    }).limit(5);
+    // 5. ดึงสมุนไพรที่เกี่ยวข้องจากตาราการเชื่อมโยง
+    const herbRelations = await HerbDiseaseRelation.find({ disease: bestMatch._id })
+      .populate('herb')
+      .sort({ effectiveness: -1 })
+      .limit(10);
+
+    // ถ้าไม่มีความสัมพันธ์ที่สร้างไว้ ให้ค้นหาจากคุณสมบัติของสมุนไพร
+    let recommendedHerbs = [];
+    
+    if (herbRelations.length > 0) {
+      // ใช้ herbs จาก HerbDiseaseRelation
+      recommendedHerbs = herbRelations.map(rel => ({
+        name: rel.herb.name,
+        effectiveness: rel.effectiveness
+      }));
+    } else {
+      // Fallback: ค้นหาจากคุณสมบัติ หรือชื่อ
+      const fallbackHerbs = await Herb.find({
+        $or: [
+          { properties: { $in: bestMatch.symptoms || [] } },
+          { description: { $regex: bestMatch.name, $options: 'i' } }
+        ]
+      }).limit(5);
+      
+      recommendedHerbs = fallbackHerbs.map(h => ({
+        name: h.name,
+        effectiveness: 'ยังไม่ได้รับการยืนยัน'
+      }));
+    }
 
     // 6. ส่งผลลัพธ์กลับไป
     res.status(200).json({
@@ -151,7 +174,7 @@ export const diagnoseSymptoms = async (req, res) => {
         disease: bestMatch.name,
         confidence: Math.min(0.95, highestScore / 100), // ความมั่นใจ (0-0.95)
         advice: `${bestMatch.description?.substring(0, 200) || 'โรคนี้ต้องการการดูแลผิวหนังที่เหมาะสม'} แนะนำให้ปรึกษาแพทย์ผิวหนังเพื่อการวินิจฉัยอย่างชัดเจน`,
-        herbs: relatedHerbs.map(h => h.name) || []
+        herbs: recommendedHerbs
       }
     });
 
