@@ -103,6 +103,20 @@ body::after {
   background: rgba(255,255,255,0.6);
 }
 
+/* ปุ่ม Admin พิเศษ */
+.admin-btn {
+    background-color: #FFC107 !important; /* สีเหลือง */
+    color: #111C44 !important;
+    display: none; /* ซ่อนไว้ก่อน */
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.admin-btn:hover {
+    background-color: #FFD54F !important;
+    transform: translateY(-1px);
+}
+
 .profile-icon {
   width: 40px;
   height: 40px;
@@ -290,6 +304,11 @@ header p {
     <a href="/" class="logo">🌿 SkinHerbCare</a>
     <div class="auth-links">
       <a href="/">Home</a>
+      
+      <a href="dashboard.html" id="admin-btn" class="admin-btn">
+         ⚙️ จัดการระบบ
+      </a>
+
       <a href="/login.html">Log In</a>
       <a href="/register.html">Sign Up</a>
       <div class="profile-icon">
@@ -333,6 +352,21 @@ header p {
     </div>
   </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // ตรวจสอบ LocalStorage ว่ามี userRole เป็น admin หรือไม่
+        const isAdmin = localStorage.getItem('userRole') === 'admin';
+        
+        // ถ้าเป็น Admin ให้แสดงปุ่ม
+        if (isAdmin) {
+            const btn = document.getElementById('admin-btn');
+            if(btn) {
+                btn.style.display = 'flex';
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
