@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เพิ่มข้อมูลโรค - SkinHerbCare Admin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #e0f2f1, #dcfce7);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #064e3b;
+      margin-bottom: 30px;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #064e3b;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0f2f1;
+      border-radius: 8px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #10b981;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .help-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 5px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Sarabun', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-submit {
+      background: #10b981;
+      color: white;
+      flex: 1;
+    }
+
+    .btn-submit:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-cancel {
+      background: #e5e7eb;
+      color: #374151;
+      flex: 1;
+    }
+
+    .btn-cancel:hover {
+      background: #d1d5db;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+      display: block;
+    }
+
+    .alert.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: #10b981;
+      margin-top: 20px;
+    }
+
+    .nav-back {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav-back:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 25px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      button {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="/admin-dashboard.html" class="nav-back">← กลับไปหน้า Admin</a>
+
+    <h1>🏥 เพิ่มข้อมูลโรค</h1>
+
+    <div id="alertBox" class="alert"></div>
+
+    <form id="addDiseaseForm">
+      <div class="form-group">
+        <label for="name">ชื่อโรค *</label>
+        <input 
+          type="text" 
+          id="name" 
+          placeholder="เช่น สิว, ผื่นแดง, เกลื้อน" 
+          required
+        >
+        <div class="help-text">ชื่อโรคที่ต้องการเพิ่ม (ต้องไม่ซ้ำกับโรคที่มีอยู่)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">คำอธิบายโรค *</label>
+        <textarea 
+          id="description" 
+          placeholder="อธิบายลักษณะและสัญญาณของโรค เช่น เป็นการติดเชื้อจาก..." 
+          required
+        ></textarea>
+        <div class="help-text">ให้รายละเอียดเกี่ยวกับโรคนี้</div>
+      </div>
+
+      <div class="form-group">
+        <label for="symptoms">อาการของโรค</label>
+        <textarea 
+          id="symptoms" 
+          placeholder="เช่น คัน, ผื่น, บวม, เกิดโลหิตออก"
+        ></textarea>
+        <div class="help-text">อาการต่างๆ คั่นด้วยลูกน้ำ (,) หรือขึ้นบรรทัดใหม่</div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn-submit">✅ เพิ่มข้อมูลโรค</button>
+        <button type="button" class="btn-cancel" onclick="window.history.back()">❌ ยกเลิก</button>
+      </div>
+    </form>
+
+    <div class="loading" id="loading">⏳ กำลังส่งข้อมูล...</div>
+  </div>
+
+  <script>
+    // ตรวจสอบการเข้าสู่ระบบและสิทธิ์แอดมิน
+    window.addEventListener('load', async () => {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        alert('❌ กรุณาเข้าสู่ระบบก่อน');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // ตรวจสอบว่าเป็นแอดมินจริงหรือไม่ (ทำได้โดยลองสร้างข้อมูล)
+      // สำหรับตอนนี้อนุญาตให้เข้า แต่เซิร์ฟเวอร์จะตรวจสอบ
+    });
+
+    // จัดการการส่งฟอร์ม
+    document.getElementById('addDiseaseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showAlert('กรุณาเข้าสู่ระบบก่อน', 'error');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // ดึงข้อมูลจากฟอร์ม
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const symptomsInput = document.getElementById('symptoms').value.trim();
+
+      // แปลงอาการเป็น array
+      const symptoms = symptomsInput
+        ? symptomsInput.split(/[\n,]+/).map(s => s.trim()).filter(s => s)
+        : [];
+
+      if (!name || !description) {
+        showAlert('❌ ต้องระบุชื่อโรคและคำอธิบาย', 'error');
+        return;
+      }
+
+      // แสดงสถานะกำลังโหลด
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('addDiseaseForm').style.opacity = '0.6';
+
+      try {
+        const response = await fetch('https://skinherbcareweb1.onrender.com/api/diseases', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name,
+            description,
+            symptoms
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert(`✅ ${data.message}`, 'success');
+          
+          // เคลียร์ฟอร์ม
+          document.getElementById('addDiseaseForm').reset();
+
+          // เปลี่ยนหน้าไป disease_list.html หลังจาก 2 วินาที
+          setTimeout(() => {
+            window.location.href = '/disease_list.html';
+          }, 2000);
+        } else {
+          showAlert(`❌ เกิดข้อผิดพลาด: ${data.error || 'ไม่ทราบสาเหตุ'}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์', 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('addDiseaseForm').style.opacity = '1';
+      }
+    });
+
+    // ฟังก์ชันแสดง Alert
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert ${type}`;
+      alertBox.style.display = 'block';
+
+      if (type === 'success') {
+        setTimeout(() => {
+          alertBox.style.display = 'none';
+        }, 5000);
+      }
+    }
+  </script>
+</body>
+
+</html>
