@@ -63,9 +63,10 @@ async function startServer() {
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-    // --- Static Files (สำคัญมาก: บอกให้ Server รู้จักโฟลเดอร์เก็บรูปและหน้าเว็บ) ---
-    app.use(express.static(path.join(__dirname, "../public"))); 
-    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+    // --- Static Files (แก้ Path ให้หาเจอใน Root Folder) ---
+    // หมายเหตุ: ตัด ../ ออก เพราะไฟล์ server.js อยู่ชั้นเดียวกับโฟลเดอร์ public
+    app.use(express.static(path.join(__dirname, "public"))); 
+    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
     // --- Health Check ---
     app.get("/api/health", (req, res) => {
@@ -84,34 +85,33 @@ async function startServer() {
     app.use("/api/admin", adminRoutes);
 
     // ==========================================
-    // 🌐 FRONTEND ROUTES (ส่วนที่เพิ่มมาใหม่)
+    // 🌐 FRONTEND ROUTES
     // ==========================================
 
     // 1. หน้าแรก (Home Page)
     app.get("/", (req, res) => {
-        // ให้เปิดไฟล์ home.html เป็นหน้าแรก
-        res.sendFile(path.join(__dirname, "../public/home.html"));
+        res.sendFile(path.join(__dirname, "public/home.html"));
     });
 
     // 2. เผื่อคนพิมพ์ /home
     app.get("/home", (req, res) => {
-        res.sendFile(path.join(__dirname, "../public/home.html"));
+        res.sendFile(path.join(__dirname, "public/home.html"));
     });
 
     // 3. หน้าเข้าสู่ระบบ (Login)
     app.get("/login", (req, res) => {
-        res.sendFile(path.join(__dirname, "../public/login.html"));
+        res.sendFile(path.join(__dirname, "public/login.html"));
     });
 
     // 4. หน้าสมัครสมาชิก (Sign Up)
     app.get("/signup", (req, res) => {
-        res.sendFile(path.join(__dirname, "../public/signup.html"));
+        res.sendFile(path.join(__dirname, "public/signup.html"));
     });
 
     // 5. หน้าวิเคราะห์โรค (Analysis)
-    // *หมายเหตุ: ถ้าไฟล์หน้าวิเคราะห์ชื่อ index.html ให้ใช้ index.html*
     app.get("/analysis", (req, res) => {
-        res.sendFile(path.join(__dirname, "../public/index.html")); 
+        // เช็คชื่อไฟล์หน้าวิเคราะห์ของคุณให้ดีว่าเป็น index.html หรือ analysis.html
+        res.sendFile(path.join(__dirname, "public/index.html")); 
     });
 
     // ==========================================
