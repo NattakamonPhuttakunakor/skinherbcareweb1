@@ -9,7 +9,16 @@ import morgan from "morgan";
 // อ่านค่า .env
 dotenv.config();
 
-// 🔥 ระบบกันตาย: ถ้าไม่มี API_KEY ให้ใส่ค่าหลอกทันที
+// 🔥 ระบบกันตาย: ตรวจสอบ Environment Variables ที่จำเป็น
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'GEMINI_API_KEY'];
+const missingEnvVars = requiredEnvVars.filter(key => !process.env[key] || process.env[key].includes('your-'));
+
+if (missingEnvVars.length > 0) {
+    console.warn(`⚠️ Warning: Missing or placeholder environment variables: ${missingEnvVars.join(', ')}`);
+    console.warn("   Please set these on Render: https://dashboard.render.com/");
+}
+
+// 🔥 Fallback for development
 if (!process.env.API_KEY) {
     console.log("⚠️ Warning: API_KEY missing. Using dummy key to prevent crash.");
     process.env.API_KEY = "123456_dummy_key_for_startup";

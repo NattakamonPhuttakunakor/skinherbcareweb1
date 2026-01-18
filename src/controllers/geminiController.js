@@ -5,8 +5,13 @@ import fs from 'fs';
 export const suggestHerbs = async (req, res) => {
     const { symptoms } = req.body;
 
-    if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ success: false, message: "API Key not found" });
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
+        console.error('❌ GEMINI_API_KEY not configured on Render');
+        return res.status(500).json({ 
+            success: false, 
+            message: "ระบบยังไม่ได้ตั้งค่า API Key สำหรับ AI กรุณาติดต่อผู้ดูแลระบบ",
+            detail: "GEMINI_API_KEY is not configured on Render environment"
+        });
     }
 
     try {
@@ -41,8 +46,13 @@ export const analyzeDiseaseImage = async (req, res) => {
             return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
-            return res.status(500).json({ success: false, message: "API Key not found" });
+        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
+            console.error('❌ GEMINI_API_KEY not configured on Render');
+            return res.status(500).json({ 
+                success: false, 
+                message: "ระบบยังไม่ได้ตั้งค่า API Key สำหรับ AI กรุณาติดต่อผู้ดูแลระบบ",
+                detail: "GEMINI_API_KEY is not configured on Render environment"
+            });
         }
 
         const imageBuffer = fs.readFileSync(req.file.path);
@@ -92,8 +102,13 @@ export const analyzeHerbImage = async (req, res) => {
             return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
-            return res.status(500).json({ success: false, message: "API Key not found" });
+        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
+            console.error('❌ GEMINI_API_KEY not configured on Render');
+            return res.status(500).json({ 
+                success: false, 
+                message: "ระบบยังไม่ได้ตั้งค่า API Key สำหรับ AI กรุณาติดต่อผู้ดูแลระบบ",
+                detail: "GEMINI_API_KEY is not configured on Render environment"
+            });
         }
 
         const imageBuffer = fs.readFileSync(req.file.path);
