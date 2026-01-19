@@ -13,7 +13,6 @@
             --bg-gradient-end: #dcfce7;
             --card-bg: rgba(255, 255, 255, 0.6);
             --blur-strength: 15px;
-            --border-color: rgba(255, 255, 255, 0.5);
             --primary-text: #064e3b;
             --secondary-text: #1f2937;
         }
@@ -139,7 +138,7 @@
             margin-bottom: 2.5rem;
         }
 
-        /* --- Features Buttons (ปรับแก้ตรงนี้ให้อ่อนลงครับ) --- */
+        /* --- Features Buttons (ปรับแก้ใหม่: ให้เขียวชัดขึ้นแบบพาสเทล) --- */
         .features {
             display: flex;
             flex-direction: column;
@@ -147,11 +146,12 @@
         }
         
         .feature-button {
-            /* >>> สีใหม่: ขาวไล่ไปเขียวจางๆ (ไม่เข้ม) <<< */
-            background: linear-gradient(145deg, #ffffff 0%, #ebfef4 100%);
+            /* >>> จุดที่แก้: ใช้รหัสสีเขียวอ่อนที่ชัดขึ้น (Mint Cream -> Pale Green) <<< */
+            /* ไล่จากเขียวอ่อนมากๆ ไปหาเขียวอ่อนปกติ */
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
             
-            /* เส้นขอบสีเขียวพาสเทล ให้ดูมีขอบเขตชัดเจน */
-            border: 1px solid #bbf7d0; 
+            /* เส้นขอบสีเขียวอ่อน */
+            border: 1px solid #6ee7b7; 
             
             border-radius: 16px;
             padding: 20px;
@@ -161,14 +161,14 @@
             text-decoration: none;
             color: var(--secondary-text);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* เงาบางๆ */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .feature-button:hover {
             transform: translateY(-3px);
-            /* ตอนชี้ให้เขียวขึ้นอีกนิดนึง แต่ยังไม่มืด */
-            background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
-            border-color: #86efac;
+            /* ตอนชี้ให้เขียวเข้มขึ้นอีกสเต็ป */
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #34d399;
             box-shadow: 0 8px 15px rgba(0,0,0,0.08);
         }
 
@@ -178,13 +178,13 @@
             height: 50px;
             border-radius: 12px;
             background: white; 
-            color: #16a34a; /* สีไอคอนเขียวสดใส */
+            color: #059669; /* เขียวเข้มสวยๆ */
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border: 1px solid #dcfce7;
+            border: 1px solid #d1fae5;
         }
         
         .feature-content h3 {
