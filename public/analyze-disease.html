@@ -325,6 +325,7 @@
                     previewBox.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Captured">`;
                     cameraModeDiv.classList.add('hidden');
                     captureModeDiv.classList.remove('hidden');
+                    console.log('✅ Image captured and saved:', currentImageBlob);
                 });
             });
 
