@@ -171,18 +171,17 @@ header p {
 
 /* Make each feature a white rounded row with subtle shadow and left icon */
 .feature-button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 18px;
-  padding: 18px 22px;
-  border-radius: 16px;
-  text-decoration: none;
-  color: var(--secondary-text);
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(16, 185, 129, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    text-decoration: none;
+    color: var(--secondary-text);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .feature-button:hover {
