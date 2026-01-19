@@ -91,7 +91,9 @@
                         // เก็บ Token ไว้ใช้งาน
                         localStorage.setItem('token', data.token);
                         // เก็บข้อมูล User ไว้แสดงผล
-                        localStorage.setItem('user', JSON.stringify(data.user || data)); 
+                        localStorage.setItem('user', JSON.stringify(data.user || data));
+                        // เก็บ Role ไว้ใช้งาน (admin หรือ user)
+                        localStorage.setItem('userRole', data.role || 'user');
                         
                         // Redirect ไปตามบทบาท (Role)
                         // ** อย่าลืมสร้างไฟล์ admin-dashboard.html และ user-dashboard.html ด้วยนะครับ **

@@ -59,53 +59,53 @@
 </head>
 <body class="bg-[#F4F7FE] text-gray-800 flex h-screen overflow-hidden">
 
-    <aside class="w-64 bg-[#111C44] text-white flex flex-col flex-shrink-0 transition-all duration-300">
+    <aside class="w-64 bg-[#111C44] text-white flex flex-col flex-shrink-0 transition-all duration-300 shadow-xl z-20">
+        
         <div class="p-6 flex items-center justify-center border-b border-gray-700/30">
-            <div class="text-2xl font-bold tracking-wide">
-                <span class="text-green-400"><i class="fa-solid fa-leaf"></i></span> 
-                SKINHERB<span class="font-light">CARE</span>
+            <div class="text-xl font-bold tracking-wide flex items-center gap-2">
+                <i class="fa-solid fa-leaf text-green-400"></i> SKINHERB<span class="font-light">CARE</span>
             </div>
         </div>
 
-        <div class="flex flex-col items-center mt-6 mb-8">
-            <div class="relative">
-                <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin&backgroundColor=111c44" alt="Admin Profile" class="w-full h-full object-cover">
-                </div>
+        <div class="flex flex-col items-center mt-8 mb-6">
+            <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden bg-white/10">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=111c44" class="w-full h-full object-cover">
             </div>
-            <h3 class="mt-3 text-lg font-medium admin-name-display">Loading...</h3>
-            <p class="text-xs text-gray-400">Administrator</p>
+            <h3 class="mt-3 text-lg font-medium">Jureeporn zz</h3>
+            <p class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full mt-1">Admin</p>
         </div>
 
-        <nav class="flex-1 px-4 space-y-3">
-            <div class="text-xs text-gray-400 uppercase font-semibold pl-2 mb-2">Features</div>
+        <nav class="flex-1 px-4 space-y-3 overflow-y-auto">
+            <div class="text-[10px] text-gray-400 uppercase font-semibold pl-3 mb-2 tracking-wider">FEATURES</div>
             
-            <a href="admin_dashboard.html" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md transition-transform hover:scale-105">
-                <div class="w-6 text-center"><i class="fa-solid fa-table-columns text-lg"></i></div>
+            <a href="admin-dashboard.html" class="flex items-center gap-3 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold transition-all">
+                <i class="fa-solid fa-table-columns w-5 text-center"></i>
                 <span>Dashboard</span>
             </a>
 
-            <a href="herb_list.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <div class="w-6 text-center"><i class="fa-solid fa-leaf text-green-400"></i></div>
+            <a href="herb_list.html" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all hover:pl-6">
+                <i class="fa-solid fa-leaf w-5 text-center text-green-400"></i>
                 <span>สมุนไพร</span>
             </a>
 
-            <a href="disease_list.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <div class="w-6 text-center"><i class="fa-solid fa-virus text-cyan-400"></i></div>
+            <a href="disease_list.html" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all hover:pl-6">
+                <i class="fa-solid fa-virus w-5 text-center text-cyan-400"></i>
                 <span>โรคผิวหนัง</span>
-            </a>
-            
-             <a href="add_disease.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <div class="w-6 text-center"><i class="fa-solid fa-plus text-yellow-400"></i></div>
-                <span>เพิ่มข้อมูลโรค</span>
             </a>
         </nav>
 
-        <div class="p-4 mt-auto">
-            <button id="logout-btn" class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg">
+        <div class="p-4 mt-auto space-y-3 bg-[#0d1636]">
+            
+            <a href="index.html" class="w-full bg-[#1A2B5F] hover:bg-[#233a7d] text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-gray-600/50 shadow-sm">
+                <i class="fa-solid fa-globe"></i>
+                <span>ไปหน้าเว็บไซต์</span>
+            </a>
+
+            <button id="logout-btn" onclick="logout()" class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg">
                 <i class="fa-solid fa-power-off"></i>
                 <span>Log Out</span>
             </button>
+
         </div>
     </aside>
 
@@ -201,16 +201,19 @@
 
     <script src="/js/main.js"></script> 
     <script>
+        function logout() {
+            if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                window.location.href = '/login.html';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => {
-                    if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        window.location.href = '/login.html';
-                    }
-                });
+                logoutBtn.addEventListener('click', logout);
             }
 
             // ตัวอย่าง: จำลองตัวเลข Dashboard (ลบออกได้ถ้าใช้ admin.js ดึงค่าจริง)

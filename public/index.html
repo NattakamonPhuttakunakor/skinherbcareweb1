@@ -168,18 +168,6 @@ header p {
   width: 100%;
 }
 
-@media (min-width: 768px) {
-  .features {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .features {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .feature-button {
   display: flex;
   flex-direction: column;
@@ -302,15 +290,26 @@ header p {
 <nav class="top-nav">
   <div class="nav-container">
     <a href="/" class="logo">🌿 SkinHerbCare</a>
-    <div class="auth-links">
+    
+    <!-- Guest Navigation -->
+    <div class="auth-links" id="guest-nav">
       <a href="/">Home</a>
-      
-      <a href="dashboard.html" id="admin-btn" class="admin-btn">
-         ⚙️ จัดการระบบ
-      </a>
-
       <a href="/login.html">Log In</a>
       <a href="/register.html">Sign Up</a>
+      <div class="profile-icon">
+        👤
+      </div>
+    </div>
+
+    <!-- Admin Navigation -->
+    <div class="auth-links" id="admin-nav" style="display: none;">
+      <a href="/">Home</a>
+      <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+        ⚙️ จัดการระบบ
+      </a>
+      <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
+        Log Out
+      </button>
       <div class="profile-icon">
         👤
       </div>
@@ -354,18 +353,30 @@ header p {
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // ตรวจสอบ LocalStorage ว่ามี userRole เป็น admin หรือไม่
-        const isAdmin = localStorage.getItem('userRole') === 'admin';
-        
-        // ถ้าเป็น Admin ให้แสดงปุ่ม
-        if (isAdmin) {
-            const btn = document.getElementById('admin-btn');
-            if(btn) {
-                btn.style.display = 'flex';
-            }
+    function checkLoginStatus() {
+        const userRole = localStorage.getItem('userRole');
+        const guestNav = document.getElementById('guest-nav');
+        const adminNav = document.getElementById('admin-nav');
+
+        if (userRole === 'admin') {
+            guestNav.style.display = 'none';
+            adminNav.style.display = 'flex';
+        } else {
+            guestNav.style.display = 'flex';
+            adminNav.style.display = 'none';
         }
-    });
+    }
+
+    function logout() {
+        if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            location.reload();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkLoginStatus);
 </script>
 
 </body>
