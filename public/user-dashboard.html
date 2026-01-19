@@ -4,24 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkinHerbCare - AI Skin Analysis</title>
-    <!-- === ส่วนของการออกแบบ (Styling) === -->
     <style>
         /* --- การตั้งค่าพื้นฐาน --- */
-        /* Import ฟอนต์ Sarabun จาก Google Fonts */
         @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
 
-        /* กำหนดค่าสีหลักที่จะใช้ในหน้าเว็บ ทำให้แก้ไขสีได้ง่ายในที่เดียว */
         :root {
-            --bg-gradient-start: #e0f2f1; /* สีพื้นหลังไล่เฉด (เริ่มต้น) */
-            --bg-gradient-end: #dcfce7;   /* สีพื้นหลังไล่เฉด (สิ้นสุด) */
-            --card-bg: rgba(255, 255, 255, 0.5); /* สีพื้นหลังของการ์ด (โปร่งแสง) */
-            --blur-strength: 15px; /* ความเบลอของพื้นหลังการ์ด */
-            --border-color: rgba(255, 255, 255, 0.2); /* สีเส้นขอบ */
-            --primary-text: #064e3b; /* สีตัวอักษรหลัก (เขียวเข้ม) */
-            --secondary-text: #1f2937; /* สีตัวอักษรรอง (เทาเข้ม) */
+            --bg-gradient-start: #e0f2f1;
+            --bg-gradient-end: #dcfce7;
+            --card-bg: rgba(255, 255, 255, 0.6);
+            --blur-strength: 15px;
+            --border-color: rgba(255, 255, 255, 0.5);
+            --primary-text: #064e3b;
+            --secondary-text: #1f2937;
         }
 
-        /* --- การออกแบบ Body (ส่วนหลักของหน้า) --- */
         body {
             margin: 0;
             padding: 0;
@@ -32,8 +28,7 @@
             position: relative;
         }
 
-        /* --- องค์ประกอบตกแต่งพื้นหลัง --- */
-        /* สร้างใบไม้ตกแต่งที่มุมซ้ายล่างและขวาบนของหน้าจอ */
+        /* --- Background Decorations --- */
         body::before {
             content: '🌿';
             position: fixed;
@@ -42,7 +37,7 @@
             font-size: 250px;
             color: rgba(255, 255, 255, 0.5);
             transform: rotate(-30deg);
-            z-index: -1; /* ทำให้ใบไม้อยู่หลังเนื้อหาอื่น */
+            z-index: -1;
         }
          body::after {
             content: '🌿';
@@ -55,19 +50,19 @@
             z-index: -1;
         }
 
-        /* --- แถบเมนูด้านบน (Navbar) --- */
+        /* --- Navbar --- */
         .top-nav {
-            background: rgba(255, 255, 255, 0.3); /* พื้นหลังโปร่งแสง */
-            backdrop-filter: blur(10px); /* เอฟเฟกต์กระจกฝ้า */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             padding: 15px 40px;
-            position: sticky; /* ทำให้เมนูเลื่อนตามหน้าจอ */
+            position: sticky;
             width: 100%;
             top: 0;
             left: 0;
             box-sizing: border-box;
             z-index: 100;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid white;
         }
         .nav-container {
             max-width: 1200px;
@@ -93,28 +88,30 @@
             border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: var(--primary-text);
         }
         .login-btn:hover {
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(255, 255, 255, 0.8);
         }
         .profile-icon {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--border-color);
+            background-color: white;
+            border: 1px solid #bbf7d0;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            color: var(--primary-text);
         }
 
-        /* --- ส่วนเนื้อหาหลัก --- */
+        /* --- Main Content --- */
         .container {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: calc(100vh - 80px); /* ความสูงเต็มจอ (ลบความสูง Navbar) */
+            min-height: calc(100vh - 80px);
             padding: 20px;
             box-sizing: border-box;
         }
@@ -125,7 +122,7 @@
             border-radius: 24px;
             padding: 30px 40px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
+            border: 2px solid white;
             text-align: center;
             max-width: 600px;
             width: 100%;
@@ -142,15 +139,20 @@
             margin-bottom: 2.5rem;
         }
 
-        /* --- ปุ่มฟังก์ชัน 3 อัน --- */
+        /* --- Features Buttons (ปรับแก้ตรงนี้ให้อ่อนลงครับ) --- */
         .features {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
+        
         .feature-button {
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.2));
-            border: 1px solid var(--border-color);
+            /* >>> สีใหม่: ขาวไล่ไปเขียวจางๆ (ไม่เข้ม) <<< */
+            background: linear-gradient(145deg, #ffffff 0%, #ebfef4 100%);
+            
+            /* เส้นขอบสีเขียวพาสเทล ให้ดูมีขอบเขตชัดเจน */
+            border: 1px solid #bbf7d0; 
+            
             border-radius: 16px;
             padding: 20px;
             display: flex;
@@ -159,12 +161,15 @@
             text-decoration: none;
             color: var(--secondary-text);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* เงาบางๆ */
         }
+
         .feature-button:hover {
-            transform: translateY(-5px);
-            background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            /* ตอนชี้ให้เขียวขึ้นอีกนิดนึง แต่ยังไม่มืด */
+            background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #86efac;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.08);
         }
 
         .feature-icon {
@@ -172,35 +177,34 @@
             width: 50px;
             height: 50px;
             border-radius: 12px;
-            background: white;
-            color: var(--primary-text);
+            background: white; 
+            color: #16a34a; /* สีไอคอนเขียวสดใส */
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #dcfce7;
         }
+        
         .feature-content h3 {
             font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-text);
+            font-weight: 700;
+            color: #064e3b; 
             margin: 0 0 5px 0;
         }
         .feature-content p {
             margin: 0;
             color: #4b5563;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         
     </style>
 </head>
 <body>
-    <!-- === ส่วน Navbar === -->
     <nav class="top-nav">
         <div class="nav-container">
-            <!-- โลโก้และชื่อเว็บ -->
             <a href="/" class="logo">🌿 SkinHerbCare</a>
-            <!-- ลิงก์สำหรับเข้าสู่ระบบ/สมัครสมาชิก -->
             <div class="auth-links">
                 <a href="/" class="login-btn">Home</a>
                 <a href="/login.html" class="login-btn">Log In</a>
@@ -214,20 +218,15 @@
         </div>
     </nav>
 
-    <!-- === ส่วนเนื้อหาหลักที่จัดกึ่งกลาง === -->
     <div class="container">
-        <!-- การ์ดหลักแบบกระจกฝ้า -->
         <div class="main-card">
-            <!-- ส่วนหัวข้อ -->
             <header>
                 <h1>ยินดีต้อนรับสู่เว็ปไซต์แนะนำสมุนไพรรักษาโรคผิวหนัง</h1>
                 <p>โปรดเลือกประเภทการใช้งาน</p>
             </header>
 
-            <!-- ส่วนเนื้อหาหลัก (ปุ่มฟังก์ชัน) -->
             <main>
                 <div class="features">
-                    <!-- ฟังก์ชันที่ 1: วิเคราะห์โรค -->
                     <a href="/analyze-disease.html" class="feature-button">
                         <div class="feature-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
@@ -240,7 +239,6 @@
                         </div>
                     </a>
 
-                    <!-- ฟังก์ชันที่ 2: ค้นหาสมุนไพร -->
                     <a href="/analyze-herb.html" class="feature-button">
                         <div class="feature-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
@@ -254,7 +252,6 @@
                         </div>
                     </a>
 
-                    <!-- ฟังก์ชันที่ 3: วิเคราะห์จากอาการ -->
                     <a href="/analyze-symptoms.html" class="feature-button">
                         <div class="feature-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
@@ -273,4 +270,3 @@
     </div>
 </body>
 </html>
-
