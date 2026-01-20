@@ -362,7 +362,7 @@
                 }
             });
 
-            // Analyze Button
+            // Analyze Button - DEMO MODE (always show Vitiligo result)
             analyzeBtn.addEventListener('click', async () => {
                 if (!currentImageBlob) {
                     alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
@@ -371,44 +371,37 @@
 
                 analyzeBtn.disabled = true;
                 analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';
+                const resultsContainer = document.getElementById('results-container');
 
-                const formData = new FormData();
-                formData.append('image', currentImageBlob, 'photo.jpg');
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/gemini/analyze-disease-image`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-                    const resultsContainer = document.getElementById('results-container');
-
-                    if (data.success) {
-                        resultsContainer.innerHTML = `
-                            <div class="bg-green-100 border-l-4 border-green-600 p-4">
-                                <h3 class="font-bold text-lg text-green-800">${data.result}</h3>
-                                <p class="text-green-700 text-sm mt-2">${data.advice || 'โปรดปรึกษาแพทย์'}</p>
+                // Simulate processing delay
+                setTimeout(() => {
+                    // DEMO: Always show Vitiligo result regardless of image
+                    resultsContainer.innerHTML = `
+                        <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 text-left">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                    <i class="fa-solid fa-clipboard-check text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-[#111C44]">ผลการวิเคราะห์: โรคด่างขาว (Vitiligo)</h3>
                             </div>
-                        `;
-                    } else {
-                        resultsContainer.innerHTML = `
-                            <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
-                                ❌ ${data.message || 'เกิดข้อผิดพลาด'}
+                            <p class="text-gray-600 mb-4">
+                                จากการวิเคราะห์เบื้องต้น พบลักษณะที่คล้ายกับโรคด่างขาว ซึ่งเกิดจากการที่เซลล์สร้างเม็ดสีผิวถูกทำลาย ทำให้ผิวหนังบริเวณนั้นเป็นสีขาวซีด
+                            </p>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                <h4 class="font-bold text-green-800 mb-2"><i class="fa-solid fa-leaf"></i> สมุนไพรทางเลือกที่แนะนำ:</h4>
+                                <ul class="list-disc list-inside text-green-700 space-y-1">
+                                    <li><b>พญายอ (เสลดพังพอนตัวเมีย):</b> มีฤทธิ์ต้านการอักเสบ อาจช่วยชะลอการลุกลาม</li>
+                                    <li><b>ใบบัวบก:</b> ช่วยกระตุ้นการสร้างคอลลาเจนและฟื้นฟูสภาพผิว</li>
+                                    <li><b>ขมิ้นชัน:</b> มีสารต้านอนุมูลอิสระสูง ช่วยดูแลผิวพรรณโดยรวม</li>
+                                </ul>
                             </div>
-                        `;
-                    }
-                } catch (err) {
-                    console.error('Error:', err);
-                    document.getElementById('results-container').innerHTML = `
-                        <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
-                            ❌ เกิดข้อผิดพลาด: ${err.message}
+                            <p class="text-xs text-red-500 mt-4">*คำเตือน: ผลลัพธ์นี้เป็นเพียงการจำลองเพื่อการสาธิต ไม่สามารถใช้อ้างอิงทางการแพทย์ได้จริง</p>
                         </div>
                     `;
-                } finally {
+
                     analyzeBtn.disabled = false;
                     analyzeBtn.textContent = 'วิเคราะห์';
-                }
+                }, 1500);
             });
 
             // Show upload mode by default

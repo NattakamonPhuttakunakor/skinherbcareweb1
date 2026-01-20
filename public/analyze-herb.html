@@ -361,7 +361,7 @@
         }
       });
 
-      // Analyze Button - send to backend
+      // Analyze Button - DEMO MODE (always show Mangosteen result)
       analyzeBtn.addEventListener('click', async () => {
         if (!currentImageBlob) {
           alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
@@ -370,44 +370,47 @@
 
         analyzeBtn.disabled = true;
         analyzeBtn.textContent = '⏳ กำลังค้นหา...';
+        const resultsContainer = document.getElementById('results-container');
 
-        const formData = new FormData();
-        formData.append('image', currentImageBlob, 'photo.jpg');
-
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/gemini/analyze-herb-image`, {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-          const resultsContainer = document.getElementById('results-container');
-
-          if (data.success) {
-            resultsContainer.innerHTML = `
-              <div class="bg-green-100 border-l-4 border-green-600 p-4">
-                <h3 class="font-bold text-lg text-green-800">${data.result}</h3>
-                <p class="text-green-700 text-sm mt-2">${data.advice || 'ข้อมูลเพิ่มเติมจากระบบ'}</p>
+        // Simulate processing delay
+        setTimeout(() => {
+          // DEMO: Always show Mangosteen result regardless of image
+          resultsContainer.innerHTML = `
+            <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500 text-left">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                  <i class="fa-solid fa-seedling text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-[#111C44]">ผลการค้นหา: เปลือกมังคุด (Mangosteen Peel)</h3>
               </div>
-            `;
-          } else {
-            resultsContainer.innerHTML = `
-              <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
-                ❌ ${data.message || 'เกิดข้อผิดพลาด'}
+              
+              <p class="text-gray-600 mb-4">
+                เปลือกมังคุดแห้ง อุดมไปด้วยสารแซนโทน (Xanthone) ซึ่งเป็นสารต้านอนุมูลอิสระที่มีฤทธิ์ทางยาโดดเด่นในการดูแลผิวหนัง
+              </p>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                  <h4 class="font-bold text-green-800 mb-2">สรรพคุณหลัก:</h4>
+                  <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
+                    <li>ยับยั้งเชื้อแบคทีเรียที่ทำให้เกิดหนอง</li>
+                    <li>ช่วยสมานแผลสด แผลไฟไหม้ น้ำร้อนลวก</li>
+                    <li>ลดการอักเสบของสิว และโรคผิวหนังบางชนิด</li>
+                  </ul>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                  <h4 class="font-bold text-blue-800 mb-2">วิธีใช้เบื้องต้น:</h4>
+                  <p class="text-blue-700 text-sm">
+                    นำเปลือกแห้งมาฝนกับน้ำปูนใสให้ข้นพอประมาณ แล้วทาบริเวณแผลวันละ 2-3 ครั้ง
+                  </p>
+                </div>
               </div>
-            `;
-          }
-        } catch (err) {
-          console.error('Error:', err);
-          document.getElementById('results-container').innerHTML = `
-            <div class="bg-red-100 border-l-4 border-red-600 p-4 text-red-800">
-              ❌ เกิดข้อผิดพลาด: ${err.message}
+              <p class="text-xs text-red-500 mt-4">*คำเตือน: ผลลัพธ์นี้เป็นเพียงการจำลองเพื่อการสาธิต ไม่สามารถใช้อ้างอิงทางการแพทย์ได้จริง</p>
             </div>
           `;
-        } finally {
+
           analyzeBtn.disabled = false;
           analyzeBtn.textContent = 'ค้นหา';
-        }
+        }, 1500);
       });
 
       // Show upload mode by default
