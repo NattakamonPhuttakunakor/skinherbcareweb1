@@ -6,240 +6,401 @@
     <title>วิเคราะห์รูปโรคผิวหนัง - SkinHerbCare</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* -------------------------------
+           🌿 ส่วนการตกแต่งหลักของเว็บ
+        -------------------------------- */
+        @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
+
+        :root {
+            --bg-gradient-start: #e0f2f1;
+            --bg-gradient-end: #dcfce7;
+            --card-bg: linear-gradient(to bottom, rgba(245, 255, 250, 0.8), rgba(240, 253, 245, 0.8));
+            --blur-strength: 15px;
+            --border-color: rgba(16, 185, 129, 0.08);
+            --primary-text: #064e3b;
+            --secondary-text: #1f2937;
+        }
+
         body {
+            margin: 0;
+            padding: 0;
             font-family: "Sarabun", sans-serif;
-            background-color: #f0fdf4; /* พื้นหลังเขียวอ่อนๆ */
-            background-image: radial-gradient(#dcfce7 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: linear-gradient(160deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--primary-text);
+            position: relative;
         }
-        
-        /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+
+        /* 🌿 ใบไม้ตกแต่งพื้นหลัง */
+        body::before {
+            content: '🌿';
+            position: fixed;
+            bottom: -50px;
+            left: -50px;
+            font-size: 250px;
+            color: rgba(255, 255, 255, 0.5);
+            transform: rotate(-30deg);
+            z-index: -1;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        body::after {
+            content: '🌿';
+            position: fixed;
+            top: -80px;
+            right: -80px;
+            font-size: 300px;
+            color: rgba(255, 255, 255, 0.4);
+            transform: rotate(20deg);
+            z-index: -1;
+        }
+
+        /* 🌿 Navbar */
+        .top-nav {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            position: sticky;
+            width: 100%;
+            top: 0;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-text);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .auth-links {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .auth-links a {
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .login-btn:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .profile-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        @media (max-width: 640px) {
+            .top-nav {
+                padding: 10px 12px;
+            }
+            .logo {
+                font-size: 1rem;
+            }
+            .auth-links a {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* 🌿 กล่องแสดงเนื้อหาหลัก */
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--blur-strength));
+            border-radius: 24px;
+            padding: 30px 40px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* กล่องแสดงภาพตัวอย่าง */
+        .preview-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+        .preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
 
-<body class="flex items-center justify-center min-h-screen p-4">
-
-    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-xl overflow-hidden border border-gray-100 p-6 sm:p-10 relative">
-        
-        <div class="mb-6">
-            <a href="/user-dashboard.html" class="inline-flex items-center text-gray-500 hover:text-green-700 transition font-medium">
-                <i class="fa-solid fa-arrow-left mr-2"></i>
-                กลับไปหน้าแดชบอร์ด
-            </a>
+<body>
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="logo">🌿 SkinHerbCare</a>
+            <div class="auth-links">
+                <a href="/" class="login-btn">Home</a>
+                <a href="/login.html" class="login-btn">Log In</a>
+                <a href="/register.html" class="login-btn">Sign Up</a>
+                <div class="profile-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                    </svg>
+                </div>
+            </div>
         </div>
+    </nav>
 
-        <div class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">วิเคราะห์รูปโรคผิวหนัง</h1>
-            <p class="text-gray-500 text-sm sm:text-base">อัปโหลดภาพถ่ายผิว หรือถ่ายภาพจากกล้องเพื่อให้ AI ช่วยวิเคราะห์ข้อมูล</p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-            <button id="upload-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold shadow-sm transition flex items-center justify-center gap-2">
-                <i class="fa-regular fa-folder-open"></i> เลือกรูปจากเครื่อง
-            </button>
-            <button id="camera-btn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-xl font-semibold shadow-sm transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-camera"></i> เปิดกล้อง
-            </button>
-        </div>
-
-        <div class="relative w-full h-64 sm:h-80 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 flex flex-col items-center justify-center overflow-hidden mb-6 group hover:border-green-400 transition-colors">
+    <main class="flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-12">
+        <div class="main-card">
             
-            <div id="placeholder-content" class="text-center p-4">
-                <i class="fa-solid fa-image text-4xl text-gray-300 mb-3 block"></i>
-                <span class="text-gray-400">ภาพตัวอย่างจะแสดงที่นี่</span>
+            <div class="w-full flex justify-start mb-2">
+                <a href="/user-dashboard.html" class="inline-flex items-center text-gray-500 hover:text-green-700 transition font-medium text-sm sm:text-base">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    กลับไปหน้าแดชบอร์ด
+                </a>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold mb-2">วิเคราะห์รูปโรคผิวหนัง</h1>
+            <p class="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">อัปโหลดภาพถ่ายผิว หรือถ่ายภาพจากกล้องเพื่อรับการวิเคราะห์เบื้องต้นจาก AI</p>
+
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 justify-center">
+                <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
+                    📁 เลือกรูปจากเครื่อง
+                </button>
+                <button id="camera-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition text-sm sm:text-base">
+                    📷 เปิดกล้อง
+                </button>
             </div>
 
-            <img id="image-preview" class="hidden w-full h-full object-contain p-2" alt="Preview">
+            <div id="camera-mode" class="hidden mb-4 sm:mb-6">
+                <video id="video-stream" width="100%" height="auto" style="border-radius: 12px; background: #000; max-height: 400px;" autoplay playsinline></video>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4 justify-center">
+                    <button id="capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
+                        ✓ ถ่ายภาพ
+                    </button>
+                    <button id="close-camera-btn" class="px-4 sm:px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
+                        ✕ ปิดกล้อง
+                    </button>
+                </div>
+            </div>
 
-            <video id="video-stream" class="hidden w-full h-full object-cover" autoplay playsinline></video>
-        </div>
+            <div id="capture-mode" class="hidden mb-4 sm:mb-6">
+                <div id="image-preview-box" class="preview-box"><span>ภาพจะแสดงที่นี่</span></div>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+                    <button id="use-capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
+                        ✓ ใช้รูปนี้
+                    </button>
+                    <button id="retake-btn" class="px-4 sm:px-6 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition text-sm sm:text-base">
+                        🔄 ถ่ายใหม่
+                    </button>
+                </div>
+            </div>
 
-        <div id="camera-controls" class="hidden flex justify-center gap-3 mb-6">
-            <button id="capture-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700">
-                <i class="fa-solid fa-camera-retro mr-1"></i> ถ่ายภาพ
+            <div id="upload-mode" class="mb-4 sm:mb-6">
+                <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
+            </div>
+
+            <input id="disease-image-upload" type="file" accept="image/*" 
+                   class="hidden block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
+                          file:rounded-full file:border-0 file:text-sm file:font-semibold 
+                          file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
+
+            <button id="analyze-disease-btn"
+                    class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95">
+                วิเคราะห์
             </button>
-            <button id="close-camera-btn" class="bg-red-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-600">
-                ยกเลิก
-            </button>
+
+            <div id="results-container" class="mt-6 bg-gray-50 p-4 rounded-lg min-h-[100px]">
+                <p>ผลลัพธ์จะแสดงที่นี่...</p>
+            </div>
         </div>
-
-        <div id="retake-controls" class="hidden flex justify-center gap-3 mb-6">
-            <button id="retake-btn" class="bg-yellow-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-yellow-600">
-                <i class="fa-solid fa-rotate-right mr-1"></i> ถ่ายใหม่
-            </button>
-        </div>
-
-        <input type="file" id="disease-image-upload" accept="image/*" class="hidden">
-
-        <button id="analyze-disease-btn" class="w-full bg-green-600 hover:bg-green-700 text-white text-lg font-bold py-3.5 rounded-xl shadow-md transition active:scale-[0.98]">
-            วิเคราะห์ข้อมูล
-        </button>
-
-        <div id="results-container" class="mt-6"></div>
-
-    </div>
+    </main>
 
     <script>
+        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+        let currentImageBlob = null;
+        let mediaStream = null; // 🎥 For storing the actual MediaStream object (v2)
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Elements
+            const imageInput = document.getElementById('disease-image-upload');
             const uploadBtn = document.getElementById('upload-btn');
             const cameraBtn = document.getElementById('camera-btn');
-            const fileInput = document.getElementById('disease-image-upload');
-            const placeholder = document.getElementById('placeholder-content');
-            const imagePreview = document.getElementById('image-preview');
-            const videoElement = document.getElementById('video-stream');
-            const cameraControls = document.getElementById('camera-controls');
-            const retakeControls = document.getElementById('retake-controls');
+            const videoElement = document.getElementById('video-stream'); // 🎥 This is the HTML element
+            const captureBtn = document.getElementById('capture-btn');
+            const closeCameraBtn = document.getElementById('close-camera-btn');
+            const retakeBtn = document.getElementById('retake-btn');
+            const useCaptureBtn = document.getElementById('use-capture-btn');
+            const cameraModeDiv = document.getElementById('camera-mode');
+            const captureModeDiv = document.getElementById('capture-mode');
+            const uploadModeDiv = document.getElementById('upload-mode');
+            const previewBoxUpload = document.getElementById('image-preview-box-upload');
+            const previewBox = document.getElementById('image-preview-box');
             const analyzeBtn = document.getElementById('analyze-disease-btn');
-            const resultsContainer = document.getElementById('results-container');
-            
-            let currentImageBlob = null;
-            let mediaStream = null;
 
-            // --- 1. Upload Logic ---
-            uploadBtn.addEventListener('click', () => {
-                stopCamera();
-                fileInput.click();
+            // 🎥 Switch to Upload Mode
+            uploadBtn.addEventListener('click', async () => {
+                await stopCamera();
+                uploadModeDiv.classList.remove('hidden');
+                cameraModeDiv.classList.add('hidden');
+                captureModeDiv.classList.add('hidden');
+                imageInput.click();
             });
 
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    showImagePreview(file);
-                    currentImageBlob = file;
-                }
-            });
-
-            // --- 2. Camera Logic ---
+            // 🎥 Switch to Camera Mode
             cameraBtn.addEventListener('click', async () => {
-                // Reset UI
-                placeholder.classList.add('hidden');
-                imagePreview.classList.add('hidden');
-                videoElement.classList.remove('hidden');
-                cameraControls.classList.remove('hidden');
-                retakeControls.classList.add('hidden');
-                
+                uploadModeDiv.classList.add('hidden');
+                captureModeDiv.classList.add('hidden');
+                cameraModeDiv.classList.remove('hidden');
+                await startCamera(videoElement);
+            });
+
+            // 🎥 Start Camera
+            async function startCamera(videoElement) {
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment' }
+                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                        audio: false
                     });
                     videoElement.srcObject = mediaStream;
+                    videoElement.play();
                 } catch (err) {
-                    alert('ไม่สามารถเปิดกล้องได้: ' + err.message);
-                    resetUI();
+                    console.error('กล้องไม่พร้อม:', err);
+                    alert('ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต');
+                    cameraModeDiv.classList.add('hidden');
                 }
-            });
-
-            document.getElementById('capture-btn').addEventListener('click', () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                canvas.getContext('2d').drawImage(videoElement, 0, 0);
-                
-                canvas.toBlob(blob => {
-                    currentImageBlob = blob;
-                    stopCamera(); // Stop video stream
-                    
-                    // Show captured image
-                    const url = URL.createObjectURL(blob);
-                    imagePreview.src = url;
-                    imagePreview.classList.remove('hidden');
-                    videoElement.classList.add('hidden');
-                    cameraControls.classList.add('hidden');
-                    retakeControls.classList.remove('hidden'); // Show retake button
-                });
-            });
-
-            document.getElementById('close-camera-btn').addEventListener('click', () => {
-                stopCamera();
-                resetUI();
-            });
-
-            document.getElementById('retake-btn').addEventListener('click', () => {
-                cameraBtn.click(); // Trigger camera start again
-            });
-
-            // --- Helpers ---
-            function showImagePreview(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                    videoElement.classList.add('hidden');
-                    retakeControls.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
             }
 
-            function stopCamera() {
+            // 🎥 Stop Camera
+            async function stopCamera() {
                 if (mediaStream) {
                     mediaStream.getTracks().forEach(track => track.stop());
                     mediaStream = null;
                 }
             }
 
-            function resetUI() {
-                placeholder.classList.remove('hidden');
-                imagePreview.classList.add('hidden');
-                videoElement.classList.add('hidden');
-                cameraControls.classList.add('hidden');
-                retakeControls.classList.add('hidden');
-                imagePreview.src = '';
-                fileInput.value = '';
-                currentImageBlob = null;
-            }
+            // 📷 Capture Image from Video
+            captureBtn.addEventListener('click', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(videoElement, 0, 0);
+                
+                canvas.toBlob((blob) => {
+                    currentImageBlob = blob;
+                    previewBox.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Captured">`;
+                    cameraModeDiv.classList.add('hidden');
+                    captureModeDiv.classList.remove('hidden');
+                    console.log('✅ Image captured and saved:', currentImageBlob);
+                });
+            });
 
-            // --- 3. Analysis Logic (Demo) ---
-            analyzeBtn.addEventListener('click', () => {
+            // 🔄 Retake Photo
+            retakeBtn.addEventListener('click', async () => {
+                captureModeDiv.classList.add('hidden');
+                cameraModeDiv.classList.remove('hidden');
+                await startCamera(videoElement);
+            });
+
+            // ✓ Use Captured Photo
+            useCaptureBtn.addEventListener('click', () => {
+                stopCamera();
+                uploadModeDiv.classList.add('hidden');
+                cameraModeDiv.classList.add('hidden');
+                captureModeDiv.classList.add('hidden');
+            });
+
+            // ✕ Close Camera
+            closeCameraBtn.addEventListener('click', async () => {
+                await stopCamera();
+                cameraModeDiv.classList.add('hidden');
+                uploadModeDiv.classList.remove('hidden');
+            });
+
+            // 📁 Upload Image
+            imageInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    currentImageBlob = file;
+                    const reader = new FileReader();
+                    reader.onload = (e) => previewBoxUpload.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Analyze Button - DEMO MODE (always show Vitiligo result)
+            analyzeBtn.addEventListener('click', async () => {
                 if (!currentImageBlob) {
-                    alert('กรุณาเลือกรูปภาพก่อนกดวิเคราะห์');
+                    alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
                     return;
                 }
 
-                analyzeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังวิเคราะห์...';
                 analyzeBtn.disabled = true;
-                resultsContainer.innerHTML = '';
+                analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';
+                const resultsContainer = document.getElementById('results-container');
 
-                // Simulate API Call
+                // Simulate processing delay
                 setTimeout(() => {
+                    // DEMO: Always show Vitiligo result regardless of image
                     resultsContainer.innerHTML = `
-                        <div class="bg-green-50 rounded-xl p-5 border border-green-200 animate-fade-in-up">
-                            <div class="flex items-start gap-4">
-                                <div class="bg-green-100 p-3 rounded-full text-green-600">
-                                    <i class="fa-solid fa-clipboard-check text-2xl"></i>
+                        <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 text-left">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                    <i class="fa-solid fa-clipboard-check text-xl"></i>
                                 </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800">ผลการวิเคราะห์: โรคด่างขาว (Vitiligo)</h3>
-                                    <p class="text-gray-600 mt-2 text-sm leading-relaxed">
-                                        ลักษณะผิวหนังมีความคล้ายคลึงกับโรคด่างขาว ซึ่งเกิดจากการขาดเม็ดสีเมลานิน
-                                    </p>
-                                    <div class="mt-4 pt-4 border-t border-green-200">
-                                        <h4 class="font-semibold text-green-800 mb-2">🌿 สมุนไพรแนะนำ:</h4>
-                                        <ul class="list-disc list-inside text-gray-700 text-sm space-y-1">
-                                            <li><b>พญายอ:</b> ลดการอักเสบ</li>
-                                            <li><b>ใบบัวบก:</b> กระตุ้นการสร้างเซลล์ผิว</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                <h3 class="text-xl font-bold text-[#111C44]">ผลการวิเคราะห์: โรคด่างขาว (Vitiligo)</h3>
                             </div>
+                            <p class="text-gray-600 mb-4">
+                                จากการวิเคราะห์เบื้องต้น พบลักษณะที่คล้ายกับโรคด่างขาว ซึ่งเกิดจากการที่เซลล์สร้างเม็ดสีผิวถูกทำลาย ทำให้ผิวหนังบริเวณนั้นเป็นสีขาวซีด
+                            </p>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                <h4 class="font-bold text-green-800 mb-2"><i class="fa-solid fa-leaf"></i> สมุนไพรทางเลือกที่แนะนำ:</h4>
+                                <ul class="list-disc list-inside text-green-700 space-y-1">
+                                    <li><b>พญายอ (เสลดพังพอนตัวเมีย):</b> มีฤทธิ์ต้านการอักเสบ อาจช่วยชะลอการลุกลาม</li>
+                                    <li><b>ใบบัวบก:</b> ช่วยกระตุ้นการสร้างคอลลาเจนและฟื้นฟูสภาพผิว</li>
+                                    <li><b>ขมิ้นชัน:</b> มีสารต้านอนุมูลอิสระสูง ช่วยดูแลผิวพรรณโดยรวม</li>
+                                </ul>
+                            </div>
+                            <p class="text-xs text-red-500 mt-4">*คำเตือน: ผลลัพธ์นี้เป็นเพียงการจำลองเพื่อการสาธิต ไม่สามารถใช้อ้างอิงทางการแพทย์ได้จริง</p>
                         </div>
                     `;
-                    analyzeBtn.innerHTML = 'วิเคราะห์ข้อมูล';
+
                     analyzeBtn.disabled = false;
-                }, 2000);
+                    analyzeBtn.textContent = 'วิเคราะห์';
+                }, 1500);
             });
+
+            // Show upload mode by default
+            uploadModeDiv.classList.remove('hidden');
         });
     </script>
 </body>
