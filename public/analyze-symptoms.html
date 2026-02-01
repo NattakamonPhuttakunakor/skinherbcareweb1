@@ -212,7 +212,7 @@
                     const token = localStorage.getItem('token');
 
                     // ==========================================
-                    // ✅ จุดที่แก้: เปลี่ยน URL ให้ตรงกับ Server บน Render
+                    // ✅ จุดที่แก้: ใช้ Link เต็มๆ ของ Render เลย ชัวร์ที่สุด!
                     // ==========================================
                     const response = await fetch('https://skinherbcareweb1.onrender.com/api/analysis', { 
                         method: 'POST',
@@ -225,7 +225,7 @@
                     
                     const result = await response.json();
 
-                    // ✅ เช็คผลลัพธ์แบบใหม่ (มี found และ data เป็น List)
+                    // ✅ เช็คผลลัพธ์แบบใหม่
                     if (response.ok && result.success && result.found && result.data && result.data.length > 0) {
                         
                         // เอาโรคอันดับ 1 มาแสดง
@@ -247,7 +247,6 @@
                             </div>
                         `;
 
-                        // ถ้ามีสมุนไพรแนะนำ (และไม่ใช่แค่ขีด -)
                         if (topDisease.herbs && topDisease.herbs.length > 0 && topDisease.herbs[0] !== '-') {
                             htmlContent += `
                                 <div class="mt-4">
@@ -263,12 +262,10 @@
                         resultsContainer.innerHTML = htmlContent;
 
                     } else {
-                        // กรณีไม่พบโรค หรือมั่นใจน้อย
                          resultsContainer.innerHTML = `
                             <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                 <h3 class="font-bold text-yellow-800 text-lg mb-2">⚠️ ไม่พบข้อมูลที่ชัดเจน</h3>
                                 <p class="text-gray-700">AI ไม่มั่นใจว่าเป็นโรคอะไร กรุณาระบุอาการให้ละเอียดขึ้น หรือปรึกษาแพทย์ผิวหนังโดยตรง</p>
-                                <p class="text-sm text-gray-500 mt-2">(Confidence: 0%)</p>
                             </div>
                         `;
                     }
@@ -278,7 +275,7 @@
                     resultsContainer.innerHTML = `
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                             <strong class="font-bold">เกิดข้อผิดพลาด!</strong>
-                            <span class="block sm:inline">เชื่อมต่อ Server ไม่สำเร็จ (กรุณาเช็คอินเทอร์เน็ต หรือลองใหม่ภายหลัง)</span>
+                            <span class="block sm:inline">เชื่อมต่อ Server ไม่สำเร็จ หรือระบบกำลังเริ่มต้น (ลองกดใหม่อีกครั้ง)</span>
                         </div>`;
                 } finally {
                     analyzeBtn.disabled = false;
