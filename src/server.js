@@ -5,23 +5,17 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import axios from "axios"; // ✅ เพิ่ม Axios เพื่อใช้คุยกับ Python
 
 // อ่านค่า .env
 dotenv.config();
 
-// 🔥 ระบบกันตาย: ตรวจสอบ Environment Variables ที่จำเป็น
-const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'GEMINI_API_KEY'];
+// 🔥 ระบบกันตาย: ตรวจสอบ Environment Variables
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET']; // ตัด GEMINI_API_KEY ออกชั่วคราวถ้าไม่ได้ใช้
 const missingEnvVars = requiredEnvVars.filter(key => !process.env[key] || process.env[key].includes('your-'));
 
 if (missingEnvVars.length > 0) {
-    console.warn(`⚠️ Warning: Missing or placeholder environment variables: ${missingEnvVars.join(', ')}`);
-    console.warn("   Please set these on Render: https://dashboard.render.com/");
-}
-
-// 🔥 Fallback for development
-if (!process.env.API_KEY) {
-    console.log("⚠️ Warning: API_KEY missing. Using dummy key to prevent crash.");
-    process.env.API_KEY = "123456_dummy_key_for_startup";
+    console.warn(`⚠️ Warning: Missing environment variables: ${missingEnvVars.join(', ')}`);
 }
 
 // Import Database
@@ -39,56 +33,62 @@ import geminiRoutes from "./routes/gemini.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔥 แก้ Path ให้ถอยกลับไป 1 ชั้น เพื่อหา folder public และ uploads 
-// (เพราะ server.js อยู่ใน src/ แต่ public กับ uploads อยู่ที่ root)
 const publicPath = path.join(__dirname, "../public");
 const uploadPath = path.join(__dirname, "../uploads");
 
 async function startServer() {
   try {
     console.log("🔄 Connecting to database...");
-    await connectDB();
-    console.log("✅ Database connected successfully!");
+    
+    // ลองต่อ DB ถ้าไม่ได้ให้ข้ามไปก่อน (เพื่อให้ Server รันได้)
+    try {
+        await connectDB();
+        console.log("✅ Database connected successfully!");
+    } catch (dbError) {
+        console.warn("⚠️ Database connection failed (Server will start anyway):", dbError.message);
+    }
 
     const app = express();
 
-    // --- Security Middleware ---
-    app.use(
-      helmet({
-        crossOriginResourcePolicy: { policy: "cross-origin" },
-        contentSecurityPolicy: false
-      })
-    );
-
-    // --- Logging Middleware ---
-    if (process.env.NODE_ENV === "development") {
-      app.use(morgan("dev"));
-    }
+    // --- Security & Logging ---
+    app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" }, contentSecurityPolicy: false }));
+    if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
     // --- CORS ---
-    app.use(
-      cors({
-        origin: '*', 
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
-      })
-    );
+    app.use(cors({ origin: '*', methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"] }));
 
     // --- Body Parser ---
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-    // --- Static Files (ใช้ publicPath และ uploadPath ที่แก้ไปแล้ว) ---
+    // --- Static Files ---
     app.use(express.static(publicPath)); 
     app.use("/uploads", express.static(uploadPath));
 
-    // --- Health Check ---
-    app.get("/api/health", (req, res) => {
-      res.json({
-        status: "ok",
-        message: "Server is running",
-        timestamp: new Date().toISOString()
-      });
+    // ==========================================
+    // 🌉 สะพานเชื่อม: Node.js -> Python (จุดสำคัญ!)
+    // ==========================================
+    app.post("/api/bridge/analyze", async (req, res) => {
+        try {
+            const { symptoms } = req.body;
+            console.log("📡 Node.js กำลังส่งข้อมูลไป Python:", symptoms);
+
+            // 🚀 ยิง request ไปหา Python Port 5001
+            const response = await axios.post("http://localhost:5001/api/analyze", {
+                symptoms: symptoms
+            });
+
+            // ✅ ส่งคำตอบจาก Python กลับไปให้หน้าเว็บ
+            res.json(response.data);
+
+        } catch (error) {
+            console.error("❌ เชื่อมต่อ Python ไม่สำเร็จ:", error.message);
+            // กรณี Python ปิดอยู่ หรือ Error
+            res.status(500).json({
+                success: false,
+                message: "ระบบวิเคราะห์ AI (Python) ไม่ตอบสนอง กรุณาตรวจสอบว่ารัน app.py หรือยัง"
+            });
+        }
     });
 
     // --- API Routes ---
@@ -100,90 +100,34 @@ async function startServer() {
     app.use("/api/gemini", geminiRoutes);
 
     // ==========================================
-    // 🌐 FRONTEND ROUTES
+    // 🌐 FRONTEND ROUTES (HTML)
     // ==========================================
+    app.get("/", (req, res) => res.sendFile(path.join(publicPath, "index.html")));
+    app.get("/home", (req, res) => res.sendFile(path.join(publicPath, "index.html")));
+    app.get("/login", (req, res) => res.sendFile(path.join(publicPath, "login.html")));
+    app.get("/register", (req, res) => res.sendFile(path.join(publicPath, "register.html")));
+    app.get("/analysis", (req, res) => res.sendFile(path.join(publicPath, "analyze-disease.html"))); 
+    app.get("/analyze-symptoms", (req, res) => res.sendFile(path.join(publicPath, "analyze-symptoms.html")));
 
-    // 1. หน้าแรก (Home Page)
-    app.get("/", (req, res) => {
-        res.sendFile(path.join(publicPath, "index.html"));
-    });
-
-    // 2. เผื่อคนพิมพ์ /home
-    app.get("/home", (req, res) => {
-        res.sendFile(path.join(publicPath, "index.html"));
-    });
-
-    // 3. หน้าเข้าสู่ระบบ (Login)
-    app.get("/login", (req, res) => {
-        res.sendFile(path.join(publicPath, "login.html"));
-    });
-
-    // 4. หน้าสมัครสมาชิก (Sign Up)
-    app.get("/signup", (req, res) => {
-        res.sendFile(path.join(publicPath, "register.html"));
-    });
-
-    // 4.1 Alias สำหรับ /register.html
-    app.get("/register", (req, res) => {
-        res.sendFile(path.join(publicPath, "register.html"));
-    });
-
-    // 5. หน้าวิเคราะห์โรค (Analysis)
-    app.get("/analysis", (req, res) => {
-        res.sendFile(path.join(publicPath, "analyze-disease.html")); 
-    });
-
-    // 5.1 หน้าวิเคราะห์อาการ
-    app.get("/analyze-symptoms", (req, res) => {
-        res.sendFile(path.join(publicPath, "analyze-symptoms.html"));
-    });
-
-    // 5.2 หน้าวิเคราะห์สมุนไพร
-    app.get("/analyze-herb", (req, res) => {
-        res.sendFile(path.join(publicPath, "analyze-herb.html"));
-    });
-
-    // 5.3 หน้าวิเคราะห์โรคจากรูป
-    app.get("/analyze-disease", (req, res) => {
-        res.sendFile(path.join(publicPath, "analyze-disease.html"));
-    });
-
-    // ==========================================
-
-    // --- 404 Handler ---
-    app.use((req, res) => {
-      res.status(404).json({
-        success: false,
-        message: "Route not found",
-        path: req.originalUrl
-      });
-    });
-
-    // --- Error Handler ---
+    // --- 404 & Error Handler ---
+    app.use((req, res) => res.status(404).json({ success: false, message: "Route not found" }));
     app.use((err, req, res, next) => {
       console.error("❌ Error:", err.stack);
-      res.status(err.status || 500).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-        ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-      });
+      res.status(500).json({ success: false, message: "Internal Server Error" });
     });
 
     // --- Start Server ---
     const PORT = process.env.PORT || 5000;
-    const server = app.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log("\n" + "=".repeat(50));
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-      console.log("✅ Ready to serve requests...");
+      console.log(`🚀 Node.js Server running at http://localhost:${PORT}`);
+      console.log(`🌉 Python Bridge Route: POST http://localhost:${PORT}/api/bridge/analyze`);
+      console.log("✅ Ready to serve...");
       console.log("=".repeat(50) + "\n");
     });
 
   } catch (error) {
-    console.error("\n" + "=".repeat(50));
-    console.error("❌ Failed to start server:");
-    console.error(error.message);
-    console.error("Make sure MONGO_URI is set in Render Environment Variables");
-    console.error("=".repeat(50) + "\n");
+    console.error("❌ Fatal Error:", error);
     process.exit(1);
   }
 }
