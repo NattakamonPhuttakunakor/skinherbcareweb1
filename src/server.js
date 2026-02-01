@@ -3,17 +3,22 @@ console.log("1. เริ่มต้นการทำงาน...");
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import multer from 'multer';       // ตัวช่วยรับรูปภาพ
-import FormData from 'form-data';  // ตัวช่วยห่อข้อมูลส่ง Python
-import path from 'path';           // ช่วยระบุตำแหน่งโฟลเดอร์
-import { fileURLToPath } from 'url'; // สำหรับแก้เรื่อง path ใน ES Module
+import multer from 'multer';
+import FormData from 'form-data';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 console.log("2. Import ไลบรารีสำเร็จ...");
 
 const app = express();
-const PORT = 5000;
 
-// แก้ไขเรื่อง Path ให้ Node รู้จักโฟลเดอร์ปัจจุบัน
+// -------------------------------------------------------------
+// 🔥 จุดแก้ที่ 1: เรื่อง PORT
+// บน Cloud เขาจะสุ่ม Port ให้เรา เราบังคับ 5000 ไม่ได้
+// โค้ดนี้แปลว่า "ถ้า Server ให้ Port มาก็ใช้ (process.env.PORT) ถ้าไม่มีค่อยใช้ 5000"
+// -------------------------------------------------------------
+const PORT = process.env.PORT || 5000;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,46 +27,45 @@ app.use(cors());
 app.use(express.json());
 
 // บอกให้ Node.js เปิดไฟล์หน้าเว็บจากโฟลเดอร์ 'public'
-app.use(express.static('public')); 
+// ใช้ path.join เพื่อความชัวร์เวลาขึ้น Server
+app.use(express.static(path.join(__dirname, '../public'))); 
 
-// ตั้งค่า Multer (เก็บไฟล์ใน RAM ชั่วคราว เพื่อส่งต่อทันที)
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- Route เช็คสถานะ ---
 app.get('/status', (req, res) => {
-    res.send('✅ Node.js Server (รองรับรูปภาพ) ทำงานอยู่!');
+    res.send('✅ Node.js Server (Ready for Cloud) ทำงานอยู่!');
 });
 
-// 👇👇👇 แก้ไขตรงนี้ครับ (เปลี่ยนชื่อ Route ให้ตรงกับหน้าเว็บ) 👇👇👇
 app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
     console.log("📩 Node ได้รับ Request จากหน้าเว็บ");
 
     try {
         const formData = new FormData();
 
-        // 1. ถ้ามีไฟล์รูปแนบมา ให้เอาใส่กล่อง formData
         if (req.file) {
             console.log(`📸 พบรูปภาพ: ${req.file.originalname}`);
             formData.append('file', req.file.buffer, req.file.originalname);
-        } else {
-            console.log("⚠️ ไม่พบรูปภาพ (Request นี้อาจมีแค่ข้อความ)");
         }
 
-        // 2. ถ้ามีข้อความอื่นๆ (เช่น symptoms) แนบมาด้วย
         if (req.body) {
             Object.keys(req.body).forEach(key => {
                 formData.append(key, req.body[key]);
             });
         }
 
-        // 3. ส่งต่อไป Python (Port 5001)
-        console.log("🚀 กำลังส่งข้อมูลไปหา Python...");
-        // ใช้ 127.0.0.1 ตามที่เราตกลงกันไว้
-        const pythonUrl = 'http://127.0.0.1:5001/api/analyze';
+        // -------------------------------------------------------------
+        // 🔥 จุดแก้ที่ 2: ที่อยู่ของ Python
+        // บนเว็บจริง Node กับ Python อยู่คนละที่แน่นอน (ไม่ใช่ 127.0.0.1)
+        // เราต้องเตรียมตัวแปร PYTHON_API_URL ไว้ใส่ลิงก์ Python ของจริงทีหลัง
+        // -------------------------------------------------------------
+        const pythonUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5001/api/analyze';
         
+        console.log(`🚀 กำลังส่งข้อมูลไปหา Python ที่: ${pythonUrl}`);
+
         const response = await axios.post(pythonUrl, formData, {
             headers: {
-                ...formData.getHeaders() // สำคัญ! ต้องใส่ Header ให้ถูกรูปแบบไฟล์
+                ...formData.getHeaders()
             }
         });
 
@@ -70,26 +74,26 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
 
     } catch (error) {
         console.error("❌ ติดต่อ Python ไม่ได้ / เกิดข้อผิดพลาด:");
+        
+        // เพิ่มการ Log ให้ละเอียดขึ้นสำหรับ Server จริง
+        if (error.code === 'ECONNREFUSED') {
+             console.error(`   สาเหตุ: เชื่อมต่อ ${process.env.PYTHON_API_URL || '127.0.0.1:5001'} ไม่ได้`);
+        }
+
         if (error.response) {
-            // กรณี Python ตอบ Error กลับมา
-            console.error("   Status:", error.response.status);
-            console.error("   Data:", error.response.data);
             res.status(error.response.status).json(error.response.data);
         } else {
-            // กรณีต่อ Python ไม่ติดเลย
-            console.error("   Message:", error.message);
-            res.status(500).json({ success: false, message: "เชื่อมต่อ Python Server ไม่ได้ (เปิด Port 5001 หรือยัง?)" });
+            res.status(500).json({ success: false, message: "เชื่อมต่อ Python Server ไม่ได้" });
         }
     }
 });
 
-// --- สั่งให้ Server รอรับ request ---
+// --- Start Server ---
 try {
-    console.log("3. กำลังจะเปิด Port...");
     app.listen(PORT, () => {
         console.log("---------------------------------------------------");
-        console.log(`🚀 SERVER RUNNING ON: http://localhost:${PORT}`);
-        console.log("   (โหมดรองรับรูปภาพ + เชื่อมต่อ Python)");
+        console.log(`🚀 SERVER RUNNING ON PORT: ${PORT}`);
+        console.log("   (โหมดพร้อมขึ้น Cloud + รองรับ Python URL)");
         console.log("---------------------------------------------------");
     });
 } catch (err) {
