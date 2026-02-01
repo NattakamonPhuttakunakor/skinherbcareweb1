@@ -10,26 +10,27 @@ export const diagnoseSymptoms = async (req, res) => {
             return res.status(400).json({ success: false, message: "กรุณาระบุอาการ" });
         }
 
-        // 🔍 Debug: ดูค่าที่ดึงมาจาก Render (ดูได้ที่หน้า Logs ของ Render)
-        const pythonApiUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = (process.env.API_KEY || '123456').trim(); // ถ้าลืมตั้งใน Render จะใช้ 123456 เป็นค่าเริ่มต้น
+        // 🔍 Debug ข้อมูลจาก Environment
+        const pythonApiUrl = (process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict').trim();
+        const apiKey = (process.env.API_KEY || '123456').trim(); // 🔑 ลบช่องว่างที่อาจติดมาจากหน้า Render
 
         console.log(`📤 Node กำลังส่งไป: ${pythonApiUrl}`);
-        console.log(`🔑 ใช้ API Key: ${apiKey.substring(0, 2)}***`); // แสดงแค่ 2 ตัวแรกเพื่อความปลอดภัย
+        console.log(`🔑 ใช้ API Key: ${apiKey.substring(0, 2)}***`);
 
         const response = await fetch(pythonApiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': apiKey // หัวใจสำคัญ: ตัวพิมพ์ใหญ่-เล็กต้องตรงกับฝั่ง Python
+                'X-API-Key': apiKey,      // 📍 ส่งแบบมาตรฐาน
+                'api-key': apiKey        // 📍 ส่งเผื่อไว้เผื่อ Python รอรับตัวเล็ก
             },
             body: JSON.stringify({ 
                 symptoms: symptoms.trim() 
             }),
-            signal: AbortSignal.timeout(30000) // 🕒 30 วินาที
+            signal: AbortSignal.timeout(30000) // 🕒 30 วินาที แก้ปัญหา Timeout
         });
 
-        // 🚫 ถ้า Python ตอบกลับว่า Unauthorized (401)
+        // 🚫 จัดการกรณี Key ไม่ตรง (Unauthorized)
         if (response.status === 401) {
             console.error("❌ Python แจ้งว่า API Key ไม่ถูกต้อง!");
             throw new Error("API Key ไม่ถูกต้อง (Unauthorized)");
@@ -40,7 +41,7 @@ export const diagnoseSymptoms = async (req, res) => {
         }
 
         const data = await response.json();
-        console.log("✅ Python ตอบกลับสำเร็จ:", data.prediction || "พบข้อมูล");
+        console.log("✅ Python ตอบกลับสำเร็จ");
 
         res.json({
             success: true,
@@ -63,7 +64,7 @@ export const diagnoseSymptoms = async (req, res) => {
             errMsg = "AI Server ตอบสนองช้า (Timeout)";
         } else if (error.message.includes('Unauthorized')) {
             statusCode = 401;
-            errMsg = "ระบบรักษาความปลอดภัยปฏิเสธการเข้าถึง (Key ผิด)";
+            errMsg = "ระบบรักษาความปลอดภัยปฏิเสธการเข้าถึง (เช็ก Key ใน Render)";
         }
 
         res.status(statusCode).json({ 
@@ -83,5 +84,5 @@ router.post('/analyze', diagnoseSymptoms);
 router.get('/sales', getSalesData);
 router.get('/categories', getCategoryData);
 
-// ⚠️ หัวใจสำคัญ: ห้ามลบบรรทัดนี้!
+// ⚠️ หัวใจสำคัญ: ห้ามลบบรรทัดนี้เด็ดขาด! แก้ SyntaxError
 export default router;
