@@ -10,17 +10,18 @@ export const diagnoseSymptoms = async (req, res) => {
             return res.status(400).json({ success: false, message: "กรุณาระบุอาการ" });
         }
 
-        console.log(`📤 Node กำลังส่งไป Python: "${symptoms}"`);
-
-        // ดึงค่าจาก Environment Variables
+        // 🔍 Debug: ดูค่าที่ดึงมาจาก Render (ดูได้ที่หน้า Logs ของ Render)
         const pythonApiUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = String(process.env.API_KEY || '').trim(); 
+        const apiKey = (process.env.API_KEY || '123456').trim(); // ถ้าลืมตั้งใน Render จะใช้ 123456 เป็นค่าเริ่มต้น
+
+        console.log(`📤 Node กำลังส่งไป: ${pythonApiUrl}`);
+        console.log(`🔑 ใช้ API Key: ${apiKey.substring(0, 2)}***`); // แสดงแค่ 2 ตัวแรกเพื่อความปลอดภัย
 
         const response = await fetch(pythonApiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': apiKey 
+                'X-API-Key': apiKey // หัวใจสำคัญ: ตัวพิมพ์ใหญ่-เล็กต้องตรงกับฝั่ง Python
             },
             body: JSON.stringify({ 
                 symptoms: symptoms.trim() 
@@ -28,13 +29,18 @@ export const diagnoseSymptoms = async (req, res) => {
             signal: AbortSignal.timeout(30000) // 🕒 30 วินาที
         });
 
+        // 🚫 ถ้า Python ตอบกลับว่า Unauthorized (401)
+        if (response.status === 401) {
+            console.error("❌ Python แจ้งว่า API Key ไม่ถูกต้อง!");
+            throw new Error("API Key ไม่ถูกต้อง (Unauthorized)");
+        }
+
         if (!response.ok) {
-            if (response.status === 401) throw new Error("API Key ไม่ถูกต้อง (Unauthorized)");
             throw new Error(`Python API Error: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("✅ Python ตอบกลับสำเร็จ");
+        console.log("✅ Python ตอบกลับสำเร็จ:", data.prediction || "พบข้อมูล");
 
         res.json({
             success: true,
@@ -47,21 +53,22 @@ export const diagnoseSymptoms = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Node Error:", error.message);
+        console.error("❌ Node Error Details:", error.message);
         
         let statusCode = 500;
         let errMsg = error.message;
 
         if (error.name === 'AbortError' || error.message.includes('timeout')) {
             statusCode = 504;
-            errMsg = "AI Server ตอบสนองช้าเกินไป (กำลังปลุก Server...)";
+            errMsg = "AI Server ตอบสนองช้า (Timeout)";
         } else if (error.message.includes('Unauthorized')) {
             statusCode = 401;
+            errMsg = "ระบบรักษาความปลอดภัยปฏิเสธการเข้าถึง (Key ผิด)";
         }
 
         res.status(statusCode).json({ 
             success: false,
-            message: errMsg, 
+            message: errMsg,
             error: error.message 
         });
     }
@@ -71,10 +78,10 @@ export const diagnoseSymptoms = async (req, res) => {
 export const getSalesData = async (req, res) => res.json({ success: true, message: "Sales data" });
 export const getCategoryData = async (req, res) => res.json({ success: true, message: "Category data" });
 
-// ✅ 3. ผูก Route เข้ากับฟังก์ชัน (เพื่อให้เรียกใช้ผ่าน URL ได้)
+// ✅ 3. ผูก Route เข้ากับฟังก์ชัน
 router.post('/analyze', diagnoseSymptoms);
 router.get('/sales', getSalesData);
 router.get('/categories', getCategoryData);
 
-// ⚠️ หัวใจสำคัญ: แก้ SyntaxError ด้วยบรรทัดนี้!
+// ⚠️ หัวใจสำคัญ: ห้ามลบบรรทัดนี้!
 export default router;
