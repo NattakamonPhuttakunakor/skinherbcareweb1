@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+// ✅ ไม่ต้อง import fetch แล้ว เพราะ Node v20.10.0 มีมาให้ในตัวครับ
 
 export const diagnoseSymptoms = async (req, res) => {
     try {
@@ -10,15 +10,16 @@ export const diagnoseSymptoms = async (req, res) => {
 
         console.log(`📤 Node ส่งไป Python: "${symptoms}"`);
 
-        // เรียกใช้ URL และ KEY จาก Environment Variables ที่ตั้งไว้
+        // ดึงค่าจาก Environment Variables ที่พี่ตั้งไว้
         const pythonApiUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
         const apiKey = process.env.API_KEY; 
 
+        // เรียกใช้ fetch ของ Node ได้เลย
         const response = await fetch(pythonApiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': apiKey // 👈 ส่งรหัสผ่านไปยืนยันตัวตนตามที่ AI ร้องขอ
+                'X-API-Key': apiKey // 🔑 ส่ง Key ไปปลดล็อกตามที่ Python ร้องขอ
             },
             body: JSON.stringify({ 
                 symptoms: symptoms 
@@ -32,7 +33,7 @@ export const diagnoseSymptoms = async (req, res) => {
         const data = await response.json();
         console.log("✅ Python ตอบกลับ:", data);
 
-        // ส่งข้อมูลกลับไปให้หน้าเว็บ
+        // ส่งผลลัพธ์กลับไปแสดงที่หน้าเว็บ
         res.json({
             success: true,
             result: data.prediction || data.result || "วิเคราะห์สำเร็จ",
@@ -49,7 +50,7 @@ export const diagnoseSymptoms = async (req, res) => {
     }
 };
 
-// --- ส่วนของ Admin (ตัวอย่างโครงสร้าง) ---
+// --- Admin Functions ---
 export const getSalesData = async (req, res) => {
     res.json({ message: "Sales data fetched" });
 };
