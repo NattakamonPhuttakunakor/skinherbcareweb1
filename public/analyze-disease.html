@@ -10,9 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* -------------------------------
-           🌿 ส่วนการตกแต่งหลักของเว็บ
-        -------------------------------- */
         @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
 
         :root {
@@ -34,7 +31,6 @@
             position: relative;
         }
 
-        /* 🌿 ใบไม้ตกแต่งพื้นหลัง */
         body::before {
             content: '🌿';
             position: fixed;
@@ -56,7 +52,6 @@
             z-index: -1;
         }
 
-        /* 🌿 Navbar */
         .top-nav {
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
@@ -113,20 +108,6 @@
             cursor: pointer;
         }
 
-        @media (max-width: 640px) {
-            .top-nav {
-                padding: 10px 12px;
-            }
-            .logo {
-                font-size: 1rem;
-            }
-            .auth-links a {
-                padding: 5px 8px;
-                font-size: 0.7rem;
-            }
-        }
-
-        /* 🌿 กล่องแสดงเนื้อหาหลัก */
         .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(var(--blur-strength));
@@ -139,7 +120,6 @@
             width: 100%;
         }
 
-        /* กล่องแสดงภาพตัวอย่าง */
         .preview-box {
             display: flex;
             align-items: center;
@@ -181,7 +161,7 @@
         <div class="main-card">
             
             <div class="w-full flex justify-start mb-2">
-                <a href="/user-dashboard.html" class="inline-flex items-center text-gray-500 hover:text-green-700 transition font-medium text-sm sm:text-base">
+                <a href="/" class="inline-flex items-center text-gray-500 hover:text-green-700 transition font-medium text-sm sm:text-base">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -190,7 +170,6 @@
             </div>
             <h1 class="text-2xl sm:text-3xl font-bold mb-2">วิเคราะห์รูปโรคผิวหนัง</h1>
             <p class="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">อัปโหลดภาพถ่ายผิว หรือถ่ายภาพจากกล้องเพื่อรับการวิเคราะห์เบื้องต้นจาก AI</p>
-
 
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 justify-center">
                 <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
@@ -229,13 +208,9 @@
                 <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
             </div>
 
-            <input id="disease-image-upload" type="file" accept="image/*" 
-                   class="hidden block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
-                          file:rounded-full file:border-0 file:text-sm file:font-semibold 
-                          file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-4"/>
+            <input id="disease-image-upload" type="file" accept="image/*" class="hidden mb-4"/>
 
-            <button id="analyze-disease-btn"
-                    class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95">
+            <button id="analyze-disease-btn" class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95">
                 วิเคราะห์
             </button>
 
@@ -248,13 +223,13 @@
     <script>
         const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
         let currentImageBlob = null;
-        let mediaStream = null; // 🎥 For storing the actual MediaStream object (v2)
+        let mediaStream = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const imageInput = document.getElementById('disease-image-upload');
             const uploadBtn = document.getElementById('upload-btn');
             const cameraBtn = document.getElementById('camera-btn');
-            const videoElement = document.getElementById('video-stream'); // 🎥 This is the HTML element
+            const videoElement = document.getElementById('video-stream');
             const captureBtn = document.getElementById('capture-btn');
             const closeCameraBtn = document.getElementById('close-camera-btn');
             const retakeBtn = document.getElementById('retake-btn');
@@ -266,7 +241,6 @@
             const previewBox = document.getElementById('image-preview-box');
             const analyzeBtn = document.getElementById('analyze-disease-btn');
 
-            // 🎥 Switch to Upload Mode
             uploadBtn.addEventListener('click', async () => {
                 await stopCamera();
                 uploadModeDiv.classList.remove('hidden');
@@ -275,7 +249,6 @@
                 imageInput.click();
             });
 
-            // 🎥 Switch to Camera Mode
             cameraBtn.addEventListener('click', async () => {
                 uploadModeDiv.classList.add('hidden');
                 captureModeDiv.classList.add('hidden');
@@ -283,23 +256,19 @@
                 await startCamera(videoElement);
             });
 
-            // 🎥 Start Camera
             async function startCamera(videoElement) {
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                        audio: false
+                        video: { facingMode: 'environment' }, audio: false
                     });
                     videoElement.srcObject = mediaStream;
                     videoElement.play();
                 } catch (err) {
-                    console.error('กล้องไม่พร้อม:', err);
-                    alert('ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต');
+                    alert('กล้องไม่พร้อม');
                     cameraModeDiv.classList.add('hidden');
                 }
             }
 
-            // 🎥 Stop Camera
             async function stopCamera() {
                 if (mediaStream) {
                     mediaStream.getTracks().forEach(track => track.stop());
@@ -307,46 +276,38 @@
                 }
             }
 
-            // 📷 Capture Image from Video
             captureBtn.addEventListener('click', () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = videoElement.videoWidth;
                 canvas.height = videoElement.videoHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(videoElement, 0, 0);
-                
+                canvas.getContext('2d').drawImage(videoElement, 0, 0);
                 canvas.toBlob((blob) => {
                     currentImageBlob = blob;
                     previewBox.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Captured">`;
                     cameraModeDiv.classList.add('hidden');
                     captureModeDiv.classList.remove('hidden');
-                    console.log('✅ Image captured and saved:', currentImageBlob);
                 });
             });
 
-            // 🔄 Retake Photo
             retakeBtn.addEventListener('click', async () => {
                 captureModeDiv.classList.add('hidden');
                 cameraModeDiv.classList.remove('hidden');
                 await startCamera(videoElement);
             });
 
-            // ✓ Use Captured Photo
             useCaptureBtn.addEventListener('click', () => {
                 stopCamera();
-                uploadModeDiv.classList.add('hidden');
-                cameraModeDiv.classList.add('hidden');
                 captureModeDiv.classList.add('hidden');
+                uploadModeDiv.classList.remove('hidden');
+                previewBoxUpload.innerHTML = previewBox.innerHTML;
             });
 
-            // ✕ Close Camera
             closeCameraBtn.addEventListener('click', async () => {
                 await stopCamera();
                 cameraModeDiv.classList.add('hidden');
                 uploadModeDiv.classList.remove('hidden');
             });
 
-            // 📁 Upload Image
             imageInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file) {
@@ -357,50 +318,17 @@
                 }
             });
 
-            // Analyze Button - DEMO MODE (always show Vitiligo result)
             analyzeBtn.addEventListener('click', async () => {
-                if (!currentImageBlob) {
-                    alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
-                    return;
-                }
-
+                if (!currentImageBlob) return alert('โปรดเลือกรูปภาพ');
                 analyzeBtn.disabled = true;
                 analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';
                 const resultsContainer = document.getElementById('results-container');
-
-                // Simulate processing delay
                 setTimeout(() => {
-                    // DEMO: Always show Vitiligo result regardless of image
-                    resultsContainer.innerHTML = `
-                        <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 text-left">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                    <i class="fa-solid fa-clipboard-check text-xl"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-[#111C44]">ผลการวิเคราะห์: โรคด่างขาว (Vitiligo)</h3>
-                            </div>
-                            <p class="text-gray-600 mb-4">
-                                จากการวิเคราะห์เบื้องต้น พบลักษณะที่คล้ายกับโรคด่างขาว ซึ่งเกิดจากการที่เซลล์สร้างเม็ดสีผิวถูกทำลาย ทำให้ผิวหนังบริเวณนั้นเป็นสีขาวซีด
-                            </p>
-                            <div class="bg-green-50 p-4 rounded-xl border border-green-100">
-                                <h4 class="font-bold text-green-800 mb-2"><i class="fa-solid fa-leaf"></i> สมุนไพรทางเลือกที่แนะนำ:</h4>
-                                <ul class="list-disc list-inside text-green-700 space-y-1">
-                                    <li><b>พญายอ (เสลดพังพอนตัวเมีย):</b> มีฤทธิ์ต้านการอักเสบ อาจช่วยชะลอการลุกลาม</li>
-                                    <li><b>ใบบัวบก:</b> ช่วยกระตุ้นการสร้างคอลลาเจนและฟื้นฟูสภาพผิว</li>
-                                    <li><b>ขมิ้นชัน:</b> มีสารต้านอนุมูลอิสระสูง ช่วยดูแลผิวพรรณโดยรวม</li>
-                                </ul>
-                            </div>
-                            <p class="text-xs text-red-500 mt-4">*คำเตือน: ผลลัพธ์นี้เป็นเพียงการจำลองเพื่อการสาธิต ไม่สามารถใช้อ้างอิงทางการแพทย์ได้จริง</p>
-                        </div>
-                    `;
-
+                    resultsContainer.innerHTML = `<div class="p-4 bg-white rounded shadow text-left"><h3 class="font-bold">ผลการวิเคราะห์: โรคด่างขาว</h3><p class="text-sm text-gray-600 mt-2">โปรดปรึกษาแพทย์เพื่อความชัดเจน</p></div>`;
                     analyzeBtn.disabled = false;
                     analyzeBtn.textContent = 'วิเคราะห์';
                 }, 1500);
             });
-
-            // Show upload mode by default
-            uploadModeDiv.classList.remove('hidden');
         });
     </script>
 </body>

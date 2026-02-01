@@ -85,8 +85,25 @@
 
 <body class="antialiased">
 
+<nav class="top-nav">
+    <div class="nav-container">
+        <a href="/" class="logo">🌿 SkinHerbCare</a>
+        <div class="flex gap-4">
+            <a href="/" class="font-semibold text-sm">Home</a>
+        </div>
+    </div>
+</nav>
+
 <main class="flex flex-col items-center min-h-screen px-4 py-10">
     <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg p-8 border border-gray-200">
+        
+        <a href="/" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-6 text-sm sm:text-base font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            กลับไปหน้าหลัก
+        </a>
+
         <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">วิเคราะห์จากอาการ</h1>
         <p class="text-gray-600 text-center mb-6">
             บอกอาการหรือปัญหาผิวที่คุณกังวล เพื่อให้ AI แนะนำสมุนไพรที่เหมาะสม
@@ -98,7 +115,7 @@
             placeholder="เช่น: มีปัญหาสิวอักเสบ ผิวแห้ง และรอยแดง..."></textarea>
 
         <button id="analyze-symptom-btn"
-            class="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+            class="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition active:scale-95">
             วิเคราะห์
         </button>
 

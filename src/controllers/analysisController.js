@@ -15,23 +15,20 @@ export const diagnoseSymptoms = async (req, res) => {
         console.log(`📤 Node ส่งไป Python: "${symptoms}"`);
 
         // 2. Environment variables
-        const pythonApiUrl =
-            process.env.PYTHON_API_URL ||
-            'https://finalproject-3-uprs.onrender.com/predict';
+        const pythonApiUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
+        const apiKey = String(process.env.API_KEY || '123456').trim(); 
 
-        const apiKey = process.env.API_KEY; // 123456
-
-        // 3. Call Python API
+        // 3. Call Python API (เพิ่มเวลาเป็น 30 วินาทีกัน Timeout)
         const response = await fetch(pythonApiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': apiKey
+                'X-API-Key': apiKey // 🔑 ต้องตรงกับที่ตั้งไว้ใน Render
             },
             body: JSON.stringify({
                 symptoms: symptoms.trim()
             }),
-            signal: AbortSignal.timeout(15000)
+            signal: AbortSignal.timeout(30000) 
         });
 
         // 4. Handle Python errors
@@ -51,8 +48,7 @@ export const diagnoseSymptoms = async (req, res) => {
             found: data.ok ?? true,
             result: data.prediction || data.result || "วิเคราะห์สำเร็จ",
             confidence: data.confidence || 0,
-            recommendation:
-                data.recommendation || "ควรปรึกษาผู้เชี่ยวชาญเพิ่มเติม",
+            recommendation: data.recommendation || "ควรปรึกษาผู้เชี่ยวชาญเพิ่มเติม",
             prediction: data.prediction,
             data: data.data || []
         });
@@ -61,14 +57,13 @@ export const diagnoseSymptoms = async (req, res) => {
         console.error("❌ Node Error:", error.message);
 
         const statusCode =
-            error.name === 'AbortError' ||
-            error.message.includes('fetch failed')
+            error.name === 'AbortError' || error.message.includes('fetch failed')
                 ? 503
-                : 500;
+                : (error.message.includes('Unauthorized') ? 401 : 500);
 
         res.status(statusCode).json({
             success: false,
-            message: "ไม่พบข้อมูลที่ชัดเจน",
+            message: error.message.includes('timeout') ? "AI ตอบสนองช้า กรุณาลองใหม่" : "ไม่พบข้อมูลที่ชัดเจน",
             error: error.message
         });
     }

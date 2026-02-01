@@ -152,7 +152,6 @@
 </head>
 
 <body class="antialiased">
-  <!-- Navbar -->
   <nav class="top-nav">
     <div class="nav-container">
       <a href="/" class="logo">🌿 SkinHerbCare</a>
@@ -171,10 +170,10 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <main class="flex flex-col items-center min-h-[calc(100vh-4rem)] px-3 sm:px-4 py-6 sm:py-12">
     <div class="max-w-2xl w-full bg-white/70 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-8 border border-gray-200">
-      <a href="/user-dashboard.html" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-4 sm:mb-6 text-sm sm:text-base">
+      
+      <a href="/" class="inline-flex items-center text-gray-600 hover:text-green-700 transition mb-4 sm:mb-6 text-sm sm:text-base">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
@@ -184,7 +183,6 @@
       <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">ค้นหาข้อมูลจากรูปสมุนไพร</h1>
       <p class="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">อัปโหลดภาพสมุนไพร หรือถ่ายภาพจากกล้องเพื่อให้ AI ช่วยวิเคราะห์ข้อมูลและสรรพคุณ</p>
 
-      <!-- ✅ ปุ่มเลือกวิธี -->
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 justify-center">
         <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
           📁 เลือกรูปจากเครื่อง
@@ -194,7 +192,6 @@
         </button>
       </div>
 
-      <!-- 📹 Camera Mode Section -->
       <div id="camera-mode" class="hidden mb-4 sm:mb-6">
         <video id="video-stream" width="100%" height="auto" style="border-radius: 12px; background: #000; max-height: 400px;" autoplay playsinline></video>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4 justify-center">
@@ -207,7 +204,6 @@
         </div>
       </div>
 
-      <!-- Image Preview and Retake -->
       <div id="capture-mode" class="hidden mb-4 sm:mb-6">
         <div id="image-preview-box" class="preview-box"><span>ภาพจะแสดงที่นี่</span></div>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
@@ -220,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Upload Mode -->
       <div id="upload-mode" class="mb-4 sm:mb-6">
         <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
       </div>
@@ -247,11 +242,10 @@
 
   <script src="/js/analyze-herb.js"></script>
 
-  <!-- Camera Implementation Script -->
   <script>
     const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
     let currentImageBlob = null;
-    let videoStreamObj = null; // v2 - camera fix applied
+    let videoStreamObj = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const imageInput = document.getElementById('herb-image-upload');
@@ -269,7 +263,6 @@
       const previewBox = document.getElementById('image-preview-box');
       const analyzeBtn = document.getElementById('analyze-herb-btn');
 
-      // 🎥 Switch to Upload Mode
       uploadBtn.addEventListener('click', async () => {
         await stopCamera();
         uploadModeDiv.classList.remove('hidden');
@@ -278,7 +271,6 @@
         imageInput.click();
       });
 
-      // 🎥 Switch to Camera Mode
       cameraBtn.addEventListener('click', async () => {
         uploadModeDiv.classList.add('hidden');
         captureModeDiv.classList.add('hidden');
@@ -286,7 +278,6 @@
         await startCamera(videoElement);
       });
 
-      // 🎥 Start Camera
       async function startCamera(videoElement) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -303,7 +294,6 @@
         }
       }
 
-      // 🎥 Stop Camera
       async function stopCamera() {
         if (videoStreamObj) {
           videoStreamObj.getTracks().forEach(track => track.stop());
@@ -311,7 +301,6 @@
         }
       }
 
-      // 📷 Capture Image from Video
       captureBtn.addEventListener('click', () => {
         const canvas = document.createElement('canvas');
         canvas.width = videoElement.videoWidth;
@@ -324,33 +313,27 @@
           previewBox.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Captured">`;
           cameraModeDiv.classList.add('hidden');
           captureModeDiv.classList.remove('hidden');
-          console.log('✅ Image captured and saved:', currentImageBlob);
         });
       });
 
-      // 🔄 Retake Photo
       retakeBtn.addEventListener('click', async () => {
         captureModeDiv.classList.add('hidden');
         cameraModeDiv.classList.remove('hidden');
         await startCamera(videoElement);
       });
 
-      // ✓ Use Captured Photo
       useCaptureBtn.addEventListener('click', () => {
         stopCamera();
-        uploadModeDiv.classList.add('hidden');
-        cameraModeDiv.classList.add('hidden');
         captureModeDiv.classList.add('hidden');
+        uploadModeDiv.classList.add('hidden');
       });
 
-      // ✕ Close Camera
       closeCameraBtn.addEventListener('click', async () => {
         await stopCamera();
         cameraModeDiv.classList.add('hidden');
         uploadModeDiv.classList.remove('hidden');
       });
 
-      // 📁 Upload Image
       imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -361,7 +344,6 @@
         }
       });
 
-      // Analyze Button - DEMO MODE (always show Mangosteen result)
       analyzeBtn.addEventListener('click', async () => {
         if (!currentImageBlob) {
           alert('โปรดเลือกรูปภาพหรือถ่ายภาพ');
@@ -372,48 +354,18 @@
         analyzeBtn.textContent = '⏳ กำลังค้นหา...';
         const resultsContainer = document.getElementById('results-container');
 
-        // Simulate processing delay
         setTimeout(() => {
-          // DEMO: Always show Mangosteen result regardless of image
           resultsContainer.innerHTML = `
             <div class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-green-500 text-left">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                  <i class="fa-solid fa-seedling text-xl"></i>
-                </div>
-                <h3 class="text-xl font-bold text-[#111C44]">ผลการค้นหา: เปลือกมังคุด (Mangosteen Peel)</h3>
-              </div>
-              
-              <p class="text-gray-600 mb-4">
-                เปลือกมังคุดแห้ง อุดมไปด้วยสารแซนโทน (Xanthone) ซึ่งเป็นสารต้านอนุมูลอิสระที่มีฤทธิ์ทางยาโดดเด่นในการดูแลผิวหนัง
-              </p>
-
-              <div class="grid md:grid-cols-2 gap-4">
-                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
-                  <h4 class="font-bold text-green-800 mb-2">สรรพคุณหลัก:</h4>
-                  <ul class="list-disc list-inside text-green-700 text-sm space-y-1">
-                    <li>ยับยั้งเชื้อแบคทีเรียที่ทำให้เกิดหนอง</li>
-                    <li>ช่วยสมานแผลสด แผลไฟไหม้ น้ำร้อนลวก</li>
-                    <li>ลดการอักเสบของสิว และโรคผิวหนังบางชนิด</li>
-                  </ul>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                  <h4 class="font-bold text-blue-800 mb-2">วิธีใช้เบื้องต้น:</h4>
-                  <p class="text-blue-700 text-sm">
-                    นำเปลือกแห้งมาฝนกับน้ำปูนใสให้ข้นพอประมาณ แล้วทาบริเวณแผลวันละ 2-3 ครั้ง
-                  </p>
-                </div>
-              </div>
-              <p class="text-xs text-red-500 mt-4">*คำเตือน: ผลลัพธ์นี้เป็นเพียงการจำลองเพื่อการสาธิต ไม่สามารถใช้อ้างอิงทางการแพทย์ได้จริง</p>
+              <h3 class="text-xl font-bold text-[#111C44] mb-2">ผลการค้นหา: เปลือกมังคุด</h3>
+              <p class="text-gray-600 mb-4">อุดมไปด้วยสารแซนโทน ช่วยสมานแผลและลดการอักเสบของผิวหนังได้ดี</p>
             </div>
           `;
-
           analyzeBtn.disabled = false;
           analyzeBtn.textContent = 'ค้นหา';
         }, 1500);
       });
 
-      // Show upload mode by default
       uploadModeDiv.classList.remove('hidden');
     });
   </script>
