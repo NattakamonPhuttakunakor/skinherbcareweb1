@@ -1,135 +1,97 @@
-import express from "express";
-import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-import helmet from "helmet";
-import morgan from "morgan";
-import axios from "axios"; // ✅ เพิ่ม Axios เพื่อใช้คุยกับ Python
+console.log("1. เริ่มต้นการทำงาน...");
 
-// อ่านค่า .env
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import multer from 'multer';       // ตัวช่วยรับรูปภาพ
+import FormData from 'form-data';  // ตัวช่วยห่อข้อมูลส่ง Python
+import path from 'path';           // ช่วยระบุตำแหน่งโฟลเดอร์
+import { fileURLToPath } from 'url'; // สำหรับแก้เรื่อง path ใน ES Module
 
-// 🔥 ระบบกันตาย: ตรวจสอบ Environment Variables
-const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET']; // ตัด GEMINI_API_KEY ออกชั่วคราวถ้าไม่ได้ใช้
-const missingEnvVars = requiredEnvVars.filter(key => !process.env[key] || process.env[key].includes('your-'));
+console.log("2. Import ไลบรารีสำเร็จ...");
 
-if (missingEnvVars.length > 0) {
-    console.warn(`⚠️ Warning: Missing environment variables: ${missingEnvVars.join(', ')}`);
-}
+const app = express();
+const PORT = 5000;
 
-// Import Database
-import connectDB from "./config/db.js";
-
-// Import Routes
-import authRoutes from "./routes/auth.js";
-import analysisRoutes from "./routes/analysis.js";
-import herbRoutes from "./routes/herbs.js";
-import diseaseRoutes from "./routes/diseases.js";
-import adminRoutes from "./routes/admin.js";
-import geminiRoutes from "./routes/gemini.js";
-
-// 🔥 แก้ __dirname สำหรับ ES Modules
+// แก้ไขเรื่อง Path ให้ Node รู้จักโฟลเดอร์ปัจจุบัน
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const publicPath = path.join(__dirname, "../public");
-const uploadPath = path.join(__dirname, "../uploads");
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-async function startServer() {
-  try {
-    console.log("🔄 Connecting to database...");
-    
-    // ลองต่อ DB ถ้าไม่ได้ให้ข้ามไปก่อน (เพื่อให้ Server รันได้)
+// บอกให้ Node.js เปิดไฟล์หน้าเว็บจากโฟลเดอร์ 'public'
+app.use(express.static('public')); 
+
+// ตั้งค่า Multer (เก็บไฟล์ใน RAM ชั่วคราว เพื่อส่งต่อทันที)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// --- Route เช็คสถานะ ---
+app.get('/status', (req, res) => {
+    res.send('✅ Node.js Server (รองรับรูปภาพ) ทำงานอยู่!');
+});
+
+// 👇👇👇 แก้ไขตรงนี้ครับ (เปลี่ยนชื่อ Route ให้ตรงกับหน้าเว็บ) 👇👇👇
+app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
+    console.log("📩 Node ได้รับ Request จากหน้าเว็บ");
+
     try {
-        await connectDB();
-        console.log("✅ Database connected successfully!");
-    } catch (dbError) {
-        console.warn("⚠️ Database connection failed (Server will start anyway):", dbError.message);
-    }
+        const formData = new FormData();
 
-    const app = express();
+        // 1. ถ้ามีไฟล์รูปแนบมา ให้เอาใส่กล่อง formData
+        if (req.file) {
+            console.log(`📸 พบรูปภาพ: ${req.file.originalname}`);
+            formData.append('file', req.file.buffer, req.file.originalname);
+        } else {
+            console.log("⚠️ ไม่พบรูปภาพ (Request นี้อาจมีแค่ข้อความ)");
+        }
 
-    // --- Security & Logging ---
-    app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" }, contentSecurityPolicy: false }));
-    if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
-
-    // --- CORS ---
-    app.use(cors({ origin: '*', methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"] }));
-
-    // --- Body Parser ---
-    app.use(express.json({ limit: "10mb" }));
-    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-    // --- Static Files ---
-    app.use(express.static(publicPath)); 
-    app.use("/uploads", express.static(uploadPath));
-
-    // ==========================================
-    // 🌉 สะพานเชื่อม: Node.js -> Python (จุดสำคัญ!)
-    // ==========================================
-    app.post("/api/bridge/analyze", async (req, res) => {
-        try {
-            const { symptoms } = req.body;
-            console.log("📡 Node.js กำลังส่งข้อมูลไป Python:", symptoms);
-
-            // 🚀 ยิง request ไปหา Python Port 5001
-            const response = await axios.post("http://localhost:5001/api/analyze", {
-                symptoms: symptoms
-            });
-
-            // ✅ ส่งคำตอบจาก Python กลับไปให้หน้าเว็บ
-            res.json(response.data);
-
-        } catch (error) {
-            console.error("❌ เชื่อมต่อ Python ไม่สำเร็จ:", error.message);
-            // กรณี Python ปิดอยู่ หรือ Error
-            res.status(500).json({
-                success: false,
-                message: "ระบบวิเคราะห์ AI (Python) ไม่ตอบสนอง กรุณาตรวจสอบว่ารัน app.py หรือยัง"
+        // 2. ถ้ามีข้อความอื่นๆ (เช่น symptoms) แนบมาด้วย
+        if (req.body) {
+            Object.keys(req.body).forEach(key => {
+                formData.append(key, req.body[key]);
             });
         }
-    });
 
-    // --- API Routes ---
-    app.use("/api/auth", authRoutes);
-    app.use("/api/analysis", analysisRoutes); 
-    app.use("/api/herbs", herbRoutes);
-    app.use("/api/diseases", diseaseRoutes);
-    app.use("/api/admin", adminRoutes);
-    app.use("/api/gemini", geminiRoutes);
+        // 3. ส่งต่อไป Python (Port 5001)
+        console.log("🚀 กำลังส่งข้อมูลไปหา Python...");
+        // ใช้ 127.0.0.1 ตามที่เราตกลงกันไว้
+        const pythonUrl = 'http://127.0.0.1:5001/api/analyze';
+        
+        const response = await axios.post(pythonUrl, formData, {
+            headers: {
+                ...formData.getHeaders() // สำคัญ! ต้องใส่ Header ให้ถูกรูปแบบไฟล์
+            }
+        });
 
-    // ==========================================
-    // 🌐 FRONTEND ROUTES (HTML)
-    // ==========================================
-    app.get("/", (req, res) => res.sendFile(path.join(publicPath, "index.html")));
-    app.get("/home", (req, res) => res.sendFile(path.join(publicPath, "index.html")));
-    app.get("/login", (req, res) => res.sendFile(path.join(publicPath, "login.html")));
-    app.get("/register", (req, res) => res.sendFile(path.join(publicPath, "register.html")));
-    app.get("/analysis", (req, res) => res.sendFile(path.join(publicPath, "analyze-disease.html"))); 
-    app.get("/analyze-symptoms", (req, res) => res.sendFile(path.join(publicPath, "analyze-symptoms.html")));
+        console.log("✅ Python ตอบกลับมาแล้ว");
+        res.json(response.data);
 
-    // --- 404 & Error Handler ---
-    app.use((req, res) => res.status(404).json({ success: false, message: "Route not found" }));
-    app.use((err, req, res, next) => {
-      console.error("❌ Error:", err.stack);
-      res.status(500).json({ success: false, message: "Internal Server Error" });
-    });
+    } catch (error) {
+        console.error("❌ ติดต่อ Python ไม่ได้ / เกิดข้อผิดพลาด:");
+        if (error.response) {
+            // กรณี Python ตอบ Error กลับมา
+            console.error("   Status:", error.response.status);
+            console.error("   Data:", error.response.data);
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            // กรณีต่อ Python ไม่ติดเลย
+            console.error("   Message:", error.message);
+            res.status(500).json({ success: false, message: "เชื่อมต่อ Python Server ไม่ได้ (เปิด Port 5001 หรือยัง?)" });
+        }
+    }
+});
 
-    // --- Start Server ---
-    const PORT = process.env.PORT || 5000;
+// --- สั่งให้ Server รอรับ request ---
+try {
+    console.log("3. กำลังจะเปิด Port...");
     app.listen(PORT, () => {
-      console.log("\n" + "=".repeat(50));
-      console.log(`🚀 Node.js Server running at http://localhost:${PORT}`);
-      console.log(`🌉 Python Bridge Route: POST http://localhost:${PORT}/api/bridge/analyze`);
-      console.log("✅ Ready to serve...");
-      console.log("=".repeat(50) + "\n");
+        console.log("---------------------------------------------------");
+        console.log(`🚀 SERVER RUNNING ON: http://localhost:${PORT}`);
+        console.log("   (โหมดรองรับรูปภาพ + เชื่อมต่อ Python)");
+        console.log("---------------------------------------------------");
     });
-
-  } catch (error) {
-    console.error("❌ Fatal Error:", error);
-    process.exit(1);
-  }
+} catch (err) {
+    console.error("❌ เกิดข้อผิดพลาดตอน Start:", err);
 }
-
-startServer();
