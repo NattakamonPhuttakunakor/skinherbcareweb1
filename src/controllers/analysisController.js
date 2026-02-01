@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// ⚠️ ต้องตรงกับ Port ที่ Python รัน
+// ⚠️ ต้องตรงกับ Port ที่ Python รัน (5001)
 const PYTHON_API_URL = "http://localhost:5001/api/analyze";
 
 /**
@@ -35,7 +35,7 @@ export const getCategoryData = async (req, res) => {
 
 /**
  * ================================
- * 🧠 SYMPTOM ANALYSIS (USER - เชื่อมต่อ Python)
+ * 🧠 SYMPTOM ANALYSIS (USER - เชื่อมต่อ Python AI)
  * ================================
  */
 export const diagnoseSymptoms = async (req, res) => {
