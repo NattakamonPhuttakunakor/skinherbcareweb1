@@ -25,10 +25,13 @@ export const diagnoseSymptoms = async (req, res) => {
         const apiKey = process.env.PYTHON_API_KEY?.trim();
 
         if (!pythonApiUrl || !apiKey) {
-            console.error("❌ ENV ขาด PYTHON_API_URL หรือ PYTHON_API_KEY");
+            const missing = [];
+            if (!pythonApiUrl) missing.push('PYTHON_API_URL');
+            if (!apiKey) missing.push('PYTHON_API_KEY');
+            console.error("❌ Missing env:", missing.join(', '));
             return res.status(500).json({
                 success: false,
-                message: "Server configuration error"
+                message: `Server configuration error: missing ${missing.join(', ')}. Set them in your hosting environment.`
             });
         }
 

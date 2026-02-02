@@ -39,7 +39,11 @@ if (process.env.NODE_ENV === 'production') {
     if (!process.env.PYTHON_API_KEY) missing.push('PYTHON_API_KEY');
     if (missing.length > 0) {
         console.error('❌ Missing required environment variables for production:', missing.join(', '));
-        process.exit(1);
+        console.error('💡 Fix: Set these in your hosting provider (e.g. Render) before enabling production. Example: PYTHON_API_KEY=fp_yolo_2026_secret_x93k');
+        console.error('⚠️ Continuing startup in degraded mode: endpoints that require the missing envs will return 500 until fixed.');
+        // Do NOT exit the process here to allow the service to start (useful for inspecting logs on providers like Render).
+        // The server will still return configuration errors for endpoints that require these env vars.
+        global.MISSING_PROD_ENVS = missing; // expose for health checks
     }
 }
 
@@ -99,7 +103,8 @@ app.get('/status', async (req, res) => {
         mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
         port: PORT,
         timestamp: new Date().toISOString(),
-        python: { reachable: false }
+        python: { reachable: false },
+        missing_envs: global.MISSING_PROD_ENVS || []
     };
 
     if (pythonUrl) {
