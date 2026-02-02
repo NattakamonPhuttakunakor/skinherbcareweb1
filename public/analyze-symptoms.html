@@ -156,33 +156,28 @@ document.addEventListener('DOMContentLoaded', () => {
             let result;
             try {
                 result = await response.json();
-            } catch {
+            } catch (parseErr) {
+                console.error('Failed to parse JSON response', parseErr);
                 result = { success: false, message: 'Response is not JSON' };
             }
 
             if (!response.ok) {
-                // แสดงข้อความจากเซิร์ฟเวอร์ตรงๆ
+                // แสดงข้อความจากเซิร์ฟเวอร์ตรงๆ (ถ้ามี)
                 resultsContainer.innerHTML = `<p class="text-red-500">${result.message || 'เกิดข้อผิดพลาด'}</p>`;
                 return;
             }
 
-            let result;
-            try {
-                result = await response.json();
-            } catch {
-                throw new Error('Response is not JSON');
-            }
-
-            if (response.ok && result.success && result.data?.length) {
-                const d = result.data[0];
+            // สถานะ OK แต่ตรวจสอบเนื้อหาเพื่อนำเสนอ
+            if (result.success && (Array.isArray(result.data) ? result.data.length > 0 : (result.data && Object.keys(result.data).length > 0))) {
+                const d = Array.isArray(result.data) ? result.data[0] : result.data;
                 resultsContainer.innerHTML = `
                     <h3 class="font-bold text-lg mb-2">🧬 ผลการวิเคราะห์</h3>
-                    <p><b>โรคที่คาดว่าเป็น:</b> ${d.disease}</p>
-                    <p><b>ความมั่นใจ:</b> ${d.confidence}%</p>
-                    <p class="mt-2"><b>คำแนะนำ:</b> ${d.treatment}</p>
+                    <p><b>โรคที่คาดว่าเป็น:</b> ${d.disease || d.prediction || 'ไม่ทราบ'}</p>
+                    <p><b>ความมั่นใจ:</b> ${d.confidence ?? (d.confidence_percent ?? 'N/A')}%</p>
+                    <p class="mt-2"><b>คำแนะนำ:</b> ${d.treatment || d.recommendation || d.advice || 'ไม่มีคำแนะนำ'}</p>
                 `;
             } else {
-                resultsContainer.innerHTML = 'ไม่พบข้อมูลที่ชัดเจน';
+                resultsContainer.innerHTML = `<p class="text-gray-600">ไม่พบข้อมูลที่ชัดเจน<br>${result.message ? ('(' + result.message + ')') : ''}</p>`;
             }
 
         } catch (err) {

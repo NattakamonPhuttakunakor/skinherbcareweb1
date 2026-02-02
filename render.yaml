@@ -1,0 +1,41 @@
+# Render service configuration file for deploying both Node (API) and Python (AI)
+# Replace placeholders (<...>) with your actual values or set them via Render dashboard
+services:
+  - type: web
+    name: skinherbcare-node
+    env: node
+    region: oregon
+    branch: main
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set PYTHON_API_URL to the public URL of the Python service (below)
+      - key: PYTHON_API_URL
+        value: "https://<your-python-service>.onrender.com/predict"
+      # Do NOT put secret values here; set the secret in the dashboard instead
+      - key: PYTHON_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+
+  - type: web
+    name: skinherbcare-python
+    env: python
+    region: oregon
+    branch: main
+    plan: free
+    buildCommand: pip install -r src/requirements.txt
+    startCommand: gunicorn src.app:app -b 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_API_KEY
+        sync: false
+      - key: PORT
+        value: "$PORT"
+
+# Notes:
+# - Use the Render dashboard to set secret env vars (PYTHON_API_KEY, MONGODB_URI).
+# - After deploying Python service, update NODE service's PYTHON_API_URL to point to the Python public URL.
+# - Health checks: Node -> GET /status, Python -> GET / (root) or /status
