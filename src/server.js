@@ -7,16 +7,15 @@ import multer from 'multer';
 import FormData from 'form-data';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose'; // ✅ เพิ่มสำหรับเชื่อมต่อ MongoDB
 
 // ✅ IMPORT ROUTES
 import analysisRoutes from './routes/analysis.js';
-// 🔑 กู้คืน Auth Routes (ถ้าพี่ใช้ชื่อไฟล์อื่น เช่น login.js ให้เปลี่ยนชื่อตรงนี้ครับ)
 import authRoutes from './routes/auth.js'; 
 
 console.log("2. Import ไลบรารีสำเร็จ...");
 
 const app = express();
-
 const PORT = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,12 +27,47 @@ app.use(cors());
 app.use(express.json());
 
 // -------------------------------------------------------------
-// ✅ MOUNT ROUTES (หัวใจสำคัญที่ทำให้ Login กลับมา)
+// ✅ เชื่อมต่อ MongoDB (แก้ปัญหา Login Timeout)
 // -------------------------------------------------------------
-// 1. เส้นทางสำหรับ Login/Register
-app.use('/api/auth', authRoutes); 
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// 2. เส้นทางสำหรับวิเคราะห์อาการ (ที่คุยกับ Python)
+if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI ไม่ได้ตั้งค่าใน Environment Variables!');
+    process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 10000, // ✅ เพิ่ม timeout
+    socketTimeoutMS: 45000,
+})
+.then(() => {
+    console.log('✅ MongoDB Connected Successfully');
+    console.log('📍 Database:', mongoose.connection.name);
+})
+.catch(err => {
+    console.error('❌ MongoDB Connection Error:', err.message);
+    console.error('💡 ตรวจสอบ:');
+    console.error('   1. MONGODB_URI ถูกต้องหรือไม่');
+    console.error('   2. MongoDB Atlas IP Whitelist');
+    console.error('   3. Username/Password ถูกต้อง');
+    process.exit(1);
+});
+
+// เช็คสถานะการเชื่อมต่อ
+mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB Disconnected');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB Runtime Error:', err.message);
+});
+
+// -------------------------------------------------------------
+// ✅ MOUNT ROUTES
+// -------------------------------------------------------------
+app.use('/api/auth', authRoutes); 
 app.use('/api/analysis', analysisRoutes);
 
 // -------------------------------------------------------------
@@ -47,7 +81,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Status check
 // -------------------------------------------------------------
 app.get('/status', (req, res) => {
-    res.send('✅ Node.js Server (Ready for Cloud) ทำงานอยู่!');
+    res.json({
+        status: '✅ Server Running',
+        mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+        port: PORT,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // -------------------------------------------------------------
@@ -66,24 +105,78 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
         }
 
         const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = (process.env.API_KEY || '123456').strip();
+        const apiKey = (process.env.API_KEY || '123456').trim(); // ✅ แก้จาก .strip()
+
+        console.log('📤 Bridge → Python:', pythonUrl);
+        console.log('🔑 API Key:', apiKey.slice(0, 4) + '***');
 
         const response = await axios.post(pythonUrl, formData, {
             headers: {
                 ...formData.getHeaders(),
-                'x-api-key': apiKey
-            }
+                'X-API-Key': apiKey
+            },
+            timeout: 30000 // 30 วินาที
         });
 
         res.json(response.data);
     } catch (error) {
         console.error("❌ Bridge Error:", error.message);
-        res.status(500).json({ success: False, message: "เชื่อมต่อ AI Server ไม่ได้" });
+        
+        let statusCode = 500;
+        let message = "เชื่อมต่อ AI Server ไม่ได้";
+        
+        if (error.code === 'ECONNREFUSED') {
+            message = "ไม่สามารถเชื่อมต่อ Python Server";
+        } else if (error.code === 'ETIMEDOUT') {
+            statusCode = 504;
+            message = "Python Server ตอบช้า (Timeout)";
+        } else if (error.response?.status === 401) {
+            statusCode = 401;
+            message = "API Key ไม่ถูกต้อง";
+        }
+        
+        res.status(statusCode).json({ 
+            success: false,  // ✅ แก้จาก False
+            message: message,
+            error: error.message
+        });
     }
 });
 
+// -------------------------------------------------------------
+// ✅ Error Handling Middleware
+// -------------------------------------------------------------
+app.use((err, req, res, next) => {
+    console.error('💥 Unhandled Error:', err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
+
+// -------------------------------------------------------------
+// Start Server
+// -------------------------------------------------------------
 app.listen(PORT, () => {
-    console.log("---------------------------------------------------");
+    console.log("===================================================");
     console.log(`🚀 SERVER RUNNING ON PORT: ${PORT}`);
-    console.log("---------------------------------------------------");
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🗄️  MongoDB: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '⏳ Connecting...'}`);
+    console.log("===================================================");
+});
+
+// -------------------------------------------------------------
+// Graceful Shutdown
+// -------------------------------------------------------------
+process.on('SIGTERM', async () => {
+    console.log('⚠️ SIGTERM received, shutting down gracefully...');
+    await mongoose.connection.close();
+    process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+    console.log('⚠️ SIGINT received, shutting down gracefully...');
+    await mongoose.connection.close();
+    process.exit(0);
 });
