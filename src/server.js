@@ -143,16 +143,16 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
         }
 
         const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = (process.env.API_KEY || '123456').trim(); // ✅ แก้จาก .strip()
+        const apiKey = process.env.PYTHON_API_KEY?.trim();
 
         console.log('📤 Bridge → Python:', pythonUrl);
-        console.log('🔑 API Key:', apiKey.slice(0, 4) + '***');
+        console.log('🔑 API Key (configured):', apiKey ? (apiKey.slice(0, 4) + '***') : '(not set)');
+
+        const headers = { ...formData.getHeaders() };
+        if (apiKey) headers['X-API-Key'] = apiKey;
 
         const response = await axios.post(pythonUrl, formData, {
-            headers: {
-                ...formData.getHeaders(),
-                'X-API-Key': apiKey
-            },
+            headers,
             timeout: 30000 // 30 วินาที
         });
 

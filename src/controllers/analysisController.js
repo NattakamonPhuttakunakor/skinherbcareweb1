@@ -55,7 +55,7 @@ export const diagnoseSymptoms = async (req, res) => {
 
         // 4. Handle Python error or non-OK responses
         if (response.status === 401) {
-            // When Python returns 401, try calling again without header (in case Python was not configured to require keys)
+            // If we have a configured API key, retry without it (some Python deployments don't enforce X-API-Key)
             if (apiKey) {
                 console.warn('🔐 Python returned 401 with key; retrying without X-API-Key...');
                 try {
@@ -71,7 +71,8 @@ export const diagnoseSymptoms = async (req, res) => {
                     return res.json({ success: true, found: true, data: [fallback], message: 'Fallback analysis (server-side heuristic)' });
                 }
             } else {
-                return res.status(401).json({ success: false, message: 'Unauthorized: API Key ไม่ถูกต้อง' });
+                console.error('❌ Python requires API Key but server has none.');
+                return res.status(500).json({ success: false, message: 'Server configuration missing: PYTHON_API_KEY. Set it in your hosting environment.' });
             }
         }
 
