@@ -143,7 +143,8 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
         }
 
         const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = process.env.PYTHON_API_KEY?.trim();
+        // Check API_KEY first (as set on Render), fallback to PYTHON_API_KEY
+        const apiKey = (process.env.API_KEY || process.env.PYTHON_API_KEY)?.trim();
 
         console.log('📤 Bridge → Python:', pythonUrl);
         console.log('🔑 API Key (configured):', apiKey ? (apiKey.slice(0, 4) + '***') : '(not set)');

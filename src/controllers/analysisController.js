@@ -20,14 +20,15 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         }
 
-        // 2. Resolve Python service URL and key (tolerant)
+        // 2. Resolve Python service URL and key (tolerant, check both API_KEY and PYTHON_API_KEY)
         let pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5001/predict';
-        const apiKey = process.env.PYTHON_API_KEY?.trim();
+        // Check API_KEY first (as set on Render), fallback to PYTHON_API_KEY
+        const apiKey = (process.env.API_KEY || process.env.PYTHON_API_KEY)?.trim();
 
         if (!process.env.PYTHON_API_URL || !apiKey) {
             const missingParts = [];
             if (!process.env.PYTHON_API_URL) missingParts.push('PYTHON_API_URL (using fallback http://127.0.0.1:5001/predict)');
-            if (!apiKey) missingParts.push('PYTHON_API_KEY (not set — will call Python without X-API-Key if allowed)');
+            if (!apiKey) missingParts.push('API_KEY or PYTHON_API_KEY (not set — will call Python without X-API-Key if allowed)');
             console.warn('⚠️ Partial/missing Python config:', missingParts.join(', '));
         }
 
