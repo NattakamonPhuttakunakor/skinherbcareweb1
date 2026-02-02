@@ -1,74 +1,76 @@
-import express from 'express';
-import multer from 'multer';
-import axios from 'axios';
-import FormData from 'form-data';
+import express from "express";
+import axios from "axios";
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
-// Router: /api/analysis/analyze
-router.post('/analyze', upload.single('image'), async (req, res) => {
-    console.log("-------------------------------------------------");
-    console.log("📩 Node: ได้รับคำสั่งวิเคราะห์จากหน้าเว็บ");
-    
-    // 1. ตรวจสอบว่ามี Link Python หรือยัง?
-    const pythonUrl = process.env.PYTHON_API_URL;
+/**
+ * POST /api/analysis/analyze
+ * รับ symptoms จาก frontend แล้วส่งต่อไป Python
+ */
+router.post("/analyze", async (req, res) => {
+  try {
+    const { symptoms } = req.body;
+
+    // 1️⃣ validate input
+    if (!symptoms || typeof symptoms !== "string" || symptoms.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "กรุณาระบุอาการ"
+      });
+    }
+
+    // 2️⃣ env
+    const pythonUrl = process.env.PYTHON_API_URL; // ต้องลงท้ายด้วย /predict
+    const apiKey = process.env.API_KEY || "fp_yolo_2026_secret_x93k";
+
     if (!pythonUrl) {
-        console.error("❌ Node Error: ไม่พบตัวแปร PYTHON_API_URL ใน Environment");
-        return res.status(500).json({ success: false, message: "Server Config Error: Missing Python URL" });
+      console.error("❌ Missing PYTHON_API_URL");
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error"
+      });
     }
 
-    try {
-        // 2. เตรียมข้อมูลจะส่งไป Python
-        const formData = new FormData();
-        
-        // ใส่ข้อความอาการ
-        const symptoms = req.body.symptoms || "";
-        formData.append('symptoms', symptoms);
-        console.log(`📝 อาการที่ส่งไป: "${symptoms}"`);
+    console.log("📤 Node → Python:", pythonUrl);
+    console.log("💬 Symptoms:", symptoms);
 
-        // ใส่รูปภาพ (ถ้ามี)
-        if (req.file) {
-            console.log(`📸 มีรูปภาพแนบมา: ${req.file.originalname}`);
-            formData.append('file', req.file.buffer, req.file.originalname);
-        }
+    // 3️⃣ call Python (JSON ล้วน)
+    const response = await axios.post(
+      pythonUrl,
+      { symptoms },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey
+        },
+        timeout: 60000
+      }
+    );
 
-        // 3. ยิงไปหา Python (ช่วงลุ้นระทึก)
-        console.log(`🚀 กำลังเชื่อมต่อไปยัง Python ที่: ${pythonUrl}`);
-        
-        const response = await axios.post(pythonUrl, formData, {
-            headers: {
-                ...formData.getHeaders(),
-                // 'x-api-key': '123456' // เปิดบรรทัดนี้ถ้า Python เปิดเช็ก Key
-            },
-            timeout: 60000 // รอ Python ตื่นสูงสุด 60 วินาที (กัน Timeout เร็วไป)
-        });
+    console.log("✅ Python response:", response.data);
 
-        // 4. ถ้า Python ตอบกลับมา
-        console.log("✅ Python ตอบกลับสำเร็จ:", response.data);
-        res.json(response.data);
+    // 4️⃣ ส่งกลับ frontend
+    return res.json({
+      success: true,
+      ...response.data
+    });
 
-    } catch (error) {
-        // 5. จุดดักจับความผิดพลาด (ไม่ให้ขึ้น 500 แบบงงๆ)
-        console.error("❌ Node Crash Error:", error.message);
+  } catch (err) {
+    console.error("❌ Analyze error:", err.message);
 
-        if (error.response) {
-            // Python ตอบกลับมาเป็น Error (404, 500)
-            console.error("📌 Python Response Data:", error.response.data);
-            res.status(error.response.status).json(error.response.data);
-        } else if (error.code === 'ECONNREFUSED') {
-            // Python ปิดอยู่ หรือ Link ผิด
-            console.error("📌 สาเหตุ: เชื่อมต่อ Python ไม่ได้ (Server อาจจะดับ หรือ Link ผิด)");
-            res.status(503).json({ success: false, message: "AI Service Unavailable (Connection Refused)" });
-        } else {
-            // อื่นๆ
-            res.status(500).json({ 
-                success: false, 
-                message: "Internal Bridge Error", 
-                error: error.message 
-            });
-        }
+    // Python ตอบ error code กลับมา
+    if (err.response) {
+      return res
+        .status(err.response.status)
+        .json(err.response.data);
     }
+
+    // Node พังเอง
+    return res.status(500).json({
+      success: false,
+      message: "ไม่สามารถวิเคราะห์ได้"
+    });
+  }
 });
 
 export default router;
