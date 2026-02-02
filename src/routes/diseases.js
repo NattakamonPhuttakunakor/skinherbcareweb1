@@ -25,6 +25,10 @@ router.get('/', async (req, res) => {
 // ➕ Add disease (Admin only)
 router.post('/', protect, admin, async (req, res) => {
   try {
+    console.log('📝 POST /api/diseases — incoming request');
+    console.log('   DB readyState:', mongoose.connection.readyState);
+    console.log('   user:', req.user && (req.user._id || req.user));
+
     const { name, description, symptoms } = req.body;
 
     // Validate required fields
@@ -62,6 +66,7 @@ router.post('/', protect, admin, async (req, res) => {
       disease: savedDisease 
     });
   } catch (error) {
+    console.error('❌ Error saving disease:', error);
     if (error.code === 11000) {
       res.status(400).json({ success: false, error: 'โรคนี้มีอยู่แล้ว!' });
     } else {
