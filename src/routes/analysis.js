@@ -1,77 +1,74 @@
 import express from 'express';
+import multer from 'multer';
 import axios from 'axios';
+import FormData from 'form-data';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ วิเคราะห์อาการ (ส่งไป Python)
-export const diagnoseSymptoms = async (req, res) => {
+// Router: /api/analysis/analyze
+router.post('/analyze', upload.single('image'), async (req, res) => {
+    console.log("-------------------------------------------------");
+    console.log("📩 Node: ได้รับคำสั่งวิเคราะห์จากหน้าเว็บ");
+    
+    // 1. ตรวจสอบว่ามี Link Python หรือยัง?
+    const pythonUrl = process.env.PYTHON_API_URL;
+    if (!pythonUrl) {
+        console.error("❌ Node Error: ไม่พบตัวแปร PYTHON_API_URL ใน Environment");
+        return res.status(500).json({ success: false, message: "Server Config Error: Missing Python URL" });
+    }
+
     try {
-        const { symptoms } = req.body;
+        // 2. เตรียมข้อมูลจะส่งไป Python
+        const formData = new FormData();
+        
+        // ใส่ข้อความอาการ
+        const symptoms = req.body.symptoms || "";
+        formData.append('symptoms', symptoms);
+        console.log(`📝 อาการที่ส่งไป: "${symptoms}"`);
 
-        // 1. Validate input
-        if (!symptoms || typeof symptoms !== 'string' || symptoms.trim() === "") {
-            return res.status(400).json({
-                success: false,
-                message: "กรุณาระบุอาการ"
-            });
+        // ใส่รูปภาพ (ถ้ามี)
+        if (req.file) {
+            console.log(`📸 มีรูปภาพแนบมา: ${req.file.originalname}`);
+            formData.append('file', req.file.buffer, req.file.originalname);
         }
 
-        // 2. ENV
-        const pythonApiUrl = process.env.PYTHON_API_URL?.trim();
-        const apiKey = process.env.API_KEY?.trim();
-
-        if (!pythonApiUrl) {
-            console.error("❌ PYTHON_API_URL ไม่ถูกตั้งค่า");
-            return res.status(500).json({
-                success: false,
-                message: "Server config error (PYTHON_API_URL)"
-            });
-        }
-
-        console.log("📤 Node → Python:", pythonApiUrl);
-        console.log("💬 Symptoms:", symptoms.trim());
-
-        // 3. Call Python API (ใช้ axios)
-        const response = await axios.post(
-            pythonApiUrl,
-            { symptoms: symptoms.trim() },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-API-Key": apiKey || "123456" // กันพัง
-                },
-                timeout: 30000
-            }
-        );
-
-        console.log("📥 Python Response:", response.data);
-
-        // 4. ส่งกลับ Frontend
-        res.json({
-            success: true,
-            prediction: response.data.prediction || "ไม่พบผลลัพธ์",
-            confidence: response.data.confidence || 0,
-            treatment: response.data.treatment || "-",
-            herbs: response.data.herbs || []
+        // 3. ยิงไปหา Python (ช่วงลุ้นระทึก)
+        console.log(`🚀 กำลังเชื่อมต่อไปยัง Python ที่: ${pythonUrl}`);
+        
+        const response = await axios.post(pythonUrl, formData, {
+            headers: {
+                ...formData.getHeaders(),
+                // 'x-api-key': '123456' // เปิดบรรทัดนี้ถ้า Python เปิดเช็ก Key
+            },
+            timeout: 60000 // รอ Python ตื่นสูงสุด 60 วินาที (กัน Timeout เร็วไป)
         });
+
+        // 4. ถ้า Python ตอบกลับมา
+        console.log("✅ Python ตอบกลับสำเร็จ:", response.data);
+        res.json(response.data);
 
     } catch (error) {
-        console.error("❌ Node Analyze Error:", error.message);
+        // 5. จุดดักจับความผิดพลาด (ไม่ให้ขึ้น 500 แบบงงๆ)
+        console.error("❌ Node Crash Error:", error.message);
 
-        // axios error detail
         if (error.response) {
-            console.error("📛 Python Status:", error.response.status);
-            console.error("📛 Python Data:", error.response.data);
+            // Python ตอบกลับมาเป็น Error (404, 500)
+            console.error("📌 Python Response Data:", error.response.data);
+            res.status(error.response.status).json(error.response.data);
+        } else if (error.code === 'ECONNREFUSED') {
+            // Python ปิดอยู่ หรือ Link ผิด
+            console.error("📌 สาเหตุ: เชื่อมต่อ Python ไม่ได้ (Server อาจจะดับ หรือ Link ผิด)");
+            res.status(503).json({ success: false, message: "AI Service Unavailable (Connection Refused)" });
+        } else {
+            // อื่นๆ
+            res.status(500).json({ 
+                success: false, 
+                message: "Internal Bridge Error", 
+                error: error.message 
+            });
         }
-
-        res.status(500).json({
-            success: false,
-            message: "ไม่สามารถวิเคราะห์อาการได้ (AI Server)",
-        });
     }
-};
-
-// Routes
-router.post('/analyze', diagnoseSymptoms);
+});
 
 export default router;
