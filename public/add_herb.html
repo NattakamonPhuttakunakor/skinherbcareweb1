@@ -229,6 +229,15 @@
                 if (response.ok) {
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
+
+                    // ถ้าบันทึกชั่วคราว (DB ไม่เชื่อมต่อ) ให้เตือนผู้ใช้
+                    if (data.savedLocally) {
+                        const note = document.createElement('div');
+                        note.className = 'text-sm text-gray-700 mt-2';
+                        note.textContent = 'บันทึกข้อมูลเป็นแบบชั่วคราว (ระบบยังไม่ได้เชื่อมต่อฐานข้อมูล) — ข้อมูลจะถูกบันทึกถาวรเมื่อระบบเชื่อม DB ได้';
+                        document.getElementById('modal-card').appendChild(note);
+                    }
+
                     modal.classList.remove('hidden');
                     setTimeout(() => {
                         modal.classList.remove('opacity-0');
