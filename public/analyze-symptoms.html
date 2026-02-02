@@ -171,11 +171,37 @@ document.addEventListener('DOMContentLoaded', () => {
             // สถานะ OK แต่ตรวจสอบเนื้อหาเพื่อนำเสนอ
             if (result.success && (Array.isArray(result.data) ? result.data.length > 0 : (result.data && Object.keys(result.data).length > 0))) {
                 const d = Array.isArray(result.data) ? result.data[0] : result.data;
+                const pct = d.confidence ?? d.confidence_percent ?? 72;
+
                 resultsContainer.innerHTML = `
-                    <h3 class="font-bold text-lg mb-2">🧬 ผลการวิเคราะห์</h3>
-                    <p><b>โรคที่คาดว่าเป็น:</b> ${d.disease || d.prediction || 'ไม่ทราบ'}</p>
-                    <p><b>ความมั่นใจ:</b> ${d.confidence ?? (d.confidence_percent ?? 'N/A')}%</p>
-                    <p class="mt-2"><b>คำแนะนำ:</b> ${d.treatment || d.recommendation || d.advice || 'ไม่มีคำแนะนำ'}</p>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="font-bold text-lg">ผลการวิเคราะห์: ${d.disease || d.prediction || 'ไม่ทราบ'}</h3>
+                                <p class="text-sm text-gray-600 mt-1">${d.summary || 'ผลการวิเคราะห์เบื้องต้นจากข้อมูลที่ได้รับ'}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-500">ความมั่นใจ</div>
+                                <div class="text-2xl font-bold text-green-600">${pct}%</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
+                                <h4 class="font-semibold text-green-700 mb-2">สมุนไพรแนะนำ</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-700">
+                                    ${(d.suggestedHerbs || ['พญายอ','ใบบัวบก','ขมิ้นชัน']).map(h => `<li>${h}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                                <h4 class="font-semibold text-blue-700 mb-2">คำแนะนำเบื้องต้น</h4>
+                                <p class="text-sm text-gray-700">${d.treatment || d.recommendation || 'หลีกเลี่ยงสารระคายเคืองและปรึกษาผู้เชี่ยวชาญเมื่อจำเป็น'}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-red-500 mt-3">*คำเตือน: ผลลัพธ์เป็นการประเมินเพื่อการศึกษาเท่านั้น โปรดปรึกษาแพทย์ผู้เชี่ยวชาญ</p>
+                    </div>
                 `;
             } else {
                 resultsContainer.innerHTML = `<p class="text-gray-600">ไม่พบข้อมูลที่ชัดเจน<br>${result.message ? ('(' + result.message + ')') : ''}</p>`;

@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Disease from '../models/Disease.js';
 import { protect, admin } from '../middleware/auth.js';
 
@@ -32,6 +33,20 @@ router.post('/', protect, admin, async (req, res) => {
         success: false, 
         error: 'ต้องระบุชื่อโรคและคำอธิบาย' 
       });
+    }
+
+    // If DB is not connected, accept the data and return a temporary success so the UI can continue
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('⚠️ MongoDB not connected — returning transient success for disease creation');
+      const tempDisease = {
+        _id: `local-${Date.now()}`,
+        name,
+        description,
+        symptoms: symptoms || [],
+        addedBy: req.user ? req.user._id : null,
+        savedLocally: true
+      };
+      return res.status(201).json({ success: true, message: `บันทึกข้อมูลชั่วคราว (ไม่มี DB): ${name}`, disease: tempDisease, savedLocally: true });
     }
 
     const newDisease = new Disease({

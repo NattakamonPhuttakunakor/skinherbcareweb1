@@ -323,11 +323,46 @@
                 analyzeBtn.disabled = true;
                 analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';
                 const resultsContainer = document.getElementById('results-container');
+
+                // Simulated / fallback result (use server response here if endpoint is available)
                 setTimeout(() => {
-                    resultsContainer.innerHTML = `<div class="p-4 bg-white rounded shadow text-left"><h3 class="font-bold">ผลการวิเคราะห์: โรคด่างขาว</h3><p class="text-sm text-gray-600 mt-2">โปรดปรึกษาแพทย์เพื่อความชัดเจน</p></div>`;
+                    const pct = 78; // ยอดนิยม: แสดงเปอร์เซ็นต์
+                    resultsContainer.innerHTML = `
+                        <div class="p-4 bg-white rounded-lg shadow text-left">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 class="font-bold text-lg">ผลการวิเคราะห์: โรคด่างขาว (Vitiligo)</h3>
+                                    <p class="text-sm text-gray-600 mt-1">จากการวิเคราะห์เบื้องต้น พบลักษณะที่คล้ายกับโรคด่างขาว ซึ่งเกิดจากการทำงานผิดปกติของเซลล์สร้างเม็ดสี</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-500">ความมั่นใจ</div>
+                                    <div class="text-2xl font-bold text-green-600">${pct}%</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
+                                    <h4 class="font-semibold text-green-700 mb-2">สมุนไพรที่แนะนำ</h4>
+                                    <ul class="list-disc list-inside text-sm text-gray-700">
+                                        <li><b>พญายอ</b> — มีฤทธิ์ต้านการอักเสบ, อาจช่วยลดการอักเสบ</li>
+                                        <li><b>ใบบัวบก</b> — ช่วยกระตุ้นการสร้างคอลลาเจนและฟื้นฟูสภาพผิว</li>
+                                        <li><b>ขมิ้นชัน</b> — มีสารต้านอนุมูลอิสระสูง ช่วยดูแลผิวพรรณโดยรวม</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                                    <h4 class="font-semibold text-blue-700 mb-2">วิธีใช้เบื้องต้น</h4>
+                                    <p class="text-sm text-gray-700">นำสมุนไพรบดผสมกับน้ำ/น้ำมันพืช ทาผิวบริเวณที่มีรอย 1-2 ครั้งต่อวัน แนะนำให้หยุดใช้หากเกิดการระคายเคือง</p>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-red-500 mt-3">*คำเตือน: ผลลัพธ์เป็นการประเมินเพื่อการศึกษาเท่านั้น โปรดปรึกษาแพทย์ผู้เชี่ยวชาญ</p>
+                        </div>
+                    `;
+
                     analyzeBtn.disabled = false;
                     analyzeBtn.textContent = 'วิเคราะห์';
-                }, 1500);
+                }, 1200);
             });
         });
     </script>

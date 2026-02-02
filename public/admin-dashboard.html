@@ -126,7 +126,13 @@
                    <p class="text-sm text-gray-600">ยินดีต้อนรับ,</p>
                    <p class="font-bold text-[#111C44] admin-name-display">Loading...</p>
                 </div>
-            </div>
+
+                <!-- Admin quick search -->
+                <div class="hidden sm:flex items-center gap-2">
+                    <input id="admin-search-input" type="search" placeholder="ค้นหา..." class="px-3 py-2 rounded-lg border border-gray-200">
+                    <button id="admin-search-btn" class="bg-green-600 text-white px-3 py-2 rounded-lg">ค้นหา</button>
+                </div>
+            </div> 
         </header>
 
         <div class="px-6 pb-6">
@@ -209,6 +215,17 @@
                 window.location.href = '/login.html';
             }
         }
+
+        // Admin quick search - navigate to herb list with optional query
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminSearchBtn = document.getElementById('admin-search-btn');
+            if (adminSearchBtn) {
+                adminSearchBtn.addEventListener('click', () => {
+                    const q = document.getElementById('admin-search-input').value.trim();
+                    window.location.href = `/herb_list.html${q ? '?q=' + encodeURIComponent(q) : ''}`;
+                });
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             const logoutBtn = document.getElementById('logout-btn');
