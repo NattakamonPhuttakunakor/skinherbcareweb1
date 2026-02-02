@@ -1,0 +1,43 @@
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({
+            "success": False,
+            "message": "Invalid JSON"
+        }), 422
+
+    if not data or "symptoms" not in data:
+        return jsonify({
+            "success": False,
+            "message": "Missing symptoms"
+        }), 422
+
+    symptoms = str(data["symptoms"]).strip()
+
+    if symptoms == "":
+        return jsonify({
+            "success": False,
+            "message": "Symptoms is empty"
+        }), 422
+
+    # ---------- วิเคราะห์ ----------
+    if vectorizer and tfidf_matrix is not None:
+        vec = vectorizer.transform([symptoms])
+        scores = cosine_similarity(vec, tfidf_matrix).flatten()
+        idx = scores.argmax()
+
+        if scores[idx] > 0.01:
+            row = df.iloc[idx]
+            return jsonify({
+                "prediction": row["รายชื่อโรค"],
+                "confidence": round(float(scores[idx]) * 100, 2),
+                "recommendation": row["วิธีรักษาเบื้อต้น"]
+            })
+
+    return jsonify({
+        "prediction": "ไม่พบข้อมูลที่ตรงกัน",
+        "confidence": 0,
+        "recommendation": "กรุณาระบุอาการเพิ่มเติม"
+    })
