@@ -10,11 +10,16 @@ import sys
 import os
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
-# ========================================
-# 🔧 ส่วนที่ 1: ปรับจูนคำศัพท์ (Synonyms)
-# ========================================
+# ===============================
+# 🔐 API KEY
+# ===============================
+API_KEY = os.getenv("API_KEY")
+
+# ===============================
+# 🔧 SYNONYM / STOPWORDS
+# ===============================
 SYNONYM_MAP = {
     'ปวด': ['เจ็บ', 'ทรมาน', 'ระบม', 'ปวดเมื่อย', 'ตึง'],
     'แสบ': ['ปวดแสบปวดร้อน', 'ร้อน', 'ไหม้', 'ระคายเคือง', 'แสบๆ'],
@@ -26,167 +31,84 @@ SYNONYM_MAP = {
 }
 
 CUSTOM_STOPWORDS = set(thai_stopwords()) | {
-    "เป็น", "มี", "รู้สึก", "อาการ", "หน่อย", "มาก", "ๆ", "ค่ะ", "ครับ", 
-    "คือ", "ที่", "และ", "หรือ", "ช่วย", "ด้วย", "แล้ว", "อยาก", "ต้อง",
-    "นะ", "จะ", "เอง", "ได้", "ไป", "มา", "อยู่", "ให้", "บริเวณ", "แถวๆ", "มัน"
+    "เป็น", "มี", "รู้สึก", "อาการ", "หน่อย", "มาก", "ๆ", "ค่ะ", "ครับ"
 }
 
 def expand_synonyms(text):
     text = str(text).lower()
-    for main_word, synonyms in SYNONYM_MAP.items():
-        for syn in synonyms:
-            if syn in text:
-                text += f" {main_word}" 
+    for main, syns in SYNONYM_MAP.items():
+        for s in syns:
+            if s in text:
+                text += f" {main}"
     return text
 
 def thai_tokenizer(text):
-    if not isinstance(text, str): return []
-    text = expand_synonyms(text) 
-    words = word_tokenize(text, engine="newmm", keep_whitespace=False)
-    return [w for w in words if w not in CUSTOM_STOPWORDS and len(w) > 1 and not w.isnumeric()]
+    text = expand_synonyms(text)
+    words = word_tokenize(text, engine="newmm")
+    return [w for w in words if w not in CUSTOM_STOPWORDS and len(w) > 1]
 
-# ========================================
-# 📂 ส่วนที่ 2: โหลดข้อมูล (Excel/CSV)
-# ========================================
-print("⏳ AI: กำลังโหลดข้อมูล...")
-df = None
-# ลองหาไฟล์หลายๆ นามสกุล
-possible_files = ["data.xlsx", "data.csv", "data.xlsx - Sheet1.csv"]
+# ===============================
+# 📂 LOAD DATA
+# ===============================
+df = pd.DataFrame({
+    'รายชื่อโรค': ['สิวอักเสบ', 'ผื่นภูมิแพ้'],
+    'อาการหลัก': ['ตุ่มแดง เจ็บ', 'คัน ผื่นแดง'],
+    'ตำแหน่งที่พบบ่อย': ['หน้า', 'แขน ขา'],
+    'วิธีรักษาเบื้อต้น': ['ล้างหน้าให้สะอาด', 'ทายาแก้แพ้']
+})
 
-for f in possible_files:
-    if os.path.exists(f):
-        try:
-            if f.endswith('.csv'):
-                df = pd.read_csv(f)
-            else:
-                df = pd.read_excel(f)
-            print(f"✅ AI: เจอไฟล์ {f}")
-            break
-        except Exception as e:
-            print(f"⚠️ AI: อ่านไฟล์ {f} ไม่ได้ ({e})")
-
-if df is None:
-    print("❌ Error: ไม่พบไฟล์ข้อมูล (data.xlsx หรือ .csv) ในโฟลเดอร์นี้")
-    print("   -> กรุณาเอาไฟล์ Excel มาวางไว้ที่เดียวกับไฟล์ app.py")
-    # สร้าง Dummy Data กันโปรแกรมพัง (เผื่อทดสอบ)
-    # sys.exit() # ปิดตรงนี้ไว้ก่อนเผื่ออยากเทส Server
-    print("⚠️ ...กำลังใช้ข้อมูลจำลอง (Dummy) เพื่อทดสอบระบบ...")
-    data = {
-        'รายชื่อโรค': ['สิวอักเสบ', 'ผื่นภูมิแพ้'],
-        'อาการหลัก': ['ตุ่มแดง เจ็บ', 'คัน ผื่นแดง'],
-        'อาการรอง': ['มีหนอง', 'ผิวแห้ง'],
-        'ตำแหน่งที่พบบ่อย': ['หน้า', 'แขน ขา'],
-        'วิธีรักษาเบื้อต้น': ['ล้างหน้าให้สะอาด', 'ทายาแก้แพ้'],
-        'สมุนไพรที่เกี่ยวข้อง': ['ขมิ้นชัน', 'ว่านหางจระเข้']
-    }
-    df = pd.DataFrame(data)
-
-# Clean Column Names
-df.columns = df.columns.str.strip()
-
-# เตรียมข้อมูลสำหรับเทรน
-def clean_and_prepare_data(row):
-    main = str(row.get('อาการหลัก', ''))
-    sub = str(row.get('อาการรอง', ''))
-    loc = str(row.get('ตำแหน่งที่พบบ่อย', ''))
-    
-    # เทคนิค: เบิ้ลคำสำคัญ
-    knowledge_text = f"{row['รายชื่อโรค']} {main} {main} {sub} {loc}"
-    return knowledge_text
-
-df['knowledge'] = df.apply(lambda x: clean_and_prepare_data(x), axis=1)
-
-# สร้างสมอง AI
-vectorizer = TfidfVectorizer(
-    tokenizer=thai_tokenizer,
-    ngram_range=(1, 2),
-    min_df=1,
-    sublinear_tf=True
+df['knowledge'] = df.apply(
+    lambda r: f"{r['รายชื่อโรค']} {r['อาการหลัก']} {r['ตำแหน่งที่พบบ่อย']}",
+    axis=1
 )
 
-try:
-    tfidf_matrix = vectorizer.fit_transform(df['knowledge'])
-    print(f"✅ AI: พร้อมทำงาน! (รู้จัก {len(df)} โรค)")
-except Exception as e:
-    print(f"❌ Error: {e}")
-    sys.exit()
+vectorizer = TfidfVectorizer(tokenizer=thai_tokenizer)
+tfidf_matrix = vectorizer.fit_transform(df['knowledge'])
 
-# ========================================
-# 🔌 ส่วนที่ 3: API Endpoint
-# ========================================
-@app.route('/api/analyze', methods=['POST'])
-def analyze():
-    # -----------------------------------------------------
-    # 🔥 แก้ไขตรงนี้: รองรับทั้ง JSON และ FormData (จาก Node.js)
-    # -----------------------------------------------------
-    user_input = ""
-    
-    # 1. ลองดึงจาก FormData (กรณี Node ส่งมา)
-    if 'symptoms' in request.form:
-        user_input = request.form['symptoms']
-    # 2. หรือถ้าไม่มี ลองดึงจาก JSON (กรณีเทสด้วย Postman)
-    elif request.json and 'symptoms' in request.json:
-        user_input = request.json['symptoms']
-    
-    user_input = user_input.strip()
-    
-    print(f"\n📩 ได้รับข้อความ: '{user_input}'")
-    
-    # ถ้ามีรูปแนบมาด้วย (ในอนาคตเผื่อเอาไปใช้)
-    if 'file' in request.files:
-        print(f"📸 (มีไฟล์รูปภาพแนบมาด้วย: {request.files['file'].filename}) - แต่ตอนนี้ใช้ Text วิเคราะห์ก่อน")
+# ===============================
+# 🔌 API
+# ===============================
+@app.route('/diagnose', methods=['POST'])
+def diagnose():
+    # 🔐 CHECK API KEY
+    client_key = request.headers.get("X-API-Key")
 
-    if not user_input:
-        return jsonify({"success": False, "message": "กรุณาระบุอาการ"})
+    print("🔑 ENV API KEY:", API_KEY[:4] + "***" if API_KEY else None)
+    print("📥 CLIENT KEY:", client_key[:4] + "***" if client_key else None)
 
-    # เริ่มวิเคราะห์
-    user_vec = vectorizer.transform([user_input])
+    if not API_KEY:
+        return jsonify({"message": "Server API_KEY not set"}), 500
+
+    if not client_key or client_key.strip() != API_KEY.strip():
+        return jsonify({"message": "Invalid API Key"}), 401
+
+    # 📩 รับ JSON
+    data = request.get_json(silent=True)
+    symptoms = data.get("symptoms", "").strip() if data else ""
+
+    if not symptoms:
+        return jsonify({"message": "กรุณาระบุอาการ"}), 400
+
+    user_vec = vectorizer.transform([symptoms])
     scores = cosine_similarity(user_vec, tfidf_matrix).flatten()
-    
-    top_indices = scores.argsort()[::-1][:3]
-    
-    results = []
-    found_any = False
 
-    for idx in top_indices:
-        score = scores[idx]
-        
-        # เกณฑ์ความมั่นใจ
-        if score > 0.01: 
-            found_any = True
-            row = df.iloc[idx]
-            
-            print(f"   👉 ตรงกับ: {row['รายชื่อโรค']} (ความมั่นใจ: {score:.4f})")
+    idx = scores.argmax()
+    score = scores[idx]
 
-            warning_msg = ""
-            if 'ไข้' in user_input and 'ไข้' in str(row.get('อาการรอง', '')):
-                warning_msg = "(โรคนี้มักมีไข้ร่วมด้วย ตรงกับอาการของคุณ)"
-
-            results.append({
-                "disease": str(row['รายชื่อโรค']),
-                "confidence": round(score * 100, 2),
-                "symptoms": str(row.get('อาการหลัก', '')),
-                "location": str(row.get('ตำแหน่งที่พบบ่อย', '')),
-                "treatment": str(row.get('วิธีรักษาเบื้อต้น', 'แนะนำให้พบแพทย์')),
-                "warning": warning_msg,
-                "herbs": str(row.get('สมุนไพรที่เกี่ยวข้อง', '-')).split(',')
-            })
-
-    if not found_any:
-        print("   ❌ ผลลัพธ์: ไม่พบข้อมูลที่ตรงกัน")
+    if score < 0.01:
         return jsonify({
-            "success": True,
-            "found": False,
-            "message": "ไม่พบโรคที่ตรงกับอาการชัดเจน"
+            "prediction": "ไม่พบโรคที่ตรง",
+            "confidence": 0
         })
 
+    row = df.iloc[idx]
+
     return jsonify({
-        "success": True,
-        "found": True,
-        "data": results
+        "prediction": row['รายชื่อโรค'],
+        "confidence": round(score * 100, 2),
+        "recommendation": row['วิธีรักษาเบื้อต้น']
     })
 
-if __name__ == '__main__':
-    print("🚀 Python Server รันที่ Port 5001...")
-    # 👇👇👇 แก้บรรทัดนี้ให้แล้วครับ ใส่ host='0.0.0.0' เพื่อเปิดรับการเชื่อมต่อให้หมด
-    app.run(host='0.0.0.0', port=5001, debug=True)
+if __name__ == "__main__":
+    print("🚀 Flask API running on port 5001")
+    app.run(host="0.0.0.0", port=5001, debug=True)
