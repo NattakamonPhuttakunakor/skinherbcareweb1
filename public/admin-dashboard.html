@@ -219,6 +219,19 @@
             // ตัวอย่าง: จำลองตัวเลข Dashboard (ลบออกได้ถ้าใช้ admin.js ดึงค่าจริง)
             // document.getElementById('total-products').innerText = '12';
             // document.getElementById('total-diseases').innerText = '8';
+
+            // เช็ค /status เพื่อเตือนถ้า env บนเซิร์ฟเวอร์ขาด
+            (async function checkServerStatus() {
+                try {
+                    const res = await fetch('/status');
+                    const j = await res.json().catch(() => null);
+                    if (j && Array.isArray(j.missing_envs) && j.missing_envs.length > 0) {
+                        alert('⚠️ Server configuration missing: ' + j.missing_envs.join(', ') + '\nกรุณาตั้งค่า environment variables บน hosting (Render)');
+                    }
+                } catch (err) {
+                    console.error('Status check failed', err);
+                }
+            })();
         });
     </script>
 </body>

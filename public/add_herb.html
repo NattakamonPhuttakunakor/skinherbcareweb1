@@ -236,8 +236,24 @@
                         modalCard.classList.add('scale-100');
                     }, 10);
                 } else {
-                    // ไม่สำเร็จ
-                    alert(`❌ เกิดข้อผิดพลาด: ${data.error || 'ไม่ทราบสาเหตุ'}`);
+                    // ไม่สำเร็จ — แสดงข้อความที่มา (message หรือ error)
+                    const errMsg = data.message || data.error || 'ไม่ทราบสาเหตุ';
+
+                    if (response.status === 401) {
+                        alert(`❌ ${errMsg} (กรุณาเข้าสู่ระบบใหม่)`);
+                        localStorage.removeItem('token');
+                        window.location.href = '/login.html';
+                        return;
+                    }
+
+                    if (response.status === 403) {
+                        alert(`❌ ${errMsg} (สิทธิ์ไม่เพียงพอ)`);
+                        finishBtn.disabled = false;
+                        finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+                        return;
+                    }
+
+                    alert(`❌ เกิดข้อผิดพลาด: ${errMsg}`);
                     finishBtn.disabled = false;
                     finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
                 }

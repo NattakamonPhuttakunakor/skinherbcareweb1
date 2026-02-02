@@ -37,10 +37,11 @@ if (process.env.NODE_ENV === 'production') {
     if (!MONGODB_URI) missing.push('MONGODB_URI');
     if (!process.env.PYTHON_API_URL) missing.push('PYTHON_API_URL');
     if (!process.env.PYTHON_API_KEY) missing.push('PYTHON_API_KEY');
+    if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
     if (missing.length > 0) {
         console.error('❌ Missing required environment variables for production:', missing.join(', '));
-        console.error('💡 Fix: Set these in your hosting provider (e.g. Render) before enabling production. Example: PYTHON_API_KEY=fp_yolo_2026_secret_x93k');
-        console.error('⚠️ Continuing startup in degraded mode: endpoints that require the missing envs will return 500 until fixed.');
+        console.error('💡 Fix: Set these in your hosting provider (e.g. Render) before enabling production. Example: JWT_SECRET=<your-secret>, PYTHON_API_KEY=fp_yolo_2026_secret_x93k');
+        console.error('⚠️ Continuing startup in degraded mode: endpoints that require the missing envs will return 500/401 until fixed.');
         // Do NOT exit the process here to allow the service to start (useful for inspecting logs on providers like Render).
         // The server will still return configuration errors for endpoints that require these env vars.
         global.MISSING_PROD_ENVS = missing; // expose for health checks
