@@ -1,13 +1,19 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    console.log("... กำลังเคาะประตูบ้าน MongoDB ...");
-    const conn = await mongoose.connect(process.env.MONGO_URI); // ✅ ใช้ MONGO_URI ให้ตรงกับ .env
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    const mongoURI = process.env.MONGO_URI;
+
+    if (!mongoURI) {
+      throw new Error("❌ MONGO_URI is not defined");
+    }
+
+    await mongoose.connect(mongoURI);
+
+    console.log("✅ MongoDB Connected");
   } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
-    process.exit(1); // ปิดโปรแกรมถ้าเชื่อมต่อไม่ได้
+    console.error("❌ MongoDB Connection Error:", error.message);
+    process.exit(1);
   }
 };
 
