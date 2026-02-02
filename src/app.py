@@ -19,11 +19,19 @@ if not API_KEY:
 # ===============================
 df = None
 try:
-    for f in ["data.xlsx", "data.csv", "dataset.xlsx"]:
+    # Try multiple file names (order matters — most specific first)
+    for f in ["data.xlsx", "data.csv", "dataset.xlsx", "data2.xlsx", "herbs_all1.csv"]:
         if os.path.exists(f):
-            df = pd.read_excel(f) if f.endswith(".xlsx") else pd.read_csv(f)
-            print("✅ Loaded:", f)
-            break
+            try:
+                if f.endswith(".xlsx"):
+                    df = pd.read_excel(f)
+                else:
+                    df = pd.read_csv(f)
+                print("✅ Loaded:", f)
+                break
+            except Exception as inner_e:
+                print(f"⚠️ Failed to parse {f}:", inner_e)
+                continue
 except Exception as e:
     print("⚠️ Load file error:", e)
 
