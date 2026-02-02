@@ -48,14 +48,21 @@ export const diagnoseSymptoms = async (req, res) => {
             signal: AbortSignal.timeout(30000) // 30 วิ
         });
 
-        // 4. Handle Python error
+        // 4. Handle Python error (ส่งต่อ status/text ตรงๆ เพื่อให้ frontend แสดงข้อความที่ชัดเจน)
         if (response.status === 401) {
-            throw new Error("Unauthorized: API Key ไม่ถูกต้อง");
+            return res.status(401).json({ success: false, message: 'Unauthorized: API Key ไม่ถูกต้อง' });
         }
 
         if (!response.ok) {
             const text = await response.text();
-            throw new Error(`Python API Error ${response.status}: ${text}`);
+            console.error('❌ Python returned error:', response.status, text);
+            // พยายาม parse เป็น JSON ถ้าเป็นได้
+            try {
+                const json = JSON.parse(text);
+                return res.status(response.status).json({ success: false, ...json });
+            } catch {
+                return res.status(response.status).json({ success: false, message: text || 'Python API error' });
+            }
         }
 
         const data = await response.json();

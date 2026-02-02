@@ -143,17 +143,28 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const token = localStorage.getItem('token');
 
-            const response = await fetch(
-                'https://skinherbcareweb1.onrender.com/api/analysis/analyze',
-                {
+            const response = await fetch('/api/analysis/diagnose', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': token ? `Bearer ${token}` : ''
                     },
                     body: JSON.stringify({ symptoms })
-                }
-            );
+                });
+
+            // อ่าน JSON (ถ้ามี) เพื่อแสดงข้อความจากเซิร์ฟเวอร์
+            let result;
+            try {
+                result = await response.json();
+            } catch {
+                result = { success: false, message: 'Response is not JSON' };
+            }
+
+            if (!response.ok) {
+                // แสดงข้อความจากเซิร์ฟเวอร์ตรงๆ
+                resultsContainer.innerHTML = `<p class="text-red-500">${result.message || 'เกิดข้อผิดพลาด'}</p>`;
+                return;
+            }
 
             let result;
             try {

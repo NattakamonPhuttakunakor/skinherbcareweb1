@@ -31,29 +31,40 @@ app.use(express.json());
 // -------------------------------------------------------------
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI ไม่ได้ตั้งค่าใน Environment Variables!');
-    process.exit(1);
+// If running in production we must have these envs set
+if (process.env.NODE_ENV === 'production') {
+    const missing = [];
+    if (!MONGODB_URI) missing.push('MONGODB_URI');
+    if (!process.env.PYTHON_API_URL) missing.push('PYTHON_API_URL');
+    if (!process.env.PYTHON_API_KEY) missing.push('PYTHON_API_KEY');
+    if (missing.length > 0) {
+        console.error('❌ Missing required environment variables for production:', missing.join(', '));
+        process.exit(1);
+    }
 }
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 10000, // ✅ เพิ่ม timeout
-    socketTimeoutMS: 45000,
-})
-.then(() => {
-    console.log('✅ MongoDB Connected Successfully');
-    console.log('📍 Database:', mongoose.connection.name);
-})
-.catch(err => {
-    console.error('❌ MongoDB Connection Error:', err.message);
-    console.error('💡 ตรวจสอบ:');
-    console.error('   1. MONGODB_URI ถูกต้องหรือไม่');
-    console.error('   2. MongoDB Atlas IP Whitelist');
-    console.error('   3. Username/Password ถูกต้อง');
-    process.exit(1);
-});
+if (!MONGODB_URI) {
+    console.warn('⚠️ MONGODB_URI ไม่ได้ตั้งค่า — รันในโหมด no-db (จะยังให้ endpoints ทำงานเพื่อทดสอบ)');
+} else {
+    mongoose.connect(MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 10000, // ✅ เพิ่ม timeout
+        socketTimeoutMS: 45000,
+    })
+    .then(() => {
+        console.log('✅ MongoDB Connected Successfully');
+        console.log('📍 Database:', mongoose.connection.name);
+    })
+    .catch(err => {
+        console.error('❌ MongoDB Connection Error:', err.message);
+        console.error('💡 ตรวจสอบ:');
+        console.error('   1. MONGODB_URI ถูกต้องหรือไม่');
+        console.error('   2. MongoDB Atlas IP Whitelist');
+        console.error('   3. Username/Password ถูกต้อง');
+        // ไม่ exit เพื่อให้ dev สามารถทดสอบฟังก์ชันอื่นได้
+    });
+}
 
 // เช็คสถานะการเชื่อมต่อ
 mongoose.connection.on('disconnected', () => {
@@ -80,13 +91,34 @@ const upload = multer({ storage: multer.memoryStorage() });
 // -------------------------------------------------------------
 // Status check
 // -------------------------------------------------------------
-app.get('/status', (req, res) => {
-    res.json({
+app.get('/status', async (req, res) => {
+    const pythonUrl = process.env.PYTHON_API_URL;
+
+    const status = {
         status: '✅ Server Running',
         mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
         port: PORT,
-        timestamp: new Date().toISOString()
-    });
+        timestamp: new Date().toISOString(),
+        python: { reachable: false }
+    };
+
+    if (pythonUrl) {
+        try {
+            const r = await fetch(pythonUrl.replace(/\/predict\/?$/, '/') );
+            if (r.ok) {
+                const j = await r.json().catch(() => null);
+                status.python = { reachable: true, info: j };
+            } else {
+                status.python = { reachable: false, status: r.status };
+            }
+        } catch (err) {
+            status.python = { reachable: false, error: err.message };
+        }
+    } else {
+        status.python = { reachable: false, error: 'PYTHON_API_URL not configured' };
+    }
+
+    res.json(status);
 });
 
 // -------------------------------------------------------------

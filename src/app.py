@@ -9,7 +9,10 @@ CORS(app)
 # ===============================
 # 🔐 API KEY (ยืดหยุ่น)
 # ===============================
-API_KEY = os.environ.get("API_KEY", "fp_yolo_2026_secret_x93k")
+# Prefer explicit PYTHON_API_KEY in production, fall back to API_KEY for backward compatibility
+API_KEY = os.environ.get("PYTHON_API_KEY") or os.environ.get("API_KEY") or None
+if not API_KEY:
+    print("⚠️ Warning: PYTHON_API_KEY / API_KEY not set — running without API key enforcement (not recommended for production)")
 
 # ===============================
 # 📂 Load Data (มี Dummy กันพัง)
@@ -55,18 +58,40 @@ except Exception as e:
 # ===============================
 @app.route("/", methods=["GET"])
 def health():
-    return "✅ Python AI Service Running"
+    return jsonify({
+        "success": True,
+        "message": "Python AI Service Running",
+        "ai_ready": vectorizer is not None,
+        "data_loaded": df is not None,
+        "api_key_configured": bool(API_KEY)
+    })
+
+@app.route("/status", methods=["GET"])
+def status():
+    # More detailed health info for orchestrators
+    return jsonify({
+        "success": True,
+        "ai_ready": vectorizer is not None,
+        "data_loaded": df is not None,
+        "api_key_configured": bool(API_KEY)
+    })
 
 # ===============================
 # 🔮 Predict
 # ===============================
 @app.route("/predict", methods=["POST"])
 def predict():
-    # 🔐 check key (ไม่ block เพื่อกัน 500)
+    # 🔐 check key
     print('🧾 Incoming headers:', dict(request.headers))
     client_key = request.headers.get("x-api-key")
-    if client_key != API_KEY:
-        print("⚠️ API KEY mismatch (allow)")
+    # If API_KEY is configured, enforce exact match. If not configured, allow but log.
+    if API_KEY:
+        if not client_key:
+            return jsonify({"success": False, "message": "API Key not found"}), 401
+        if client_key != API_KEY:
+            return jsonify({"success": False, "message": "API Key mismatch"}), 401
+    else:
+        print("⚠️ API key not configured on server — skipping enforcement")
 
     data = request.get_json(silent=True)
     if not data or "symptoms" not in data:
