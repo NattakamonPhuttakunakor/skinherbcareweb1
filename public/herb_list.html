@@ -73,10 +73,16 @@
             <h1 class="text-2xl font-bold text-[#111C44] flex items-center gap-3">
                 <i class="fa-solid fa-book-open"></i> รายชื่อสมุนไพร
             </h1>
-            <div class="flex gap-3">
+            <div class="flex gap-3 items-center">
                  <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
                     <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                     <span class="text-[#111C44] font-medium text-sm">Online</span>
+                </div>
+                <div class="ml-4">
+                    <input id="search-input" type="search" placeholder="ค้นหาสมุนไพร..." class="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-300">
+                </div>
+                <div>
+                    <a href="/index.html" class="text-sm text-gray-600 hover:text-green-700">← กลับไปหน้าหลัก</a>
                 </div>
             </div>
         </div>
@@ -121,22 +127,67 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('herb-table-body');
-            
-            // 1. ตรวจสอบว่ามีข้อมูลใหม่จากหน้า Add หรือไม่ (LocalStorage)
+            const searchInput = document.getElementById('search-input');
+
+            // หากมีข้อมูลจากหน้า Add ให้แสดงเป็นแถวแรก (preview)
             const storedData = localStorage.getItem('previewHerbData');
-            
             if (storedData) {
                 const data = JSON.parse(storedData);
                 const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                
-                // เพิ่มแถวข้อมูลใหม่
                 addTableRow(tableBody, data.name, today, true, 'new-item-row');
             }
 
-            // 2. โหลดข้อมูลเดิม (Static)
-            staticData.forEach((item, index) => {
-                addTableRow(tableBody, item.name, item.date, false, `static-row-${index}`);
-            });
+            // Debounce utility
+            function debounce(fn, delay = 300) {
+                let t;
+                return (...args) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn(...args), delay);
+                };
+            }
+
+            // Fetch herbs from backend (supports optional search query)
+            async function fetchHerbs(query = '') {
+                try {
+                    const res = await fetch(`/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+                    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+                    const data = await res.json();
+                    // Expecting an array of herb objects
+                    renderHerbRows(tableBody, data);
+                } catch (err) {
+                    console.warn('Failed to fetch herbs, falling back to static data.', err);
+                    // Fallback to static data
+                    tableBody.innerHTML = '';
+                    staticData.forEach((item, index) => addTableRow(tableBody, item.name, item.date, false, `static-row-${index}`));
+                }
+            }
+
+            function renderHerbRows(container, herbs) {
+                container.innerHTML = '';
+                if (!Array.isArray(herbs) || herbs.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td colspan="4" class="py-8 text-center text-gray-400">ไม่มีสมุนไพรที่ตรงกับผลการค้นหา</td>`;
+                    container.appendChild(tr);
+                    return;
+                }
+
+                herbs.forEach((h, idx) => {
+                    const name = h.name || h.commonName || h.thaiName || 'Unnamed';
+                    const updated = h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (h.date || '—');
+                    addTableRow(container, name, updated, false, `herb-${idx}`);
+                });
+            }
+
+            // Attach search handler
+            const doSearch = debounce((e) => {
+                const q = e.target.value.trim();
+                fetchHerbs(q);
+            }, 350);
+
+            searchInput.addEventListener('input', doSearch);
+
+            // Initial load
+            fetchHerbs();
         });
 
         function addTableRow(container, name, date, isNew, rowId) {

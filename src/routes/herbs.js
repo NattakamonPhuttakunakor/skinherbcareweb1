@@ -4,10 +4,17 @@ import { protect, admin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// 📋 Get all herbs
+// 📋 Get all herbs (support optional ?q=search)
 router.get('/', async (req, res) => {
   try {
-    const herbs = await Herb.find();
+    const q = req.query.q?.trim();
+    let herbs;
+    if (q) {
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      herbs = await Herb.find({ $or: [{ name: regex }, { scientificName: regex }] });
+    } else {
+      herbs = await Herb.find();
+    }
     res.json({ success: true, herbs });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

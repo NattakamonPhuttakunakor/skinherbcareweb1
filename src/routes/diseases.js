@@ -4,10 +4,17 @@ import { protect, admin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// 📋 Get all diseases
+// 📋 Get all diseases (support optional ?q=search)
 router.get('/', async (req, res) => {
   try {
-    const diseases = await Disease.find();
+    const q = req.query.q?.trim();
+    let diseases;
+    if (q) {
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      diseases = await Disease.find({ name: regex });
+    } else {
+      diseases = await Disease.find();
+    }
     res.json({ success: true, diseases });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

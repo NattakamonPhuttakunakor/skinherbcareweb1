@@ -119,9 +119,9 @@
                         // เก็บ Role ไว้ใช้งาน (admin หรือ user)
                         localStorage.setItem('userRole', data.role || 'user');
                         
-                        // Redirect ไปตามบทบาท (Role)
-                        // ** อย่าลืมสร้างไฟล์ admin-dashboard.html และ user-dashboard.html ด้วยนะครับ **
-                        window.location.href = data.role === 'admin' ? '/admin-dashboard.html' : '/user-dashboard.html';
+                        // Redirect ไปที่หน้าแรกของเว็บไซต์ (index) หลังจากล็อคอินเรียบร้อย
+                        // Previously redirected to role-specific dashboards — now send users to the public index
+                        window.location.href = '/index.html';
                     } else {
                         // --- Login ไม่สำเร็จ ---
                         throw new Error(data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
