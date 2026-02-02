@@ -1,4 +1,4 @@
-// ไฟล์: src/server.js
+// src/server.js
 
 import express from "express";
 import cors from "cors";
@@ -16,70 +16,83 @@ import herbRoutes from "./routes/herbs.js";
 import diseaseRoutes from "./routes/diseases.js";
 import adminRoutes from "./routes/admin.js";
 
-// ฟังก์ชันหลักที่จะ start ทั้งหมด
 async function startServer() {
   try {
-    // อ่านค่า .env
+    // โหลด .env
     dotenv.config();
 
-    // เชื่อมต่อ Database
+    // Connect DB
     await connectDB();
 
     const app = express();
 
-    // แก้ path สำหรับ ES module
+    // ES Module path fix
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
-    // --- 1. ตั้งค่า CORS (แก้ใหม่: เปิดรับทุกเว็บ) ---
+    // ===============================
+    // 🌐 CORS (แก้ถูกต้อง)
+    // ===============================
     app.use(
       cors({
-        origin: '*', // 🚩 อนุญาตทั้งหมด (แก้ปัญหา GitHub Pages เข้าไม่ได้)
-        credentials: true,
+        origin: "*", // ✅ เปิดทุกเว็บ
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "X-API-Key" // ✅ สำคัญมาก
+        ]
+        // ❌ ไม่ใช้ credentials เพราะ origin = "*"
       })
     );
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    // --- 2. Serve Static Files ---
-    // (สมมติว่า server.js อยู่ใน folder src ให้ถอยกลับไป 1 ขั้นเพื่อหา public)
+    // ===============================
+    // 📂 Static Files
+    // ===============================
     app.use(express.static(path.join(__dirname, "../public")));
     app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-    // --- 3. API Routes ---
+    // ===============================
+    // 🔌 API Routes
+    // ===============================
     app.use("/api/auth", authRoutes);
     app.use("/api/analysis", analysisRoutes);
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
 
-    // --- 4. หน้าแรก (Root Route) ---
+    // ===============================
+    // 🏠 Root Route
+    // ===============================
     app.get("/", (req, res) => {
-      // พยายามส่งไฟล์ index.html ถ้าหาไม่เจอให้ส่งข้อความบอก
       const indexHtmlPath = path.join(__dirname, "../public", "index.html");
       res.sendFile(indexHtmlPath, (err) => {
-          if (err) {
-              res.send("API Server is running... (Cannot find index.html in public folder)");
-          }
+        if (err) {
+          res.send("✅ API Server is running...");
+        }
       });
     });
 
-    // --- 5. Start Server ---
+    // ===============================
+    // 🚀 Start Server
+    // ===============================
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-      console.log("📊 Database connected successfully!");
-      console.log("🌐 CORS enabled for: ALL ORIGINS (*)");
-      console.log("✅ Ready to serve requests...");
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log("📊 Database connected successfully");
+      console.log("🌐 CORS: ALL ORIGINS (*)");
+      console.log("🔐 Headers allowed: X-API-Key");
+      console.log("✅ Ready!");
     });
+
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);
     process.exit(1);
   }
 }
 
-// Run the server
 startServer();
