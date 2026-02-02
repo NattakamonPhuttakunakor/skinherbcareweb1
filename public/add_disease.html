@@ -235,6 +235,22 @@
             finishBtn.disabled = true;
             finishBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
 
+            // ตรวจสอบสถานะเซิร์ฟเวอร์ (เช็คว่าฐานข้อมูลเชื่อมต่อหรือไม่)
+            try {
+                const s = await fetch(`${API_BASE_URL}/status`);
+                const sj = await s.json().catch(() => null);
+                if (sj && sj.mongodb !== 'Connected') {
+                    const proceed = confirm('⚠️ ระบบยังไม่เชื่อมต่อฐานข้อมูล — ต้องการบันทึกเป็นชั่วคราวหรือไม่? (OK = บันทึกชั่วคราว)');
+                    if (!proceed) {
+                        finishBtn.disabled = false;
+                        finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ยืนยันข้อมูล';
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('Status check failed', err);
+            }
+
             try {
                 // 2. ยิง API
                 const response = await fetch(`${API_BASE_URL}/api/diseases`, {
@@ -251,6 +267,14 @@
                 if (response.ok) {
                     // สำเร็จ: โชว์ Modal
                     document.getElementById('modal-herb-name').textContent = name;
+
+                    if (data.savedLocally) {
+                        const note = document.createElement('div');
+                        note.className = 'text-sm text-gray-700 mt-2';
+                        note.textContent = 'บันทึกข้อมูลเป็นแบบชั่วคราว (ระบบยังไม่ได้เชื่อมต่อฐานข้อมูล) — ข้อมูลจะถูกบันทึกถาวรเมื่อระบบเชื่อม DB ได้';
+                        document.getElementById('modal-card').appendChild(note);
+                    }
+
                     modal.classList.remove('hidden');
                     setTimeout(() => {
                         modal.classList.remove('opacity-0');

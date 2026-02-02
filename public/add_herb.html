@@ -205,6 +205,22 @@
             finishBtn.disabled = true;
             finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
 
+            // ตรวจสอบสถานะเซิร์ฟเวอร์ (เช็คว่าฐานข้อมูลเชื่อมต่อหรือไม่)
+            try {
+                const s = await fetch(`${API_BASE_URL}/status`);
+                const sj = await s.json().catch(() => null);
+                if (sj && sj.mongodb !== 'Connected') {
+                    const proceed = confirm('⚠️ ระบบยังไม่เชื่อมต่อฐานข้อมูล — ต้องการบันทึกเป็นชั่วคราวหรือไม่? (OK = บันทึกชั่วคราว)');
+                    if (!proceed) {
+                        finishBtn.disabled = false;
+                        finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('Status check failed', err);
+            }
+
             try {
                 // ส่งข้อมูลไป API
                 const response = await fetch(`${API_BASE_URL}/api/herbs`, {
