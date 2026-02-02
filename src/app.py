@@ -63,6 +63,7 @@ def health():
 @app.route("/predict", methods=["POST"])
 def predict():
     # 🔐 check key (ไม่ block เพื่อกัน 500)
+    print('🧾 Incoming headers:', dict(request.headers))
     client_key = request.headers.get("x-api-key")
     if client_key != API_KEY:
         print("⚠️ API KEY mismatch (allow)")

@@ -12,6 +12,14 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         }
 
+        // เพิ่มการตรวจสอบความยาวขั้นต่ำเพื่อป้องกัน 422 จาก AI Server
+        if (symptoms.trim().length < 3) {
+            return res.status(422).json({
+                success: false,
+                message: "กรุณาระบุรายละเอียดเพิ่มเติม (อย่างน้อย 3 ตัวอักษร)"
+            });
+        }
+
         // 2. ENV (ต้องมีครบ ห้าม fallback)
         const pythonApiUrl = process.env.PYTHON_API_URL;
         const apiKey = process.env.PYTHON_API_KEY?.trim();
