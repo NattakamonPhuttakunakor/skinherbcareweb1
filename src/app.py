@@ -1,64 +1,62 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from pythainlp.tokenize import word_tokenize
 from pythainlp.corpus import thai_stopwords
-import sys
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# ✅ CORS (รองรับ preflight)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ===============================
 # 🔐 API KEY
 # ===============================
 API_KEY = os.getenv("API_KEY")
 
+print("🔐 SERVER API_KEY:", API_KEY[:4] + "***" if API_KEY else "❌ NOT SET")
+
 # ===============================
-# 🔧 SYNONYM / STOPWORDS
+# 🔧 NLP CONFIG
 # ===============================
 SYNONYM_MAP = {
     'ปวด': ['เจ็บ', 'ทรมาน', 'ระบม', 'ปวดเมื่อย', 'ตึง'],
-    'แสบ': ['ปวดแสบปวดร้อน', 'ร้อน', 'ไหม้', 'ระคายเคือง', 'แสบๆ'],
-    'คัน': ['คันๆ', 'ยุบยิบ', 'ยิบๆ', 'อยากเกา', 'เกา'],
-    'ตุ่ม': ['เม็ด', 'ผื่น', 'สิว', 'แผล', 'รอยแดง', 'ปื้น', 'จุดแดง'],
-    'ปาก': ['ริมฝีปาก', 'มุมปาก', 'รอบปาก', 'หน้า'],
-    'ไข้': ['ตัวร้อน', 'รุมๆ', 'ครั่นเนื้อครั่นตัว', 'มีไข้', 'เป็นไข้'],
-    'ผิว': ['ผิวหนัง', 'ใบหน้า', 'หน้า'],
+    'แสบ': ['ปวดแสบปวดร้อน', 'ร้อน', 'ไหม้', 'ระคายเคือง'],
+    'คัน': ['ยุบยิบ', 'อยากเกา'],
+    'ตุ่ม': ['เม็ด', 'ผื่น', 'สิว', 'แผล', 'รอยแดง'],
+    'ผิว': ['ผิวหนัง', 'หน้า']
 }
 
 CUSTOM_STOPWORDS = set(thai_stopwords()) | {
-    "เป็น", "มี", "รู้สึก", "อาการ", "หน่อย", "มาก", "ๆ", "ค่ะ", "ครับ"
+    "เป็น", "มี", "อาการ", "มาก", "ค่ะ", "ครับ"
 }
 
 def expand_synonyms(text):
     text = str(text).lower()
-    for main, syns in SYNONYM_MAP.items():
-        for s in syns:
-            if s in text:
-                text += f" {main}"
+    for k, syns in SYNONYM_MAP.items():
+        if any(s in text for s in syns):
+            text += f" {k}"
     return text
 
 def thai_tokenizer(text):
-    text = expand_synonyms(text)
-    words = word_tokenize(text, engine="newmm")
+    words = word_tokenize(expand_synonyms(text), engine="newmm")
     return [w for w in words if w not in CUSTOM_STOPWORDS and len(w) > 1]
 
 # ===============================
-# 📂 LOAD DATA
+# 📂 DATA
 # ===============================
 df = pd.DataFrame({
-    'รายชื่อโรค': ['สิวอักเสบ', 'ผื่นภูมิแพ้'],
-    'อาการหลัก': ['ตุ่มแดง เจ็บ', 'คัน ผื่นแดง'],
-    'ตำแหน่งที่พบบ่อย': ['หน้า', 'แขน ขา'],
-    'วิธีรักษาเบื้อต้น': ['ล้างหน้าให้สะอาด', 'ทายาแก้แพ้']
+    'disease': ['สิวอักเสบ', 'ผื่นภูมิแพ้'],
+    'symptoms': ['ตุ่มแดง เจ็บ', 'คัน ผื่นแดง'],
+    'location': ['หน้า', 'แขน ขา'],
+    'treatment': ['ล้างหน้าให้สะอาด', 'ทายาแก้แพ้']
 })
 
 df['knowledge'] = df.apply(
-    lambda r: f"{r['รายชื่อโรค']} {r['อาการหลัก']} {r['ตำแหน่งที่พบบ่อย']}",
+    lambda r: f"{r['disease']} {r['symptoms']} {r['location']}",
     axis=1
 )
 
@@ -68,12 +66,13 @@ tfidf_matrix = vectorizer.fit_transform(df['knowledge'])
 # ===============================
 # 🔌 API
 # ===============================
-@app.route('/diagnose', methods=['POST'])
+@app.route("/diagnose", methods=["POST", "OPTIONS"])
 def diagnose():
-    # 🔐 CHECK API KEY
+    if request.method == "OPTIONS":
+        return "", 200
+
     client_key = request.headers.get("X-API-Key")
 
-    print("🔑 ENV API KEY:", API_KEY[:4] + "***" if API_KEY else None)
     print("📥 CLIENT KEY:", client_key[:4] + "***" if client_key else None)
 
     if not API_KEY:
@@ -82,9 +81,8 @@ def diagnose():
     if not client_key or client_key.strip() != API_KEY.strip():
         return jsonify({"message": "Invalid API Key"}), 401
 
-    # 📩 รับ JSON
-    data = request.get_json(silent=True)
-    symptoms = data.get("symptoms", "").strip() if data else ""
+    data = request.get_json(silent=True) or {}
+    symptoms = data.get("symptoms", "").strip()
 
     if not symptoms:
         return jsonify({"message": "กรุณาระบุอาการ"}), 400
@@ -104,11 +102,14 @@ def diagnose():
     row = df.iloc[idx]
 
     return jsonify({
-        "prediction": row['รายชื่อโรค'],
+        "prediction": row["disease"],
         "confidence": round(score * 100, 2),
-        "recommendation": row['วิธีรักษาเบื้อต้น']
+        "recommendation": row["treatment"]
     })
 
+# ===============================
+# 🚀 START SERVER
+# ===============================
 if __name__ == "__main__":
     print("🚀 Flask API running on port 5001")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001)
