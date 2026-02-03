@@ -141,8 +141,6 @@
                 alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
                 window.location.href = '/login.html';
             }
-            */
-
             // admin search handler
             const searchBtn = document.getElementById('admin-herb-search-btn');
             if (searchBtn) {
@@ -180,14 +178,12 @@
 
         // 3. ฟังก์ชันบันทึกข้อมูลไปยัง Server (Save Logic)
         async function saveDataToServer() {
-            /*
             // ⚠️ ปิดการเช็ค Token ชั่วคราว
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
                 return;
             }
-            */
 
             // ดึงค่าจาก Form
             const name = document.getElementById('input-name').value.trim();
