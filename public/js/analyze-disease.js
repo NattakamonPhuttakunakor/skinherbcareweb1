@@ -39,22 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('image', file); // 'image' คือชื่อ field ที่ backend คาดหวัง
 
         try {
-            // 3. เรียกใช้ Backend API
-            const response = await fetch('/api/gemini/analyze-disease-image', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
-            }
-
-            const data = await response.json();
-            const payload = data.data || data;
-            const diseaseName = payload.disease || payload.diagnosis || payload.condition || 'ไม่ทราบ';
-            const advice = payload.advice || payload.recommendation || '';
-            const herbs = Array.isArray(payload.herbs) ? payload.herbs : [];
+            // Demo-only (fixed): no backend yet
+            const diseaseName = 'โรคด่างขาว';
+            const advice = 'ควรหลีกเลี่ยงแสงแดดจัด ใช้ครีมกันแดดเป็นประจำ และพบแพทย์ผิวหนังเพื่อประเมินเพิ่มเติม';
+            const herbs = ['เปลือกมังคุด', 'ว่านหางจระเข้'];
             const herbHtml = herbs.length
                 ? herbs.map((h) => {
                     if (typeof h === 'string') {

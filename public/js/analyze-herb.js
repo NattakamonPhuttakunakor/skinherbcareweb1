@@ -33,27 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('image', file); // 'image' คือชื่อ field ที่ backend คาดหวัง
 
         try {
-            // 3. เรียกใช้ Backend API
-            const response = await fetch('/api/gemini/analyze-herb-image', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
-            }
-
-            const data = await response.json();
-            const payload = data.data || data;
-            const herbName = payload.name || payload.herbName || 'ไม่ทราบ';
-            const scientificName = payload.scientificName || payload.scienceName || '';
-            const benefits = payload.benefits || payload.description || '';
-            const usage = payload.usage || '';
-            const precautions = payload.precautions || '';
-            const diseases = Array.isArray(payload.diseases) ? payload.diseases : (payload.disease ? [payload.disease] : []);
-            const confidenceRaw = typeof payload.confidence === 'number' ? payload.confidence : null;
-            const confidencePct = confidenceRaw === null ? null : (confidenceRaw > 1 ? Math.round(confidenceRaw) : Math.round(confidenceRaw * 100));
+            // Demo-only (fixed): no backend yet
+            const herbName = 'เปลือกมังคุด';
+            const scientificName = 'Garcinia mangostana';
+            const benefits = 'อุดมไปด้วยสารแซนโทน ช่วยสมานแผลและลดการอักเสบของผิวหนังได้ดี';
+            const usage = 'บดผงเปลือกมังคุดผสมน้ำสะอาดเล็กน้อย ทาบริเวณที่เป็นวันละ 1-2 ครั้ง';
+            const precautions = 'หลีกเลี่ยงบริเวณแผลเปิดลึก และหยุดใช้หากเกิดการระคายเคือง';
+            const diseases = ['โรคด่างขาว'];
+            const confidencePct = 78;
 
             // 4. แสดงผลลัพธ์ที่ได้จาก AI
             const resultHtml = `
