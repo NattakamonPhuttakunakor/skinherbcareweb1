@@ -237,12 +237,12 @@
                 form.append('name', name);
                 form.append('engName', scientificName);
                 form.append('description', description);
-                form.append('properties', JSON.stringify(properties));
+                form.append('properties', JSON.stringify(data));
                 form.append('usage', usage);
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
 
-                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
+                const response = await fetch(`${API_BASE_URL}/api/herb`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`

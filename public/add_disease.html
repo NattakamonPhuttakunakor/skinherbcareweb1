@@ -257,13 +257,13 @@
 
             try {
                 // 2. ยิง API
-                const response = await fetch(`${API_BASE_URL}/api/diseases`, {
+                const response = await fetch(`${API_BASE_URL}/api/disease`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(data)
                 });
 
                 const data = await response.json();
