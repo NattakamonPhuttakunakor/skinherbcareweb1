@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname || '';
+    if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
+        return;
+    }
     const token = localStorage.getItem('token');
     const userRaw = localStorage.getItem('user');
     const user = userRaw ? JSON.parse(userRaw) : null;
@@ -159,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             fb.textContent = el.textContent.trim() || '👤';
             el.appendChild(fb);
         }
-        return { img, fb };
+        const svg = el.querySelector('svg');
+        return { img, fb, svg };
     };
 
     const applyImage = (src) => {
@@ -171,10 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
             imgFab.style.display = 'block';
             fallbackFab.style.display = 'none';
             profileIconEls.forEach((el) => {
-                const { img, fb } = ensureProfileIcon(el);
+                const { img, fb, svg } = ensureProfileIcon(el);
                 img.src = src;
                 img.style.display = 'block';
                 fb.style.display = 'none';
+                if (svg) svg.style.display = 'none';
             });
         } else {
             imgDrawer.style.display = 'none';
@@ -182,9 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
             imgFab.style.display = 'none';
             fallbackFab.style.display = 'inline';
             profileIconEls.forEach((el) => {
-                const { img, fb } = ensureProfileIcon(el);
+                const { img, fb, svg } = ensureProfileIcon(el);
                 img.style.display = 'none';
                 fb.style.display = 'flex';
+                if (svg) svg.style.display = '';
             });
         }
     };

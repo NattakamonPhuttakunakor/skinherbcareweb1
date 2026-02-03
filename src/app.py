@@ -90,12 +90,8 @@ def clean_and_prepare_data(row):
     main = str(row.get('อาการหลัก', ''))
     sub = str(row.get('อาการรอง', '') or '')
     loc = str(row.get('ตำแหน่งที่พบบ่อย', '') or '')
-    treatment = str(row.get('วิธีรักษาเบื้อต้น', '') or '')
-    
-    if 'ไข้' in treatment and 'ไข้' not in sub:
-        sub += " มีไข้"
-    
-    knowledge_text = f"{row['รายชื่อโรค']} {main} {main} {sub} {loc} {loc}"
+    disease_key = 'รายชื่อโรค'
+    knowledge_text = f"{row[disease_key]} {main} {main} {sub} {loc} {loc}"
     return knowledge_text
 
 
@@ -236,3 +232,4 @@ def predict():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     app.run(host="0.0.0.0", port=port)
+

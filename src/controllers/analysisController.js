@@ -49,9 +49,10 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         } catch (err) {
             console.warn('⚠️ Unable to reach Python service:', err.message);
-            // Fall back to server-side keyword heuristic (non-demo; server returns real response)
-            const fallback = serverSideHeuristic(symptoms);
-            return res.json({ success: true, found: true, data: [fallback], message: 'Fallback analysis (server-side heuristic)' });
+            return res.status(502).json({
+                success: false,
+                message: 'ไม่สามารถเชื่อมต่อบริการวิเคราะห์ (Python) ได้ในขณะนี้'
+            });
         }
 
         // 4. Handle Python error or non-OK responses
@@ -68,8 +69,10 @@ export const diagnoseSymptoms = async (req, res) => {
                     });
                 } catch (err) {
                     console.warn('⚠️ Retry without API key failed:', err.message);
-                    const fallback = serverSideHeuristic(symptoms);
-                    return res.json({ success: true, found: true, data: [fallback], message: 'Fallback analysis (server-side heuristic)' });
+                    return res.status(502).json({
+                        success: false,
+                        message: 'ไม่สามารถเชื่อมต่อบริการวิเคราะห์ (Python) ได้ในขณะนี้'
+                    });
                 }
             } else {
                 console.error('❌ Python requires API Key but server has none.');
@@ -81,8 +84,10 @@ export const diagnoseSymptoms = async (req, res) => {
             const text = await response.text().catch(() => '');
             console.error('❌ Python returned error:', response.status, text);
             // Try fallback server-side heuristic
-            const fallback = serverSideHeuristic(symptoms);
-            return res.json({ success: true, found: true, data: [fallback], message: 'Fallback analysis (server-side heuristic due to Python error)' });
+            return res.status(500).json({
+                success: false,
+                message: 'บริการวิเคราะห์เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง'
+            });
         }
 
         const data = await response.json().catch(() => null);
@@ -104,28 +109,10 @@ export const diagnoseSymptoms = async (req, res) => {
             return res.json({ success: true, found: data.found ?? false, data: data.data ?? [], message: data.message ?? 'วิเคราะห์สำเร็จ' });
         }
 
-        // If Python returned nothing useful, fallback
-        const fallback = serverSideHeuristic(symptoms);
-        return res.json({ success: true, found: true, data: [fallback], message: 'Fallback analysis (server-side heuristic)' });
-
-        // --------------------------
-        // server-side simple heuristic
-        function serverSideHeuristic(text) {
-            const t = (text || '').toLowerCase();
-            if (t.includes('สิว') || t.includes('acne')) {
-                return { disease: 'สิวอักเสบ (Acne)', confidence: 70, recommendation: 'แนะนำสมุนไพร: ว่านหางจระเข้, แตงกวา' };
-            }
-            if (t.includes('แห้ง') || t.includes('ผิวแห้ง') || t.includes('dry')) {
-                return { disease: 'ผิวแห้ง (Dry skin)', confidence: 65, recommendation: 'แนะนำสมุนไพร: มะพร้าว, ว่านหางจระเข้' };
-            }
-            if (t.includes('คัน') || t.includes('ผื่น') || t.includes('itch')) {
-                return { disease: 'ผื่นคัน / ผิวอักเสบ', confidence: 62, recommendation: 'แนะนำสมุนไพร: ใบบัวบก, ดอกทองพันชั่ง' };
-            }
-            if (t.includes('แดง') || t.includes('อักเสบ')) {
-                return { disease: 'การอักเสบทั่วไป', confidence: 60, recommendation: 'แนะนำสมุนไพร: ว่านหางจระเข้' };
-            }
-            return { disease: 'ไม่แน่ใจ (ต้องการข้อมูลเพิ่มเติม)', confidence: 50, recommendation: 'ขอข้อมูลเพิ่มเพื่อการวินิจฉัยที่แม่นยำขึ้น' };
-        }
+        return res.status(500).json({
+            success: false,
+            message: 'บริการวิเคราะห์ไม่สามารถประมวลผลได้'
+        });
 
     } catch (error) {
         console.error("❌ Node Error:", error.message);
