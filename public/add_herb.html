@@ -131,15 +131,17 @@
         const fileListContainer = document.getElementById('file-list-container');
         
         // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
-        let uploadedImageFile = null; // เก็บออบเจ็กต์ File
+        let uploadedImageFile = null; 
 
-        // 1. ตรวจสอบการ Login (Auth Check)
+        // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
         window.addEventListener('load', () => {
+            /* // ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
                 window.location.href = '/login.html';
             }
+            */
 
             // admin search handler
             const searchBtn = document.getElementById('admin-herb-search-btn');
@@ -161,7 +163,6 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // แสดงชื่อไฟล์และตัวอย่างเล็กๆ
                 const fileItem = document.createElement('div');
                 fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
                 fileItem.innerHTML = `
@@ -179,11 +180,14 @@
 
         // 3. ฟังก์ชันบันทึกข้อมูลไปยัง Server (Save Logic)
         async function saveDataToServer() {
+            /*
+            // ⚠️ ปิดการเช็ค Token ชั่วคราว
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
                 return;
             }
+            */
 
             // ดึงค่าจาก Form
             const name = document.getElementById('input-name').value.trim();
@@ -215,55 +219,29 @@
             finishBtn.disabled = true;
             finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
 
-            // ตรวจสอบสถานะเซิร์ฟเวอร์ (เช็คว่าฐานข้อมูลเชื่อมต่อหรือไม่)
-            try {
-                const s = await fetch(`${API_BASE_URL}/status`);
-                const sj = await s.json().catch(() => null);
-                if (sj && sj.mongodb !== 'Connected') {
-                    const proceed = confirm('⚠️ ระบบยังไม่เชื่อมต่อฐานข้อมูล — ต้องการบันทึกเป็นชั่วคราวหรือไม่? (OK = บันทึกชั่วคราว)');
-                    if (!proceed) {
-                        finishBtn.disabled = false;
-                        finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn('Status check failed', err);
-            }
-
             try {
                 // ส่งข้อมูลไป API เป็น FormData (ไฟล์ส่งเป็น binary)
                 const form = new FormData();
                 form.append('name', name);
                 form.append('engName', scientificName);
                 form.append('description', description);
-                form.append('properties', JSON.stringify(data));
+                form.append('properties', JSON.stringify(properties)); // ✅ แก้ตรงนี้: ใช้ properties แทน data
                 form.append('usage', usage);
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
 
-                const response = await fetch(`${API_BASE_URL}/api/herb`, {
+                const response = await fetch(`${API_BASE_URL}/api/herb`, { // ✅ URL ไม่มี s
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
+                    // headers: { 'Authorization': `Bearer ${token}` }, // ⚠️ ปิดไว้ก่อนเพราะยังไม่มี Token
                     body: form
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
                 if (response.ok) {
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
-
-                    // ถ้าบันทึกชั่วคราว (DB ไม่เชื่อมต่อ) ให้เตือนผู้ใช้
-                    if (data.savedLocally) {
-                        const note = document.createElement('div');
-                        note.className = 'text-sm text-gray-700 mt-2';
-                        note.textContent = 'บันทึกข้อมูลเป็นแบบชั่วคราว (ระบบยังไม่ได้เชื่อมต่อฐานข้อมูล) — ข้อมูลจะถูกบันทึกถาวรเมื่อระบบเชื่อม DB ได้';
-                        document.getElementById('modal-card').appendChild(note);
-                    }
-
+                    
                     modal.classList.remove('hidden');
                     setTimeout(() => {
                         modal.classList.remove('opacity-0');
@@ -271,23 +249,8 @@
                         modalCard.classList.add('scale-100');
                     }, 10);
                 } else {
-                    // ไม่สำเร็จ — แสดงข้อความที่มา (message หรือ error)
-                    const errMsg = data.message || data.error || 'ไม่ทราบสาเหตุ';
-
-                    if (response.status === 401) {
-                        alert(`❌ ${errMsg} (กรุณาเข้าสู่ระบบใหม่)`);
-                        localStorage.removeItem('token');
-                        window.location.href = '/login.html';
-                        return;
-                    }
-
-                    if (response.status === 403) {
-                        alert(`❌ ${errMsg} (สิทธิ์ไม่เพียงพอ)`);
-                        finishBtn.disabled = false;
-                        finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
-                        return;
-                    }
-
+                    // ไม่สำเร็จ
+                    const errMsg = result.message || result.error || 'ไม่ทราบสาเหตุ';
                     alert(`❌ เกิดข้อผิดพลาด: ${errMsg}`);
                     finishBtn.disabled = false;
                     finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
