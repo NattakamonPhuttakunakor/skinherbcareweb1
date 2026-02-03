@@ -257,22 +257,31 @@
 
             try {
                 // 2. ยิง API
+                const payload = {
+                    name,
+                    engName,
+                    description,
+                    symptoms,
+                    medicines,
+                    usage
+                };
+
                 const response = await fetch(`${API_BASE_URL}/api/disease`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
                 if (response.ok) {
                     // สำเร็จ: โชว์ Modal
                     document.getElementById('modal-herb-name').textContent = name;
 
-                    if (data.savedLocally) {
+                    if (result.savedLocally) {
                         const note = document.createElement('div');
                         note.className = 'text-sm text-gray-700 mt-2';
                         note.textContent = 'บันทึกข้อมูลเป็นแบบชั่วคราว (ระบบยังไม่ได้เชื่อมต่อฐานข้อมูล) — ข้อมูลจะถูกบันทึกถาวรเมื่อระบบเชื่อม DB ได้';
@@ -287,7 +296,7 @@
                     }, 10);
                 } else {
                     // ไม่สำเร็จ — แสดงข้อความที่มา (message หรือ error)
-                    const errMsg = data.message || data.error || 'บันทึกข้อมูลไม่สำเร็จ';
+                    const errMsg = result.message || result.error || 'บันทึกข้อมูลไม่สำเร็จ';
 
                     // ถ้าเป็นปัญหา authorization ให้พาไปหน้า login
                     if (response.status === 401) {
