@@ -130,7 +130,8 @@
         const modalCard = document.getElementById('modal-card');
         const fileListContainer = document.getElementById('file-list-container');
         
-        let uploadedImageBase64 = null; // เก็บรูปภาพเป็น Base64
+        // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
+        let uploadedImageFile = null; // เก็บออบเจ็กต์ File
 
         // 1. ตรวจสอบการ Login (Auth Check)
         window.addEventListener('load', () => {
@@ -156,11 +157,10 @@
             fileListContainer.innerHTML = '';
             
             const file = files[0]; // เอาแค่ไฟล์แรก
-            const reader = new FileReader();
+            uploadedImageFile = file; // เก็บไว้ส่งเป็น FormData
 
+            const reader = new FileReader();
             reader.onload = function(e) {
-                uploadedImageBase64 = e.target.result; // เก็บ Base64 ไว้ส่ง API
-                
                 // แสดงชื่อไฟล์และตัวอย่างเล็กๆ
                 const fileItem = document.createElement('div');
                 fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
@@ -232,22 +232,22 @@
             }
 
             try {
-                // ส่งข้อมูลไป API
+                // ส่งข้อมูลไป API เป็น FormData (ไฟล์ส่งเป็น binary)
+                const form = new FormData();
+                form.append('name', name);
+                form.append('engName', scientificName);
+                form.append('description', description);
+                form.append('properties', JSON.stringify(properties));
+                form.append('usage', usage);
+                form.append('diseases', JSON.stringify(diseases));
+                if (uploadedImageFile) form.append('image', uploadedImageFile);
+
                 const response = await fetch(`${API_BASE_URL}/api/herbs`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        name,
-                        scientificName,
-                        description,
-                        properties,
-                        usage,
-                        diseases, // ส่งโรคที่เลือกไปด้วย
-                        image: uploadedImageBase64 // ส่งรูปภาพไปด้วย
-                    })
+                    body: form
                 });
 
                 const data = await response.json();

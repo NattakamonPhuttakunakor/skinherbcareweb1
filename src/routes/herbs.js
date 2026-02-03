@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Herb from '../models/Herb.js';
 import { protect, admin } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -23,9 +24,18 @@ router.get('/', async (req, res) => {
 });
 
 // ➕ Add herb (Admin only)
-router.post('/', protect, admin, async (req, res) => {
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const { name, scientificName, description, properties, usage } = req.body;
+    // parse fields (properties may be JSON string)
+    const name = req.body.name;
+    const scientificName = req.body.engName || req.body.scientificName || '';
+    const description = req.body.description;
+    let properties = [];
+    if (req.body.properties) {
+      try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
+    }
+    const usage = req.body.usage || '';
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '/uploads/default-herb.png');
 
     // Validate required fields
     if (!name || !description) {
@@ -45,6 +55,7 @@ router.post('/', protect, admin, async (req, res) => {
         description,
         properties: properties || [],
         usage: usage || '',
+        image: imagePath,
         addedBy: req.user ? req.user._id : null,
         savedLocally: true
       };
@@ -57,6 +68,7 @@ router.post('/', protect, admin, async (req, res) => {
       description,
       properties: properties || [],
       usage: usage || '',
+      image: imagePath,
       addedBy: req.user._id
     });
 

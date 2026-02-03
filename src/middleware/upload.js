@@ -25,7 +25,7 @@ function checkFileType(file, cb) {
 // Init upload
 const upload = multer({
   storage: storage,
-  limits: { fileSize: Number(process.env.MAX_FILE_SIZE) || 5000000 }, // Use from .env or default to 5MB
+  limits: { fileSize: Number(process.env.MAX_FILE_SIZE) || 10000000 }, // Use from .env or default to 10MB
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },

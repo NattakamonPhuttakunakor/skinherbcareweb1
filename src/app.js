@@ -47,15 +47,16 @@ async function startServer() {
       })
     );
 
-    // Allow larger payloads (images are sent as base64 in JSON)
-    app.use(express.json({ limit: '10mb' }));
-    app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    // Allow larger payloads (images may be uploaded via multipart or sent as JSON in rare cases)
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
     // ===============================
     // 📂 Static Files
     // ===============================
     app.use(express.static(path.join(__dirname, "../public")));
-    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+    // Serve uploads saved under public/uploads
+    app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
     // ===============================
     // 🔌 API Routes
@@ -65,6 +66,15 @@ async function startServer() {
     app.use("/api/herbs", herbRoutes);
     app.use("/api/diseases", diseaseRoutes);
     app.use("/api/admin", adminRoutes);
+
+    // Payload-too-large handler (catch body-parser / multer size errors)
+    app.use((err, req, res, next) => {
+      if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+        console.warn('⚠️ Payload too large:', err.message);
+        return res.status(413).json({ success: false, error: 'ไฟล์หรือข้อมูลขนาดใหญ่เกินไป (limit exceeded). โปรดลองอัปโหลดไฟล์ขนาดเล็กหรือใช้การอัปโหลดแบบไฟล์ (FormData).' });
+      }
+      next(err);
+    });
 
     // ===============================
     // 🏠 Root Route

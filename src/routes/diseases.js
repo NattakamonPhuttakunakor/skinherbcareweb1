@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Disease from '../models/Disease.js';
 import { protect, admin } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -22,14 +23,31 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ➕ Add disease (Admin only)
-router.post('/', protect, admin, async (req, res) => {
+// ➕ Add disease (Admin only) — support multipart/form-data with optional image
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    console.log('📝 POST /api/diseases — incoming request');
+    console.log('📝 POST /api/diseases — incoming request (multipart)');
     console.log('   DB readyState:', mongoose.connection.readyState);
     console.log('   user:', req.user && (req.user._id || req.user));
 
-    const { name, description, symptoms } = req.body;
+    const name = req.body.name;
+    const description = req.body.description;
+
+    // parse symptoms (may be JSON string or comma/newline separated)
+    let symptoms = [];
+    if (req.body.symptoms) {
+      try { symptoms = JSON.parse(req.body.symptoms); if (!Array.isArray(symptoms)) throw new Error('not array'); } catch (e) { symptoms = String(req.body.symptoms).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+
+    }
+
+    // other optional fields
+    const engName = req.body.engName || '';
+    let medicines = [];
+    if (req.body.medicines) {
+      try { medicines = JSON.parse(req.body.medicines); if (!Array.isArray(medicines)) throw new Error('not array'); } catch (e) { medicines = String(req.body.medicines).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+    }
+    const usage = req.body.usage || '';
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '');
 
     // Validate required fields
     if (!name || !description) {
@@ -45,8 +63,12 @@ router.post('/', protect, admin, async (req, res) => {
       const tempDisease = {
         _id: `local-${Date.now()}`,
         name,
+        engName,
         description,
         symptoms: symptoms || [],
+        medicines,
+        usage,
+        image: imagePath,
         addedBy: req.user ? req.user._id : null,
         savedLocally: true
       };
@@ -55,8 +77,12 @@ router.post('/', protect, admin, async (req, res) => {
 
     const newDisease = new Disease({
       name,
+      engName,
       description,
-      symptoms: symptoms || []
+      symptoms: symptoms || [],
+      medicines,
+      usage,
+      image: imagePath
     });
 
     const savedDisease = await newDisease.save();

@@ -139,7 +139,8 @@
         // Config Server URL
         const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
         
-        let uploadedImageBase64 = null; // ตัวแปรเก็บรูปภาพแบบ Base64
+        // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
+        let uploadedImageFile = null; // เก็บออบเจ็กต์ File
 
         // ตรวจสอบ Token เมื่อโหลดหน้า
         window.addEventListener('load', () => {
@@ -158,17 +159,12 @@
             }
         });
 
-        // จัดการไฟล์รูปภาพ
+        // จัดการไฟล์รูปภาพ (เก็บ File ไว้เพื่อส่งเป็น FormData)
         function handleFiles(files) {
             if (!files.length) return;
             fileListContainer.innerHTML = '';
-            
-            // Convert to Base64
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImageBase64 = e.target.result;
-            };
-            reader.readAsDataURL(files[0]);
+
+            uploadedImageFile = files[0];
 
             const fileItem = document.createElement('div');
             fileItem.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-300';
@@ -228,16 +224,15 @@
                 medicines.push(cb.value);
             });
 
-            // สร้าง Payload ข้อมูลที่จะส่ง
-            const payload = {
-                name,
-                engName,       // (เพิ่มใหม่)
-                description,
-                symptoms,
-                medicines,     // (เพิ่มใหม่)
-                usage,         // (เพิ่มใหม่)
-                image: uploadedImageBase64 // ส่งรูปไปด้วย (ถ้า Backend รับได้)
-            };
+            // สร้าง FormData เพื่อส่งเป็น multipart/form-data (ไฟล์จะส่งเป็น binary ไม่ใช่ Base64)
+            const form = new FormData();
+            form.append('name', name);
+            form.append('engName', engName);
+            form.append('description', description);
+            form.append('symptoms', JSON.stringify(symptoms));
+            form.append('medicines', JSON.stringify(medicines));
+            form.append('usage', usage);
+            if (uploadedImageFile) form.append('image', uploadedImageFile);
 
             // UI Loading
             const finishBtn = document.getElementById('finish-btn');
