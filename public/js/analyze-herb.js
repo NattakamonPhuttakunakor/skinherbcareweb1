@@ -48,16 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const payload = data.data || data;
             const herbName = payload.name || payload.herbName || 'ไม่ทราบ';
+            const scientificName = payload.scientificName || payload.scienceName || '';
             const benefits = payload.benefits || payload.description || '';
             const usage = payload.usage || '';
             const precautions = payload.precautions || '';
+            const diseases = Array.isArray(payload.diseases) ? payload.diseases : (payload.disease ? [payload.disease] : []);
+            const confidenceRaw = typeof payload.confidence === 'number' ? payload.confidence : null;
+            const confidencePct = confidenceRaw === null ? null : (confidenceRaw > 1 ? Math.round(confidenceRaw) : Math.round(confidenceRaw * 100));
 
             // 4. แสดงผลลัพธ์ที่ได้จาก AI
             const resultHtml = `
                 <div class="result-item">
                     <strong class="text-gray-800">สมุนไพรที่พบ:</strong>
                     <p class="mt-1"><strong>${herbName}</strong></p>
-                    ${benefits ? `<p class="mt-1">${benefits}</p>` : ''}
+                    ${scientificName ? `<p class="mt-1 text-sm text-gray-500"><strong>ชื่อวิทยาศาสตร์:</strong> ${scientificName}</p>` : ''}
+                    ${benefits ? `<p class="mt-2">${benefits}</p>` : ''}
+                    ${diseases.length ? `<p class="mt-2"><strong>รักษา/บรรเทา:</strong> ${diseases.join(', ')}</p>` : ''}
+                    ${confidencePct !== null ? `<p class="mt-1 text-sm text-gray-500"><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>` : ''}
                     ${usage ? `<p class="mt-2"><strong>วิธีใช้:</strong> ${usage}</p>` : ''}
                     ${precautions ? `<p class="mt-2"><strong>ข้อควรระวัง:</strong> ${precautions}</p>` : ''}
                 </div>

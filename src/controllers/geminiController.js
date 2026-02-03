@@ -121,9 +121,11 @@ export const analyzeHerbImage = async (req, res) => {
         const prompt = `วิเคราะห์รูปภาพสมุนไพรนี้ และให้ความเห็นว่า:
 1. ชื่อสมุนไพรคืออะไร
 2. มีประโยชน์ต่อสุขภาพผิวหนังอย่างไร
-3. วิธีใช้และปริมาณที่แนะนำ
-4. ข้อควรระวังและข้อห้าม
-ตอบในรูป JSON โดยมี keys: "name", "scientificName", "benefits", "usage", "precautions"`;
+3. รักษา/บรรเทาโรคผิวหนังอะไรได้บ้าง
+4. ความมั่นใจโดยรวม (0-100)
+5. วิธีใช้และปริมาณที่แนะนำ
+6. ข้อควรระวังและข้อห้าม
+ตอบในรูป JSON โดยมี keys: "name", "scientificName", "benefits", "diseases", "confidence", "usage", "precautions"`;
 
         const result = await model.generateContent([
             {

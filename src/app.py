@@ -98,38 +98,11 @@ def clean_and_prepare_data(row):
     knowledge_text = f"{row['รายชื่อโรค']} {main} {main} {sub} {loc} {loc}"
     return knowledge_text
 
+
+# ===============================
+# build knowledge after final data load
 df['knowledge'] = df.apply(clean_and_prepare_data, axis=1)
 
-# ===============================
-# 📂 Load Data (มี Dummy กันพัง)
-# ===============================
-df = None
-try:
-    # Try multiple file names (order matters — most specific first)
-    for f in ["data.xlsx", "data.csv", "dataset.xlsx", "data2.xlsx", "herbs_all1.csv"]:
-        if os.path.exists(f):
-            try:
-                if f.endswith(".xlsx"):
-                    df = pd.read_excel(f)
-                else:
-                    df = pd.read_csv(f)
-                print("✅ Loaded:", f)
-                break
-            except Exception as inner_e:
-                print(f"⚠️ Failed to parse {f}:", inner_e)
-                continue
-except Exception as e:
-    print("⚠️ Load file error:", e)
-
-if df is None:
-    print("⚠️ Using Dummy Data")
-    df = pd.DataFrame({
-        "รายชื่อโรค": ["สิวอักเสบ", "ผื่นภูมิแพ้"],
-        "อาการหลัก": ["ตุ่มแดง เจ็บ หน้ามัน", "คัน ผื่นแดง"],
-        "วิธีรักษาเบื้อต้น": ["ล้างหน้าให้สะอาด", "ทายาแก้แพ้"]
-    })
-
-# ===============================
 # 🤖 AI (TF-IDF with improved tokenizer)
 # ===============================
 vectorizer = None

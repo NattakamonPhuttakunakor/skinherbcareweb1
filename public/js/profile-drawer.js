@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
         : 'ผู้ใช้งาน';
     const email = user && user.email ? user.email : '-';
+    const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
     nameEl.textContent = fullName;
     emailEl.textContent = email;
 
@@ -187,7 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    applyImage(localStorage.getItem('profileImage'));
+    const legacyImage = localStorage.getItem('profileImage');
+    if (!localStorage.getItem(storageKey) && legacyImage) {
+        localStorage.setItem(storageKey, legacyImage);
+    }
+    applyImage(localStorage.getItem(storageKey));
 
     const openDrawer = () => {
         if (!token) {
@@ -212,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('profileImage');
+        // keep per-user profile images
         window.location.href = '/login.html';
     });
 
@@ -222,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const src = e.target.result;
-            localStorage.setItem('profileImage', src);
+            localStorage.setItem(storageKey, src);
             applyImage(src);
         };
         reader.readAsDataURL(file);
