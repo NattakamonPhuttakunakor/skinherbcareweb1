@@ -44,15 +44,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 4. แสดงผลลัพธ์ที่ได้จาก AI
             const resultHtml = `
-                <div class="result-item">
-                    <strong class="text-gray-800">สมุนไพรที่พบ:</strong>
-                    <p class="mt-1"><strong>${herbName}</strong></p>
-                    ${scientificName ? `<p class="mt-1 text-sm text-gray-500"><strong>ชื่อวิทยาศาสตร์:</strong> ${scientificName}</p>` : ''}
-                    ${benefits ? `<p class="mt-2">${benefits}</p>` : ''}
-                    ${diseases.length ? `<p class="mt-2"><strong>รักษา/บรรเทา:</strong> ${diseases.join(', ')}</p>` : ''}
-                    ${confidencePct !== null ? `<p class="mt-1 text-sm text-gray-500"><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>` : ''}
-                    ${usage ? `<p class="mt-2"><strong>วิธีใช้:</strong> ${usage}</p>` : ''}
-                    ${precautions ? `<p class="mt-2"><strong>ข้อควรระวัง:</strong> ${precautions}</p>` : ''}
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-[#111C44]">ผลการค้นหา: ${herbName}</h3>
+                            ${scientificName ? `<p class="text-sm text-gray-500 mt-1"><strong>ชื่อวิทยาศาสตร์:</strong> ${scientificName}</p>` : ''}
+                            ${benefits ? `<p class="text-gray-600 mt-2">${benefits}</p>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">ความมั่นใจ</div>
+                            <div class="text-2xl font-bold text-green-600">${confidencePct !== null ? confidencePct : 0}%</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
+                            <h4 class="font-semibold text-green-700 mb-2">สรรพคุณ / โรคที่บรรเทาได้</h4>
+                            ${diseases.length
+                                ? `<ul class="list-disc list-inside text-sm text-gray-700">${diseases.map(d => `<li>${d}</li>`).join('')}</ul>`
+                                : `<p class="text-sm text-gray-700">${benefits || '—'}</p>`}
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                            <h4 class="font-semibold text-blue-700 mb-2">วิธีใช้เบื้องต้น</h4>
+                            <p class="text-sm text-gray-700">${usage || '—'}</p>
+                            ${precautions ? `<p class="text-xs text-gray-500 mt-2"><strong>ข้อควรระวัง:</strong> ${precautions}</p>` : ''}
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-red-500 mt-3">*คำเตือน: ผลลัพธ์เป็นการประเมินเพื่อการศึกษาเท่านั้น โปรดปรึกษาแพทย์ผู้เชี่ยวชาญ</p>
                 </div>
             `;
             resultsContainer.innerHTML = resultHtml;
