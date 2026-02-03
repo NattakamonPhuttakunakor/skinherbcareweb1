@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
+        window.location.href = '/login.html';
+        return;
+    }
+
     const analyzeBtn = document.getElementById('analyze-symptom-btn');
     const resultsContainer = document.getElementById('results-container');
     const textInput = document.getElementById('symptom-input');
@@ -35,26 +42,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const data = json.data;
+            const result = Array.isArray(json.data) ? json.data[0] : (json.data || {});
+            const disease = result.disease || result.prediction || 'ไม่ทราบ';
+            const confidenceRaw = typeof result.confidence === 'number' ? result.confidence : 0;
+            const confidencePct = confidenceRaw > 1 ? Math.round(confidenceRaw) : Math.round(confidenceRaw * 100);
+            const advice = result.advice || result.treatment || result.recommendation || '';
+
+            const extractHerbsFromAdvice = (text) => {
+                if (!text) return [];
+                const match = text.match(/สมุนไพร[:：]\s*([^\n]+)/);
+                if (!match) return [];
+                return match[1]
+                    .split(/,|，|และ|กับ/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            };
+
+            const rawHerbs = Array.isArray(result.herbs) ? result.herbs : [];
+            const herbNames = rawHerbs.length
+                ? rawHerbs.map(h => (typeof h === 'string' ? h : (h.name || h.herb))).filter(Boolean)
+                : extractHerbsFromAdvice(advice);
+
+            const fetchHerbUsage = async (name) => {
+                try {
+                    const res = await fetch(`/api/herbs?q=${encodeURIComponent(name)}`);
+                    const json = await res.json();
+                    const herb = (json.herbs && json.herbs[0]) || (json.data && json.data[0]);
+                    return herb ? herb.usage : '';
+                } catch {
+                    return '';
+                }
+            };
+
+            const herbDetails = await Promise.all(
+                herbNames.map(async (name) => ({
+                    name,
+                    usage: await fetchHerbUsage(name)
+                }))
+            );
 
             // ✅ แสดงผลลัพธ์
             let htmlContent = `
                 <h4 class="text-xl font-bold mb-4 text-green-800">🧠 ผลการวิเคราะห์</h4>
 
                 <div class="mb-4 p-4 border rounded-lg bg-green-50">
-                    <p><strong>โรคที่คาดว่าเป็น:</strong> ${data.disease}</p>
-                    <p><strong>ความมั่นใจ:</strong> ${Math.round(data.confidence * 100)}%</p>
-                    <p><strong>คำแนะนำ:</strong> ${data.advice}</p>
+                    <p><strong>โรคที่คาดว่าเป็น:</strong> ${disease}</p>
+                    <p><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>
+                    ${advice ? `<p><strong>คำแนะนำ:</strong> ${advice}</p>` : ''}
                 </div>
 
                 <h5 class="text-lg font-bold mb-2 text-green-700">🌿 สมุนไพรที่แนะนำ</h5>
             `;
 
-            if (data.herbs && data.herbs.length > 0) {
-                data.herbs.forEach(herb => {
+            if (herbDetails.length > 0) {
+                herbDetails.forEach((herb) => {
                     htmlContent += `
                         <div class="mb-2 p-3 border border-green-100 rounded bg-white">
-                            • ${herb}
+                            • <strong>${herb.name}</strong>
+                            ${herb.usage ? `<div class="text-sm text-gray-600 mt-1"><strong>วิธีใช้:</strong> ${herb.usage}</div>` : ''}
                         </div>
                     `;
                 });

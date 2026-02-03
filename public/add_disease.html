@@ -257,27 +257,20 @@
 
             try {
                 // 2. ยิง API
-                const payload = {
-                    name,
-                    engName,
-                    description,
-                    symptoms,
-                    medicines,
-                    usage
-                };
-
-                const response = await fetch(`${API_BASE_URL}/api/disease`, {
+                const response = await fetch(`${API_BASE_URL}/api/diseases`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify(payload)
+                    body: form
                 });
 
-                const result = await response.json();
+                const contentType = response.headers.get('content-type') || '';
+                const result = contentType.includes('application/json')
+                    ? await response.json()
+                    : null;
 
-                if (response.ok) {
+                if (response.ok && result) {
                     // สำเร็จ: โชว์ Modal
                     document.getElementById('modal-herb-name').textContent = name;
 
@@ -296,7 +289,7 @@
                     }, 10);
                 } else {
                     // ไม่สำเร็จ — แสดงข้อความที่มา (message หรือ error)
-                    const errMsg = result.message || result.error || 'บันทึกข้อมูลไม่สำเร็จ';
+                    const errMsg = (result && (result.message || result.error)) || 'บันทึกข้อมูลไม่สำเร็จ';
 
                     // ถ้าเป็นปัญหา authorization ให้พาไปหน้า login
                     if (response.status === 401) {
@@ -313,7 +306,10 @@
                         return;
                     }
 
-                    alert(`❌ เกิดข้อผิดพลาด: ${errMsg}`);
+                    const fallbackMsg = contentType.includes('application/json')
+                        ? errMsg
+                        : 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (Response ไม่ใช่ JSON)';
+                    alert(`❌ เกิดข้อผิดพลาด: ${fallbackMsg}`);
                     finishBtn.disabled = false;
                     finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ยืนยันข้อมูล';
                 }

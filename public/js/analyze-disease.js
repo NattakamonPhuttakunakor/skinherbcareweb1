@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
+        window.location.href = '/login.html';
+        return;
+    }
+
     const analyzeBtn = document.getElementById('analyze-disease-btn');
     const resultsContainer = document.getElementById('results-container');
     const fileInput = document.getElementById('disease-image-upload');
@@ -45,13 +52,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            const payload = data.data || data;
+            const diseaseName = payload.disease || payload.diagnosis || payload.condition || 'ไม่ทราบ';
+            const advice = payload.advice || payload.recommendation || '';
+            const herbs = Array.isArray(payload.herbs) ? payload.herbs : [];
+            const herbHtml = herbs.length
+                ? herbs.map((h) => {
+                    if (typeof h === 'string') {
+                        return `<li><strong>${h}</strong></li>`;
+                    }
+                    const name = h.name || h.herb || 'ไม่ทราบสมุนไพร';
+                    const props = Array.isArray(h.properties) && h.properties.length
+                        ? `<div style="margin-top: 0.25rem; color: #6b7280;">${h.properties.join(', ')}</div>`
+                        : '';
+                    const usage = h.usage
+                        ? `<div style="margin-top: 0.25rem;"><strong>วิธีใช้:</strong> ${h.usage}</div>`
+                        : '';
+                    return `<li><strong>${name}</strong>${props}${usage}</li>`;
+                }).join('')
+                : '<li>ไม่พบสมุนไพรแนะนำ</li>';
 
             // 4. แสดงผลลัพธ์ที่ได้จาก AI
             const resultHtml = `
                 <div>
                     <strong style="color: var(--primary-text);">ผลการวิเคราะห์เบื้องต้น:</strong>
-                    <p style="margin-top: 0.25rem;"><strong>${data.data.condition}</strong></p>
-                    <p style="margin-top: 0.5rem;">${data.data.recommendation}</p>
+                    <p style="margin-top: 0.25rem;"><strong>${diseaseName}</strong></p>
+                    ${advice ? `<p style="margin-top: 0.5rem;">${advice}</p>` : ''}
+                    <div style="margin-top: 0.75rem;">
+                        <strong>สมุนไพรแนะนำ:</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1rem; list-style: disc;">
+                            ${herbHtml}
+                        </ul>
+                    </div>
                 </div>
             `;
             resultsContainer.innerHTML = resultHtml;
@@ -59,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 5. บันทึกผลลัพธ์ล่าสุดลงใน localStorage
             const analysisToStore = {
                 type: 'ผลการวิเคราะห์รูปโรคผิวหนัง',
-                result: `พบอาการที่อาจเป็นไปได้: ${data.data.condition}`,
+                result: `พบอาการที่อาจเป็นไปได้: ${diseaseName}`,
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));

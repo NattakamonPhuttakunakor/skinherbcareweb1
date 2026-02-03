@@ -135,7 +135,7 @@
 
         // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
         window.addEventListener('load', () => {
-            /* // ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
+            //  ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
@@ -230,7 +230,7 @@
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
 
-                const response = await fetch(`${API_BASE_URL}/api/herb`, { // ✅ URL ไม่มี s
+                const response = await fetch(`${API_BASE_URL}/api/herbs`, { // ✅ URL ไม่มี s
                     method: 'POST',
                     // headers: { 'Authorization': `Bearer ${token}` }, // ⚠️ ปิดไว้ก่อนเพราะยังไม่มี Token
                     body: form

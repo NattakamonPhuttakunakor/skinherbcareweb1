@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
+        window.location.href = '/login.html';
+        return;
+    }
+
     const analyzeBtn = document.getElementById('analyze-herb-btn');
     const resultsContainer = document.getElementById('results-container');
     const fileInput = document.getElementById('herb-image-upload');
@@ -39,13 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            const payload = data.data || data;
+            const herbName = payload.name || payload.herbName || 'ไม่ทราบ';
+            const benefits = payload.benefits || payload.description || '';
+            const usage = payload.usage || '';
+            const precautions = payload.precautions || '';
 
             // 4. แสดงผลลัพธ์ที่ได้จาก AI
             const resultHtml = `
                 <div class="result-item">
                     <strong class="text-gray-800">สมุนไพรที่พบ:</strong>
-                    <p class="mt-1"><strong>${data.data.herbName}</strong></p>
-                    <p class="mt-1">${data.data.description}</p>
+                    <p class="mt-1"><strong>${herbName}</strong></p>
+                    ${benefits ? `<p class="mt-1">${benefits}</p>` : ''}
+                    ${usage ? `<p class="mt-2"><strong>วิธีใช้:</strong> ${usage}</p>` : ''}
+                    ${precautions ? `<p class="mt-2"><strong>ข้อควรระวัง:</strong> ${precautions}</p>` : ''}
                 </div>
             `;
             resultsContainer.innerHTML = resultHtml;
@@ -53,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 5. บันทึกผลลัพธ์ล่าสุดลงใน localStorage เพื่อแสดงในหน้าแดชบอร์ด
             const analysisToStore = {
                 type: 'ผลการค้นหาข้อมูลจากรูปสมุนไพร',
-                result: `พบข้อมูล: ${data.data.herbName}`,
+                result: `พบข้อมูล: ${herbName}`,
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));
