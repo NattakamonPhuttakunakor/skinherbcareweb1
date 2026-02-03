@@ -26,6 +26,48 @@
         .pattern-germ {
             background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
         }
+        .profile-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            box-shadow: -8px 0 24px rgba(0,0,0,0.1);
+            transition: right 0.25s ease;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .profile-drawer.open { right: 0; }
+        .profile-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 900;
+        }
+        .profile-backdrop.show { opacity: 1; pointer-events: auto; }
+        .profile-drawer-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #a7f3d0;
+            background: #ecfdf5;
+        }
+        .profile-drawer-btn {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .profile-drawer-btn.primary { background: #34d399; color: #064e3b; }
+        .profile-drawer-btn.ghost { background: #e5e7eb; color: #374151; }
     </style>
 
     <script>
@@ -68,10 +110,11 @@
         </div>
 
         <div class="flex flex-col items-center mt-8 mb-6">
-            <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden bg-white/10">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=111c44" class="w-full h-full object-cover">
-            </div>
-            <h3 class="mt-3 text-lg font-medium">Jureeporn zz</h3>
+            <button id="profile-btn-admin" class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden bg-white/10">
+                <img id="profile-sidebar-img" src="" class="w-full h-full object-cover" style="display:none;">
+                <div id="profile-sidebar-fallback" class="w-full h-full flex items-center justify-center text-3xl">👤</div>
+            </button>
+            <h3 id="profile-sidebar-name" class="mt-3 text-lg font-medium">Admin</h3>
             <p class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full mt-1">Admin</p>
         </div>
 
@@ -205,6 +248,25 @@
         </div>
     </main>
 
+    <div id="profile-backdrop" class="profile-backdrop"></div>
+    <aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-[#0f3d2e]">โปรไฟล์ผู้ใช้</h3>
+            <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
+        </div>
+        <div class="flex flex-col items-start gap-2">
+            <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
+            <div id="profile-drawer-fallback" class="profile-drawer-avatar flex items-center justify-center text-2xl text-green-500">👤</div>
+            <div id="profile-drawer-name" class="font-bold text-[#0f3d2e]">Admin</div>
+            <div id="profile-drawer-email" class="text-sm text-gray-500">-</div>
+        </div>
+        <div class="mt-4 grid gap-2">
+            <label class="profile-drawer-btn ghost text-center" for="profile-image-input">เปลี่ยนรูปโปรไฟล์</label>
+            <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
+            <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
+        </div>
+    </aside>
+
     <script src="/js/main.js"></script> 
     <script>
         function logout() {
@@ -250,6 +312,87 @@
                 }
             })();
         });
+
+        (function setupProfilePanel() {
+            const token = localStorage.getItem('token');
+            const userRaw = localStorage.getItem('user');
+            const user = userRaw ? JSON.parse(userRaw) : null;
+
+            const btn = document.getElementById('profile-btn-admin');
+            const drawer = document.getElementById('profile-drawer');
+            const backdrop = document.getElementById('profile-backdrop');
+            const closeBtn = document.getElementById('profile-close');
+            const logoutBtn = document.getElementById('profile-logout');
+            const nameSidebar = document.getElementById('profile-sidebar-name');
+            const nameDrawer = document.getElementById('profile-drawer-name');
+            const emailDrawer = document.getElementById('profile-drawer-email');
+            const imgSidebar = document.getElementById('profile-sidebar-img');
+            const fallbackSidebar = document.getElementById('profile-sidebar-fallback');
+            const imgDrawer = document.getElementById('profile-drawer-img');
+            const fallbackDrawer = document.getElementById('profile-drawer-fallback');
+            const imageInput = document.getElementById('profile-image-input');
+
+            const fullName = user
+                ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'Admin'
+                : 'Admin';
+            const email = user && user.email ? user.email : '-';
+            if (nameSidebar) nameSidebar.textContent = fullName;
+            if (nameDrawer) nameDrawer.textContent = fullName;
+            if (emailDrawer) emailDrawer.textContent = email;
+
+            const applyImage = (src) => {
+                if (src) {
+                    imgSidebar.src = src;
+                    imgSidebar.style.display = 'block';
+                    fallbackSidebar.style.display = 'none';
+                    imgDrawer.src = src;
+                    imgDrawer.style.display = 'block';
+                    fallbackDrawer.style.display = 'none';
+                } else {
+                    imgSidebar.style.display = 'none';
+                    fallbackSidebar.style.display = 'flex';
+                    imgDrawer.style.display = 'none';
+                    fallbackDrawer.style.display = 'flex';
+                }
+            };
+            applyImage(localStorage.getItem('profileImage'));
+
+            const openDrawer = () => {
+                if (!token) { window.location.href = '/login.html'; return; }
+                drawer.classList.add('open');
+                backdrop.classList.add('show');
+                drawer.setAttribute('aria-hidden', 'false');
+            };
+            const closeDrawer = () => {
+                drawer.classList.remove('open');
+                backdrop.classList.remove('show');
+                drawer.setAttribute('aria-hidden', 'true');
+            };
+
+            if (btn) btn.addEventListener('click', openDrawer);
+            if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+            if (backdrop) backdrop.addEventListener('click', closeDrawer);
+            if (logoutBtn) logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('profileImage');
+                window.location.href = '/login.html';
+            });
+            if (imageInput) {
+                imageInput.addEventListener('change', () => {
+                    const file = imageInput.files && imageInput.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const src = e.target.result;
+                        localStorage.setItem('profileImage', src);
+                        applyImage(src);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        })();
     </script>
 </body>
 </html>

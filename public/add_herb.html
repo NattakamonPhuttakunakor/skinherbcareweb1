@@ -121,7 +121,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+        const API_BASE_URL = window.location.origin;
         const step1 = document.getElementById('step-1-content');
         const step2 = document.getElementById('step-2-content');
         const circle1 = document.getElementById('circle-1');
@@ -151,7 +151,7 @@
             }
         });
 
-        // 2. จัดการรูปภาพ (File Handling)
+        // 2. จัดการรูปภาพ (File Handling)git
         function handleFiles(files) {
             if (!files.length) return;
             fileListContainer.innerHTML = '';
@@ -226,15 +226,18 @@
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
 
-                const response = await fetch(`${API_BASE_URL}/api/herbs`, { // ✅ URL ไม่มี s
+                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
                     method: 'POST',
-                    // headers: { 'Authorization': `Bearer ${token}` }, // ⚠️ ปิดไว้ก่อนเพราะยังไม่มี Token
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: form
                 });
 
-                const result = await response.json();
+                const contentType = response.headers.get('content-type') || '';
+                const result = contentType.includes('application/json')
+                    ? await response.json()
+                    : null;
 
-                if (response.ok) {
+                if (response.ok && result) {
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
                     
@@ -246,7 +249,7 @@
                     }, 10);
                 } else {
                     // ไม่สำเร็จ
-                    const errMsg = result.message || result.error || 'ไม่ทราบสาเหตุ';
+                    const errMsg = (result && (result.message || result.error)) || 'ไม่ทราบสาเหตุ';
                     alert(`❌ เกิดข้อผิดพลาด: ${errMsg}`);
                     finishBtn.disabled = false;
                     finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';

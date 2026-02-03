@@ -127,6 +127,86 @@ body::after {
   justify-content: center;
   cursor: pointer;
 }
+.profile-icon img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100%;
+  background: rgba(255,255,255,0.95);
+  box-shadow: -8px 0 24px rgba(0,0,0,0.1);
+  transition: right 0.25s ease;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+.profile-drawer.open {
+  right: 0;
+}
+.profile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.profile-drawer-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #a7f3d0;
+  background: #ecfdf5;
+}
+.profile-drawer-name {
+  font-weight: 700;
+  color: #0f3d2e;
+  margin-top: 8px;
+}
+.profile-drawer-email {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+.profile-drawer-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+.profile-drawer-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.profile-drawer-btn.primary {
+  background: #34d399;
+  color: #064e3b;
+}
+.profile-drawer-btn.ghost {
+  background: #e5e7eb;
+  color: #374151;
+}
+.profile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 900;
+}
+.profile-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 /* 📦 Main layout */
 .container {
@@ -299,9 +379,10 @@ header p {
       <a href="/">Home</a>
       <a href="/login.html">Log In</a>
       <a href="/register.html">Sign Up</a>
-      <div class="profile-icon">
-        👤
-      </div>
+      <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-guest">👤</span>
+      </button>
     </div>
 
     <!-- Admin Navigation -->
@@ -313,12 +394,32 @@ header p {
       <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
         Log Out
       </button>
-      <div class="profile-icon">
-        👤
-      </div>
+      <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-admin">👤</span>
+      </button>
     </div>
   </div>
 </nav>
+
+<div id="profile-backdrop" class="profile-backdrop"></div>
+<aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
+  <div class="profile-drawer-header">
+    <h3 style="font-weight:700;color:#0f3d2e;">โปรไฟล์ผู้ใช้</h3>
+    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
+    <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
+    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">👤</div>
+    <div class="profile-drawer-name" id="profile-drawer-name">ผู้ใช้งาน</div>
+    <div class="profile-drawer-email" id="profile-drawer-email">-</div>
+  </div>
+  <div class="profile-drawer-actions">
+    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">เปลี่ยนรูปโปรไฟล์</label>
+    <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
+    <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
+  </div>
+</aside>
 
 <div class="container">
   <div class="main-card">
@@ -375,11 +476,102 @@ header p {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('userRole');
+            localStorage.removeItem('profileImage');
             location.reload();
         }
     }
 
-    document.addEventListener("DOMContentLoaded", checkLoginStatus);
+    function setupProfilePanel() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+        const user = userRaw ? JSON.parse(userRaw) : null;
+
+        const btnGuest = document.getElementById('profile-btn-guest');
+        const btnAdmin = document.getElementById('profile-btn-admin');
+        const drawer = document.getElementById('profile-drawer');
+        const backdrop = document.getElementById('profile-backdrop');
+        const closeBtn = document.getElementById('profile-close');
+        const logoutBtn = document.getElementById('profile-logout');
+        const nameEl = document.getElementById('profile-drawer-name');
+        const emailEl = document.getElementById('profile-drawer-email');
+        const imgDrawer = document.getElementById('profile-drawer-img');
+        const fallbackDrawer = document.getElementById('profile-drawer-fallback');
+        const imgGuest = document.getElementById('profile-img-guest');
+        const fallbackGuest = document.getElementById('profile-fallback-guest');
+        const imgAdmin = document.getElementById('profile-img-admin');
+        const fallbackAdmin = document.getElementById('profile-fallback-admin');
+        const imageInput = document.getElementById('profile-image-input');
+
+        const openDrawer = () => {
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            drawer.classList.add('open');
+            backdrop.classList.add('show');
+            drawer.setAttribute('aria-hidden', 'false');
+        };
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            backdrop.classList.remove('show');
+            drawer.setAttribute('aria-hidden', 'true');
+        };
+
+        const fullName = user
+            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
+            : 'ผู้ใช้งาน';
+        const email = user && user.email ? user.email : '-';
+
+        nameEl.textContent = fullName;
+        emailEl.textContent = email;
+
+        const savedImage = localStorage.getItem('profileImage');
+        const applyImage = (src) => {
+            if (src) {
+                imgDrawer.src = src;
+                imgDrawer.style.display = 'block';
+                fallbackDrawer.style.display = 'none';
+                imgGuest.src = src;
+                imgGuest.style.display = 'block';
+                fallbackGuest.style.display = 'none';
+                imgAdmin.src = src;
+                imgAdmin.style.display = 'block';
+                fallbackAdmin.style.display = 'none';
+            } else {
+                imgDrawer.style.display = 'none';
+                fallbackDrawer.style.display = 'flex';
+                imgGuest.style.display = 'none';
+                fallbackGuest.style.display = 'inline';
+                imgAdmin.style.display = 'none';
+                fallbackAdmin.style.display = 'inline';
+            }
+        };
+        applyImage(savedImage);
+
+        if (btnGuest) btnGuest.addEventListener('click', openDrawer);
+        if (btnAdmin) btnAdmin.addEventListener('click', openDrawer);
+        if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+        if (backdrop) backdrop.addEventListener('click', closeDrawer);
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        if (imageInput) {
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files && imageInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const src = e.target.result;
+                    localStorage.setItem('profileImage', src);
+                    applyImage(src);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkLoginStatus();
+        setupProfilePanel();
+    });
 </script>
 
 </body>
