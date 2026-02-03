@@ -76,7 +76,6 @@
             const userStr = localStorage.getItem('user');
             
             if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบก่อน');
                 window.location.href = '/login.html';
                 return;
             }
@@ -84,7 +83,6 @@
             const user = JSON.parse(userStr || '{}');
             
             if (user.role !== 'admin') {
-                alert('❌ เฉพาะแอดมินเท่านั้นที่เข้าได้');
                 window.location.href = '/index.html'; // หรือ user-dashboard
                 return;
             }

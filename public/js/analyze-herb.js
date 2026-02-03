@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) {
-        alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
         window.location.href = '/login.html';
         return;
     }
@@ -12,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imagePreviewBox = document.getElementById('image-preview-box');
 
     analyzeBtn.addEventListener('click', async () => {
-        const file = fileInput.files[0];
+        const file = (fileInput && fileInput.files && fileInput.files[0]) || window.currentImageBlob;
         if (!file) {
             alert('กรุณาอัปโหลดรูปภาพก่อน');
             return;

@@ -146,8 +146,8 @@
         window.addEventListener('load', () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบก่อน');
                 window.location.href = '/login.html';
+                return;
             }
 
             const searchBtn = document.getElementById('admin-disease-search-btn');
@@ -201,7 +201,6 @@
         async function saveDataToServer() {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('❌ กรุณาเข้าสู่ระบบใหม่');
                 window.location.href = '/login.html';
                 return;
             }

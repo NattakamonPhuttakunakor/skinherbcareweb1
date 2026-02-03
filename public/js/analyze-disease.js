@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) {
-        alert('❌ กรุณาเข้าสู่ระบบก่อนใช้งาน');
         window.location.href = '/login.html';
         return;
     }
