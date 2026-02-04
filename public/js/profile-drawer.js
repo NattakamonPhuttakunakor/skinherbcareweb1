@@ -39,6 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
             position: relative;
             overflow: hidden;
         }
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+        .profile-icon svg {
+            display: block;
+        }
+        .profile-icon.has-image svg {
+            display: none;
+        }
         .profile-icon img.profile-icon-img {
             width: 100%;
             height: 100%;
@@ -99,11 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 
-    const fab = document.createElement('button');
-    fab.className = 'profile-fab';
-    fab.setAttribute('aria-label', 'Profile');
-    fab.innerHTML = '<img id="profile-fab-img" alt="Profile"><span id="profile-fab-fallback">👤</span>';
-    document.body.appendChild(fab);
+    const hasProfileIcon = document.querySelector('.profile-icon');
+    let fab = null;
+    if (!hasProfileIcon) {
+        fab = document.createElement('button');
+        fab.className = 'profile-fab';
+        fab.setAttribute('aria-label', 'Profile');
+        fab.innerHTML = '<img id="profile-fab-img" alt="Profile"><span id="profile-fab-fallback">👤</span>';
+        document.body.appendChild(fab);
+    }
 
     const backdrop = document.createElement('div');
     backdrop.className = 'profile-backdrop';
@@ -135,8 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailEl = drawer.querySelector('#profile-drawer-email');
     const imgDrawer = drawer.querySelector('#profile-drawer-img');
     const fallbackDrawer = drawer.querySelector('#profile-drawer-fallback');
-    const imgFab = fab.querySelector('#profile-fab-img');
-    const fallbackFab = fab.querySelector('#profile-fab-fallback');
+    const imgFab = fab ? fab.querySelector('#profile-fab-img') : null;
+    const fallbackFab = fab ? fab.querySelector('#profile-fab-fallback') : null;
     const imageInput = drawer.querySelector('#profile-image-input');
 
     const fullName = user
@@ -172,9 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
             imgDrawer.src = src;
             imgDrawer.style.display = 'block';
             fallbackDrawer.style.display = 'none';
-            imgFab.src = src;
-            imgFab.style.display = 'block';
-            fallbackFab.style.display = 'none';
+            if (imgFab && fallbackFab) {
+                imgFab.src = src;
+                imgFab.style.display = 'block';
+                fallbackFab.style.display = 'none';
+            }
             profileIconEls.forEach((el) => {
                 const { img, fb, svg } = ensureProfileIcon(el);
                 img.src = src;
@@ -185,8 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             imgDrawer.style.display = 'none';
             fallbackDrawer.style.display = 'flex';
-            imgFab.style.display = 'none';
-            fallbackFab.style.display = 'inline';
+            if (imgFab && fallbackFab) {
+                imgFab.style.display = 'none';
+                fallbackFab.style.display = 'inline';
+            }
             profileIconEls.forEach((el) => {
                 const { img, fb, svg } = ensureProfileIcon(el);
                 img.style.display = 'none';
@@ -216,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.setAttribute('aria-hidden', 'true');
     };
 
-    fab.addEventListener('click', openDrawer);
+    if (fab) fab.addEventListener('click', openDrawer);
     drawer.querySelector('#profile-close').addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
 
