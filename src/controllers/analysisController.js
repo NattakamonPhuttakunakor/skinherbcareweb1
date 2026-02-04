@@ -124,7 +124,7 @@ const fallbackAnalyze = async (symptomsText) => {
 export const diagnoseSymptoms = async (req, res) => {
     try {
         const { symptoms } = req.body;
-        const usePython = process.env.USE_PYTHON_ANALYSIS === 'true';
+        const usePython = process.env.USE_PYTHON_ANALYSIS !== 'false';
 
         // 1. Validate input
         if (!symptoms || typeof symptoms !== "string" || !symptoms.trim()) {
