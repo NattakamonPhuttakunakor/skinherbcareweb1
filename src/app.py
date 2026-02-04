@@ -3,38 +3,47 @@ import pandas as pd
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 CORS(app)
 
 # ===============================
-# 🔐 API KEY
+# API KEY
 # ===============================
 API_KEY = os.environ.get("API_KEY") or os.environ.get("PYTHON_API_KEY") or None
 if not API_KEY:
-    print("⚠️ Warning: API_KEY / PYTHON_API_KEY not set — running without API key enforcement")
+    print("Warning: API_KEY / PYTHON_API_KEY not set - running without API key enforcement")
 
 # ===============================
-# 🔧 Synonym & Tokenizer Config
+# Synonym & Tokenizer Config
 # ===============================
 SYNONYM_MAP = {
-    'ปวด': ['เจ็บ', 'แสบ', 'บวม', 'อักเสบ', 'จุกแน่น', 'ทรมาน'],
-    'คัน': ['คันๆ', 'คันมาก', 'อยากเกา', 'ยุบยิบ'],
-    'ผื่น': ['ผื่นแดง', 'ผื่นคัน', 'ตุ่ม', 'ตุ่มแดง', 'ปื้น', 'ลมพิษ', 'ตุ่มใส'],
-    'ไข้': ['มีไข้', 'ตัวร้อน', 'เป็นไข้', 'รุมๆ'],
-    'แขน': ['ต้นแขน', 'ปลายแขน', 'ข้อศอก', 'มือ'],
-    'ขา': ['ต้นขา', 'น่อง', 'เท้า', 'เข่า'],
-    'มาก': ['มากๆ', 'รุนแรง', 'เยอะ', 'หนัก', 'ไม่ไหว'],
+    "\u0e1b\u0e27\u0e14": ["\u0e40\u0e08\u0e47\u0e1a", "\u0e41\u0e2a\u0e1a", "\u0e1a\u0e27\u0e21", "\u0e2d\u0e31\u0e01\u0e40\u0e2a\u0e1a", "\u0e08\u0e38\u0e01\u0e41\u0e19\u0e48\u0e19", "\u0e17\u0e23\u0e21\u0e32\u0e19"],
+    "\u0e04\u0e31\u0e19": ["\u0e04\u0e31\u0e19\u0e46", "\u0e04\u0e31\u0e19\u0e21\u0e32\u0e01", "\u0e2d\u0e22\u0e32\u0e01\u0e40\u0e01\u0e32", "\u0e22\u0e38\u0e1a\u0e22\u0e34\u0e1a"],
+    "\u0e1c\u0e37\u0e48\u0e19": ["\u0e1c\u0e37\u0e48\u0e19\u0e41\u0e14\u0e07", "\u0e1c\u0e37\u0e48\u0e19\u0e04\u0e31\u0e19", "\u0e15\u0e38\u0e48\u0e21", "\u0e15\u0e38\u0e48\u0e21\u0e41\u0e14\u0e07", "\u0e1b\u0e37\u0e49\u0e19", "\u0e25\u0e21\u0e1e\u0e34\u0e29", "\u0e15\u0e38\u0e48\u0e21\u0e43\u0e2a"],
+    "\u0e44\u0e02\u0e49": ["\u0e21\u0e35\u0e44\u0e02\u0e49", "\u0e15\u0e31\u0e27\u0e23\u0e49\u0e2d\u0e19", "\u0e40\u0e1b\u0e47\u0e19\u0e44\u0e02\u0e49", "\u0e23\u0e38\u0e21\u0e46"],
+    "\u0e41\u0e02\u0e19": ["\u0e15\u0e49\u0e19\u0e41\u0e02\u0e19", "\u0e1b\u0e25\u0e32\u0e22\u0e41\u0e02\u0e19", "\u0e02\u0e49\u0e2d\u0e28\u0e2d\u0e01", "\u0e21\u0e37\u0e2d"],
+    "\u0e02\u0e32": ["\u0e15\u0e49\u0e19\u0e02\u0e32", "\u0e19\u0e48\u0e2d\u0e07", "\u0e40\u0e17\u0e49\u0e32", "\u0e40\u0e02\u0e48\u0e32"],
+    "\u0e21\u0e32\u0e01": ["\u0e21\u0e32\u0e01\u0e46", "\u0e23\u0e38\u0e19\u0e41\u0e23\u0e07", "\u0e40\u0e22\u0e2d\u0e30", "\u0e2b\u0e19\u0e31\u0e01", "\u0e44\u0e21\u0e48\u0e44\u0e2b\u0e27"],
 }
 
 CUSTOM_STOPWORDS = {
-    "เป็น", "มี", "รู้สึก", "อาการ", "หน่อย", "มาก", "ๆ", "ค่ะ", "ครับ",
-    "คือ", "ที่", "และ", "หรือ", "ช่วย", "ด้วย", "แล้ว", "อยาก", "ต้อง",
-    "นะ", "จะ", "เอง", "ได้", "ไป", "มา", "อยู่", "ให้", "บริเวณ", "แถวๆ"
+    "\u0e40\u0e1b\u0e47\u0e19", "\u0e21\u0e35", "\u0e23\u0e39\u0e49\u0e2a\u0e36\u0e01", "\u0e2d\u0e32\u0e01\u0e32\u0e23", "\u0e2b\u0e19\u0e48\u0e2d\u0e22", "\u0e21\u0e32\u0e01", "\u0e46", "\u0e04\u0e48\u0e30", "\u0e04\u0e23\u0e31\u0e1a",
+    "\u0e04\u0e37\u0e2d", "\u0e17\u0e35\u0e48", "\u0e41\u0e25\u0e30", "\u0e2b\u0e23\u0e37\u0e2d", "\u0e0a\u0e48\u0e27\u0e22", "\u0e14\u0e49\u0e27\u0e22", "\u0e41\u0e25\u0e49\u0e27", "\u0e2d\u0e22\u0e32\u0e01", "\u0e15\u0e49\u0e2d\u0e07",
+    "\u0e19\u0e30", "\u0e08\u0e30", "\u0e40\u0e2d\u0e07", "\u0e44\u0e14\u0e49", "\u0e44\u0e1b", "\u0e21\u0e32", "\u0e2d\u0e22\u0e39\u0e48", "\u0e43\u0e2b\u0e49", "\u0e1a\u0e23\u0e34\u0e40\u0e27\u0e13", "\u0e41\u0e16\u0e27\u0e46"
 }
 
+COL_DISEASE = "\u0e23\u0e32\u0e22\u0e0a\u0e37\u0e48\u0e2d\u0e42\u0e23\u0e04"
+COL_MAIN = "\u0e2d\u0e32\u0e01\u0e32\u0e23\u0e2b\u0e25\u0e31\u0e01"
+COL_SUB = "\u0e2d\u0e32\u0e01\u0e32\u0e23\u0e23\u0e2d\u0e07"
+COL_LOC = "\u0e15\u0e33\u0e41\u0e2b\u0e19\u0e48\u0e07\u0e17\u0e35\u0e48\u0e1e\u0e1a\u0e1a\u0e48\u0e2d\u0e22"
+COL_CAUSE = "\u0e2a\u0e32\u0e40\u0e2b\u0e15\u0e38"
+COL_TREAT = "\u0e27\u0e34\u0e18\u0e35\u0e23\u0e31\u0e01\u0e29\u0e32\u0e40\u0e1a\u0e37\u0e49\u0e2d\u0e15\u0e49\u0e19"
+
+
 def expand_synonyms(text):
-    """ขยายคำศัพท์ (Synonym Expansion)"""
     text = str(text).lower()
     for main_word, synonyms in SYNONYM_MAP.items():
         for syn in synonyms:
@@ -42,56 +51,88 @@ def expand_synonyms(text):
                 text += f" {main_word}"
     return text
 
+
 def thai_tokenizer(text):
-    """Tokenize Thai text"""
     if not isinstance(text, str):
         return []
     text = expand_synonyms(text)
     try:
         from pythainlp.tokenize import word_tokenize
         words = word_tokenize(text, engine="newmm", keep_whitespace=False)
-    except:
+    except Exception:
         words = text.split()
     return [w for w in words if w not in CUSTOM_STOPWORDS and len(w) > 1 and not w.isnumeric()]
 
 # ===============================
-# 📂 Load & Prepare Data
+# Load & Prepare Data
 # ===============================
+
 df = None
-try:
-    for filename in ["data.xlsx", "data.csv", "dataset.xlsx", "data2.xlsx", "herbs_all1.csv"]:
-        if os.path.exists(filename):
-            try:
-                if filename.endswith(".xlsx"):
-                    df = pd.read_excel(filename)
-                else:
-                    df = pd.read_csv(filename)
-                print(f"✅ Loaded: {filename}")
-                break
-            except Exception as inner_e:
-                print(f"⚠️ Failed to parse {filename}: {inner_e}")
-                continue
-except Exception as e:
-    print(f"⚠️ Load file error: {e}")
+base_dir = os.path.dirname(__file__)
+
+candidate_files = [
+    os.path.join(base_dir, "data.xlsx"),
+    os.path.join(base_dir, "data.csv"),
+    os.path.join(base_dir, "dataset.xlsx"),
+    os.path.join(base_dir, "data2.xlsx"),
+    "data.xlsx",
+    "data.csv",
+    "dataset.xlsx",
+    "data2.xlsx",
+]
+
+for filename in candidate_files:
+    if os.path.exists(filename):
+        try:
+            if filename.endswith(".xlsx"):
+                df = pd.read_excel(filename)
+            else:
+                df = pd.read_csv(filename)
+            print(f"Loaded dataset: {filename}")
+            break
+        except Exception as inner_e:
+            print(f"Failed to parse {filename}: {inner_e}")
 
 if df is None:
-    print("⚠️ Using Dummy Data")
+    print("Using dummy data (dataset not found)")
     df = pd.DataFrame({
-        "รายชื่อโรค": ["สิวอักเสบ", "ผื่นภูมิแพ้", "ลมพิษ"],
-        "อาการหลัก": ["ตุ่มแดง เจ็บ หน้ามัน", "คัน ผื่นแดง", "ตัวแดง คันมาก"],
-        "อาการรอง": ["มีน้ำมันขึ้น", "ผิวระคายเคือง", "ปื้นขึ้นเฉพาะที่"],
-        "วิธีรักษาเบื้อต้น": ["ล้างหน้าให้สะอาด", "ทายาแก้แพ้", "ประคบเย็น"]
+        COL_DISEASE: ["\u0e2a\u0e34\u0e27\u0e2d\u0e31\u0e01\u0e40\u0e2a\u0e1a", "\u0e1c\u0e37\u0e48\u0e19\u0e20\u0e39\u0e21\u0e34\u0e41\u0e1e\u0e49", "\u0e25\u0e21\u0e1e\u0e34\u0e29"],
+        COL_MAIN: ["\u0e15\u0e38\u0e48\u0e21\u0e41\u0e14\u0e07 \u0e40\u0e08\u0e47\u0e1a \u0e2b\u0e19\u0e49\u0e32\u0e21\u0e31\u0e19", "\u0e04\u0e31\u0e19 \u0e1c\u0e37\u0e48\u0e19\u0e41\u0e14\u0e07", "\u0e15\u0e31\u0e27\u0e41\u0e14\u0e07 \u0e04\u0e31\u0e19\u0e21\u0e32\u0e01"],
+        COL_SUB: ["\u0e21\u0e35\u0e19\u0e49\u0e33\u0e21\u0e31\u0e19\u0e02\u0e36\u0e49\u0e19", "\u0e1c\u0e34\u0e27\u0e23\u0e30\u0e04\u0e32\u0e22\u0e40\u0e04\u0e37\u0e2d\u0e07", "\u0e1b\u0e37\u0e49\u0e19\u0e02\u0e36\u0e49\u0e19\u0e40\u0e09\u0e1e\u0e32\u0e30\u0e17\u0e35\u0e48"],
+        COL_LOC: ["", "", ""],
+        COL_CAUSE: ["", "", ""],
+        COL_TREAT: ["\u0e25\u0e49\u0e32\u0e07\u0e2b\u0e19\u0e49\u0e32\u0e43\u0e2b\u0e49\u0e2a\u0e30\u0e2d\u0e32\u0e14", "\u0e17\u0e32\u0e22\u0e32\u0e41\u0e01\u0e49\u0e41\u0e1e\u0e49", "\u0e1b\u0e23\u0e30\u0e04\u0e1a\u0e40\u0e22\u0e47\u0e19"],
     })
 
 df.columns = df.columns.str.strip()
 
+
 def clean_and_prepare_data(row):
-    """Clean and prepare knowledge text for AI"""
-    main = str(row.get('?????????', ''))
-    sub = str(row.get('????????', '') or '')
-    loc = str(row.get('????????????????', '') or '')
-    knowledge_text = f"{row['??????????']} {main} {main} {sub} {loc} {loc}"
+    main = str(row.get(COL_MAIN, "") or "")
+    sub = str(row.get(COL_SUB, "") or "")
+    loc = str(row.get(COL_LOC, "") or "")
+    disease = str(row.get(COL_DISEASE, "") or "")
+    knowledge_text = f"{disease} {main} {main} {sub} {loc} {loc}".strip()
     return knowledge_text
+
+
+vectorizer = None
+tfidf_matrix = None
+
+try:
+    if df is not None and len(df) > 0:
+        df["knowledge"] = df.apply(clean_and_prepare_data, axis=1)
+        vectorizer = TfidfVectorizer(
+            tokenizer=thai_tokenizer,
+            ngram_range=(1, 2),
+            min_df=1,
+            sublinear_tf=True,
+        )
+        tfidf_matrix = vectorizer.fit_transform(df["knowledge"])
+        print(f"AI ready. Diseases: {len(df)}")
+except Exception as e:
+    print(f"Vectorizer init failed: {e}")
+
 
 def health():
     return jsonify({
@@ -99,70 +140,64 @@ def health():
         "message": "Python AI Service Running",
         "ai_ready": vectorizer is not None,
         "data_loaded": df is not None,
-        "api_key_configured": bool(API_KEY)
+        "api_key_configured": bool(API_KEY),
     })
+
 
 @app.route("/status", methods=["GET"])
 def status():
-    # More detailed health info for orchestrators
     return jsonify({
         "success": True,
         "ai_ready": vectorizer is not None,
         "data_loaded": df is not None,
-        "api_key_configured": bool(API_KEY)
+        "api_key_configured": bool(API_KEY),
     })
 
-# ===============================
-# 🔮 Predict
-# ===============================
+
 @app.route("/predict", methods=["POST"])
 def predict():
-    # 🔐 check key
-    print('🧾 Incoming headers:', dict(request.headers))
     client_key = request.headers.get("x-api-key")
-    # If API_KEY is configured, enforce exact match. If not configured, allow but log.
     if API_KEY:
         if not client_key:
             return jsonify({"success": False, "message": "API Key not found"}), 401
         if client_key != API_KEY:
             return jsonify({"success": False, "message": "API Key mismatch"}), 401
-    else:
-        print("⚠️ API key not configured on server — skipping enforcement")
 
     data = request.get_json(silent=True)
     if not data or "symptoms" not in data:
         return jsonify({
             "success": False,
-            "message": "กรุณาระบุอาการ"
+            "message": "\u0e01\u0e23\u0e38\u0e13\u0e32\u0e23\u0e30\u0e1a\u0e38\u0e2d\u0e32\u0e01\u0e32\u0e23",
         }), 400
 
-    symptoms = data["symptoms"].strip()
+    symptoms = str(data.get("symptoms", "")).strip()
     if symptoms == "":
         return jsonify({
             "success": False,
-            "message": "อาการว่างเปล่า"
+            "message": "\u0e2d\u0e32\u0e01\u0e32\u0e23\u0e27\u0e48\u0e32\u0e07\u0e40\u0e1b\u0e25\u0e48\u0e32",
         }), 400
 
-    # วิเคราะห์
-    if vectorizer and tfidf_matrix is not None:
+    if vectorizer is not None and tfidf_matrix is not None:
         try:
             vec = vectorizer.transform([symptoms])
             scores = cosine_similarity(vec, tfidf_matrix).flatten()
             top_indices = scores.argsort()[::-1][:3]
-            
+
             results = []
             for idx in top_indices:
                 score = scores[idx]
-                if score > 0.1:  # Confidence threshold 10%
+                if score > 0.1:
                     row = df.iloc[idx]
                     results.append({
-                        "disease": row["รายชื่อโรค"],
+                        "disease": row.get(COL_DISEASE, ""),
                         "confidence": round(float(score) * 100, 2),
-                        "main_symptoms": row.get("อาการหลัก", ""),
-                        "secondary_symptoms": row.get("อาการรอง", ""),
-                        "recommendation": row.get("วิธีรักษาเบื้อต้น", "")
+                        "main_symptoms": row.get(COL_MAIN, ""),
+                        "secondary_symptoms": row.get(COL_SUB, ""),
+                        "recommendation": row.get(COL_TREAT, ""),
+                        "location": row.get(COL_LOC, ""),
+                        "cause": row.get(COL_CAUSE, ""),
                     })
-            
+
             if results:
                 best = results[0]
                 return jsonify({
@@ -171,32 +206,29 @@ def predict():
                     "confidence": best["confidence"],
                     "recommendation": best["recommendation"],
                     "data": results,
-                    "found": True
+                    "found": True,
                 })
-            else:
-                return jsonify({
-                    "success": False,
-                    "found": False,
-                    "prediction": "ไม่พบโรคที่ตรงกับอาการนี้ชัดเจน",
-                    "confidence": 0,
-                    "recommendation": "กรุณาระบุรายละเอียดเพิ่มเติม"
-                })
-        except Exception as e:
-            print(f"❌ Predict error: {e}")
+
             return jsonify({
                 "success": False,
-                "message": f"Error: {str(e)}"
-            }), 500
+                "found": False,
+                "prediction": "\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e42\u0e23\u0e04\u0e17\u0e35\u0e48\u0e15\u0e23\u0e07\u0e01\u0e31\u0e1a\u0e2d\u0e32\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e0a\u0e31\u0e14\u0e40\u0e08\u0e19",
+                "confidence": 0,
+                "recommendation": "\u0e01\u0e23\u0e38\u0e13\u0e32\u0e23\u0e30\u0e1a\u0e38\u0e23\u0e32\u0e22\u0e25\u0e30\u0e40\u0e2d\u0e35\u0e22\u0e14\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21",
+            })
+        except Exception as e:
+            print(f"Predict error: {e}")
+            return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
     return jsonify({
         "success": False,
         "found": False,
-        "prediction": "ไม่พบข้อมูลที่ตรงกัน",
+        "prediction": "\u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e17\u0e35\u0e48\u0e15\u0e23\u0e07\u0e01\u0e31\u0e19",
         "confidence": 0,
-        "recommendation": "กรุณาระบุอาการเพิ่มเติม"
+        "recommendation": "\u0e01\u0e23\u0e38\u0e13\u0e32\u0e23\u0e30\u0e1a\u0e38\u0e2d\u0e32\u0e01\u0e32\u0e23\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21",
     })
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     app.run(host="0.0.0.0", port=port)
-
