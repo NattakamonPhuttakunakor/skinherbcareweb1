@@ -5,6 +5,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    try {
+        const res = await fetch('/api/auth/profile', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!res.ok) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+            return;
+        }
+    } catch (e) {
+        window.location.href = '/login.html';
+        return;
+    }
+
     const analyzeBtn = document.getElementById('analyze-symptom-btn');
     const resultsContainer = document.getElementById('results-container');
     const textInput = document.getElementById('symptom-input');
