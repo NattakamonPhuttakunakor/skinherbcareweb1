@@ -152,8 +152,8 @@
                     const res = await fetch(`/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`);
                     if (!res.ok) throw new Error(`Server returned ${res.status}`);
                     const data = await res.json();
-                    // Expecting an array of herb objects
-                    renderHerbRows(tableBody, data);
+                    const herbs = Array.isArray(data) ? data : (data.herbs || data.data || []);
+                    renderHerbRows(tableBody, herbs);
                 } catch (err) {
                     console.warn('Failed to fetch herbs, falling back to static data.', err);
                     // Fallback to static data

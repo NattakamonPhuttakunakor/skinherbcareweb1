@@ -166,8 +166,9 @@
                 const res = await fetch(`/api/diseases${query ? `?q=${encodeURIComponent(query)}` : ''}`);
                 if (!res.ok) throw new Error(`Server error ${res.status}`);
                 const data = await res.json();
+                const diseases = Array.isArray(data) ? data : (data.diseases || data.data || []);
 
-                if (!Array.isArray(data) || data.length === 0) {
+                if (!Array.isArray(diseases) || diseases.length === 0) {
                     tableBody.innerHTML = '';
                     emptyState.classList.remove('hidden');
                     document.querySelector('.text-sm.font-normal.text-gray-400').textContent = `ทั้งหมด 0 รายการ`;
@@ -177,7 +178,7 @@
                 emptyState.classList.add('hidden');
                 tableBody.innerHTML = '';
 
-                data.forEach((disease, index) => {
+                diseases.forEach((disease, index) => {
                     const tr = document.createElement('tr');
                     tr.className = `hover:bg-gray-50 transition-colors border-b border-gray-100/50`;
 
@@ -197,7 +198,7 @@
                     tableBody.appendChild(tr);
                 });
 
-                document.querySelector('.text-sm.font-normal.text-gray-400').textContent = `ทั้งหมด ${data.length} รายการ`;
+                document.querySelector('.text-sm.font-normal.text-gray-400').textContent = `ทั้งหมด ${diseases.length} รายการ`;
             } catch (err) {
                 console.warn('Failed to load diseases, using static mockup', err);
                 // fallback
