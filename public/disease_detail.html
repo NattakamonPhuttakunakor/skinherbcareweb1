@@ -129,36 +129,54 @@
     <script>
         let currentDisease = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            // Prefer id-based lookup (safer). Fallback to name.
+        window.addEventListener('DOMContentLoaded', async () => {
             const diseaseId = sessionStorage.getItem('viewingDiseaseId');
-            const diseaseName = sessionStorage.getItem('viewingDiseaseName');
             if (diseaseId) {
-                loadDiseaseDetails(diseaseId, true);
-            } else if (diseaseName) {
-                loadDiseaseDetails(diseaseName, false);
+                const ok = await loadDiseaseDetailsFromApi(diseaseId);
+                if (ok) return;
             }
-        });
-
-        // If byId is true, the first argument is treated as id, otherwise as name
-        function loadDiseaseDetails(key, byId = false) {
-            const storedData = localStorage.getItem('diseaseData');
-            if (storedData) {
-                const diseases = JSON.parse(storedData || '[]');
-                if (byId) {
-                    currentDisease = diseases.find(d => d.id === key);
-                } else {
-                    currentDisease = diseases.find(d => d.name === key);
-                }
-
-                if (currentDisease) {
-                    displayDiseaseDetails(currentDisease);
-                } else {
-                    showNotFound();
-                }
+            const diseaseName = sessionStorage.getItem('viewingDiseaseName');
+            if (diseaseName) {
+                loadDiseaseDetailsFromLocal(diseaseName);
             } else {
                 showNotFound();
             }
+        });
+
+        async function loadDiseaseDetailsFromApi(id) {
+            try {
+                const res = await fetch(`/api/diseases/${id}`);
+                if (!res.ok) throw new Error('not found');
+                const json = await res.json();
+                const disease = json.disease || json.data || json;
+                currentDisease = {
+                    id: disease._id,
+                    name: disease.name,
+                    engName: disease.engName || '',
+                    description: disease.description || '',
+                    symptoms: Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || ''),
+                    medicines: disease.medicines || [],
+                    usage: disease.usage || '',
+                    image: disease.image || ''
+                };
+                displayDiseaseDetails(currentDisease);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function loadDiseaseDetailsFromLocal(name) {
+            const storedData = localStorage.getItem('diseaseData');
+            if (storedData) {
+                const diseases = JSON.parse(storedData || '[]');
+                currentDisease = diseases.find(d => d.name === name);
+                if (currentDisease) {
+                    displayDiseaseDetails(currentDisease);
+                    return;
+                }
+            }
+            showNotFound();
         }
 
         function displayDiseaseDetails(disease) {

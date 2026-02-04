@@ -199,7 +199,7 @@
                         const actionCell = row.querySelector('td:nth-child(4)');
                         if (actionCell) {
                             actionCell.innerHTML = `
-                                <button onclick='viewHerb(${JSON.stringify(idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
+                                <button onclick='viewHerb(${JSON.stringify(h._id || idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
                                     <i class="fa-solid fa-eye"></i> ดู
                                 </button>
                                 <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
@@ -215,9 +215,12 @@
                 });
             }
 
-            window.viewHerb = function (idx) {
-                const herb = latestHerbs[idx];
+            window.viewHerb = function (idOrIdx) {
+                const herb = typeof idOrIdx === 'number' ? latestHerbs[idOrIdx] : latestHerbs.find(h => h._id === idOrIdx);
                 if (!herb) return;
+                if (herb._id) {
+                    sessionStorage.setItem('viewingHerbId', herb._id);
+                }
                 const preview = {
                     name: herb.name || '',
                     engName: herb.scientificName || '',

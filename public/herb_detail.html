@@ -144,40 +144,65 @@
     </main>
 
     <script>
-        // Script ดึงข้อมูล (เหมือนเดิม แต่ปรับให้เข้ากับ Layout ใหม่)
-        window.addEventListener('DOMContentLoaded', () => {
+        function applyHerbData(data) {
+            if (!data) return;
+            document.getElementById('display-name').textContent = data.name || '-';
+            document.getElementById('display-eng').textContent = data.engName || data.scientificName || '-';
+            document.getElementById('display-desc').textContent = data.description || '-';
+            const propText = Array.isArray(data.properties) ? data.properties.join(', ') : (data.properties || '-');
+            document.getElementById('display-prop').textContent = propText;
+            document.getElementById('display-usage').textContent = data.usage || '-';
+
+            const imgEl = document.getElementById('display-image');
+            const placeholder = document.getElementById('img-placeholder');
+            if (data.image) {
+                imgEl.src = data.image;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            const diseaseContainer = document.getElementById('disease-list');
+            const diseases = Array.isArray(data.diseases) ? data.diseases : [];
+            if (diseases.length > 0) {
+                diseaseContainer.innerHTML = '';
+                diseases.forEach(disease => {
+                    const badge = document.createElement('span');
+                    badge.className = 'px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium border border-pink-200';
+                    badge.innerText = disease;
+                    diseaseContainer.appendChild(badge);
+                });
+            } else {
+                diseaseContainer.innerHTML = '<span class="text-gray-400 text-sm">- ไม่มีข้อมูลโรค -</span>';
+            }
+        }
+
+        async function loadHerbFromApi(id) {
+            try {
+                const res = await fetch(`/api/herbs/${id}`);
+                if (!res.ok) throw new Error('not found');
+                const json = await res.json();
+                const herb = json.herb || json.data || json;
+                applyHerbData(herb);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const herbId = sessionStorage.getItem('viewingHerbId');
+            if (herbId) {
+                const ok = await loadHerbFromApi(herbId);
+                if (ok) return;
+            }
+
             const storedData = localStorage.getItem('previewHerbData');
-            
             if (storedData) {
                 const data = JSON.parse(storedData);
-
-                // ใส่ข้อความ
-                document.getElementById('display-name').textContent = data.name;
-                document.getElementById('display-eng').textContent = data.engName;
-                document.getElementById('display-desc').textContent = data.description;
-                document.getElementById('display-prop').textContent = data.properties;
-                document.getElementById('display-usage').textContent = data.usage;
-
-                // ใส่รูปภาพ
-                if (data.image) {
-                    const imgEl = document.getElementById('display-image');
-                    const placeholder = document.getElementById('img-placeholder');
-                    imgEl.src = data.image;
-                    imgEl.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                }
-
-                // ใส่รายการโรค
-                const diseaseContainer = document.getElementById('disease-list');
-                if (data.diseases && data.diseases.length > 0) {
-                    diseaseContainer.innerHTML = ''; // ล้างค่าเก่า
-                    data.diseases.forEach(disease => {
-                        const badge = document.createElement('span');
-                        badge.className = 'px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium border border-pink-200';
-                        badge.innerText = disease;
-                        diseaseContainer.appendChild(badge);
-                    });
-                }
+                applyHerbData(data);
             } else {
                 document.getElementById('display-name').textContent = "ไม่พบข้อมูล";
                 document.getElementById('display-desc').textContent = "กรุณากรอกข้อมูลในหน้าเพิ่มสมุนไพรก่อนครับ";
