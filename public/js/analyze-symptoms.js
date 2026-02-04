@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     if (!token) {
         window.location.href = '/login.html';
