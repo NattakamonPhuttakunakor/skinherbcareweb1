@@ -57,66 +57,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('image', file); // 'image' คือชื่อ field ที่ backend คาดหวัง
 
         try {
-            const res = await fetch('/api/gemini/analyze-herb-image', {
-                method: 'POST',
-                body: formData
-            });
-
-            const json = await res.json();
-            if (!res.ok || !json.success) {
-                throw new Error(json.message || 'ไม่สามารถวิเคราะห์ได้');
-            }
-
-            const data = json.data || {};
-            const herbName = data.name || '—';
-            const scientificName = data.scientificName || '';
-            const benefits = data.benefits || '';
-            const usage = data.usage || '';
-            const precautions = data.precautions || '';
-            const diseases = Array.isArray(data.diseases) ? data.diseases : [];
-            const confidencePct = typeof data.confidence === 'number' ? Math.round(data.confidence) : null;
-
-            const resultHtml = `
+            resultsContainer.innerHTML = `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-[#111C44]">ผลการค้นหา: ${herbName}</h3>
-                            ${scientificName ? `<p class="text-sm text-gray-500 mt-1"><strong>ชื่อวิทยาศาสตร์:</strong> ${scientificName}</p>` : ''}
-                            ${benefits ? `<p class="text-gray-600 mt-2">${benefits}</p>` : ''}
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-500">ความมั่นใจ</div>
-                            <div class="text-2xl font-bold text-green-600">${confidencePct !== null ? confidencePct : 0}%</div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
-                            <h4 class="font-semibold text-green-700 mb-2">สรรพคุณ / โรคที่บรรเทาได้</h4>
-                            ${diseases.length
-                                ? `<ul class="list-disc list-inside text-sm text-gray-700">${diseases.map(d => `<li>${d}</li>`).join('')}</ul>`
-                                : `<p class="text-sm text-gray-700">${benefits || '—'}</p>`}
-                        </div>
-
-                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                            <h4 class="font-semibold text-blue-700 mb-2">วิธีใช้เบื้องต้น</h4>
-                            <p class="text-sm text-gray-700">${usage || '—'}</p>
-                            ${precautions ? `<p class="text-xs text-gray-500 mt-2"><strong>ข้อควรระวัง:</strong> ${precautions}</p>` : ''}
-                        </div>
-                    </div>
-
-                    <p class="text-xs text-red-500 mt-3">*คำเตือน: ผลลัพธ์เป็นการประเมินเพื่อการศึกษาเท่านั้น โปรดปรึกษาแพทย์ผู้เชี่ยวชาญ</p>
+                    <p class="text-gray-700">ระบบวิเคราะห์รูปสมุนไพรด้วย AI ถูกปิดใช้งานชั่วคราว</p>
+                    <p class="text-sm text-gray-500 mt-2">หากต้องการเปิดใช้งานอีกครั้ง ให้ติดต่อผู้ดูแลระบบ</p>
                 </div>
             `;
-            resultsContainer.innerHTML = resultHtml;
-
-            const analysisToStore = {
-                type: 'ผลการค้นหาข้อมูลจากรูปสมุนไพร',
-                result: `พบข้อมูล: ${herbName}`,
-                timestamp: new Date().toISOString()
-            };
-            localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));
-
         } catch (error) {
             console.error('Analysis Error:', error);
             resultsContainer.innerHTML = `<p class="text-red-600">ขออภัย, เกิดข้อผิดพลาด: ${error.message}</p>`;
