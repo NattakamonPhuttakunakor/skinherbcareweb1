@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+      const userRaw = localStorage.getItem('user');
+      if (!token || !userRaw) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        window.location.replace('/login.html');
+      }
+    })();
+  </script>
   <title>ค้นหาข้อมูลจากรูปสมุนไพร - SkinHerbCare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet" />
