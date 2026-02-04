@@ -1,6 +1,25 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/auth/profile', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!res.ok) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+            return;
+        }
+    } catch (e) {
         window.location.href = '/login.html';
         return;
     }
