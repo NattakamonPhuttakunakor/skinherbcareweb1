@@ -7,13 +7,11 @@ import multer from 'multer';
 import FormData from 'form-data';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mongoose from 'mongoose'; 
+import mongoose from 'mongoose'; // ✅ เพิ่มสำหรับเชื่อมต่อ MongoDB
 
-// ✅ IMPORT ROUTES (ส่วนที่เพิ่มเข้ามา)
+// ✅ IMPORT ROUTES
 import analysisRoutes from './routes/analysis.js';
 import authRoutes from './routes/auth.js'; 
-import herbRoutes from './routes/herb.js';      // 🔥 เพิ่มบรรทัดนี้
-import diseaseRoutes from './routes/disease.js'; // 🔥 เพิ่มบรรทัดนี้
 
 console.log("2. Import ไลบรารีสำเร็จ...");
 
@@ -29,10 +27,11 @@ app.use(cors());
 app.use(express.json());
 
 // -------------------------------------------------------------
-// ✅ เชื่อมต่อ MongoDB
+// ✅ เชื่อมต่อ MongoDB (แก้ปัญหา Login Timeout)
 // -------------------------------------------------------------
 const MONGODB_URI = process.env.MONGODB_URI;
 
+// If running in production we must have these envs set
 if (process.env.NODE_ENV === 'production') {
     const missing = [];
     if (!MONGODB_URI) missing.push('MONGODB_URI');
@@ -41,17 +40,21 @@ if (process.env.NODE_ENV === 'production') {
     if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
     if (missing.length > 0) {
         console.error('❌ Missing required environment variables for production:', missing.join(', '));
-        global.MISSING_PROD_ENVS = missing; 
+        console.error('💡 Fix: Set these in your hosting provider (e.g. Render) before enabling production. Example: JWT_SECRET=<your-secret>, PYTHON_API_KEY=fp_yolo_2026_secret_x93k');
+        console.error('⚠️ Continuing startup in degraded mode: endpoints that require the missing envs will return 500/401 until fixed.');
+        // Do NOT exit the process here to allow the service to start (useful for inspecting logs on providers like Render).
+        // The server will still return configuration errors for endpoints that require these env vars.
+        global.MISSING_PROD_ENVS = missing; // expose for health checks
     }
 }
 
 if (!MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI ไม่ได้ตั้งค่า — รันในโหมด no-db');
+    console.warn('⚠️ MONGODB_URI ไม่ได้ตั้งค่า — รันในโหมด no-db (จะยังให้ endpoints ทำงานเพื่อทดสอบ)');
 } else {
     mongoose.connect(MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 10000, 
+        serverSelectionTimeoutMS: 10000, // ✅ เพิ่ม timeout
         socketTimeoutMS: 45000,
     })
     .then(() => {
@@ -60,9 +63,15 @@ if (!MONGODB_URI) {
     })
     .catch(err => {
         console.error('❌ MongoDB Connection Error:', err.message);
+        console.error('💡 ตรวจสอบ:');
+        console.error('   1. MONGODB_URI ถูกต้องหรือไม่');
+        console.error('   2. MongoDB Atlas IP Whitelist');
+        console.error('   3. Username/Password ถูกต้อง');
+        // ไม่ exit เพื่อให้ dev สามารถทดสอบฟังก์ชันอื่นได้
     });
 }
 
+// เช็คสถานะการเชื่อมต่อ
 mongoose.connection.on('disconnected', () => {
     console.warn('⚠️ MongoDB Disconnected');
 });
@@ -72,12 +81,10 @@ mongoose.connection.on('error', (err) => {
 });
 
 // -------------------------------------------------------------
-// ✅ MOUNT ROUTES (ส่วนที่เพิ่มเข้ามา)
+// ✅ MOUNT ROUTES
 // -------------------------------------------------------------
 app.use('/api/auth', authRoutes); 
 app.use('/api/analysis', analysisRoutes);
-app.use('/api/herbs', herbRoutes);       // 🔥 เปิดทางให้ /api/herbs เข้าได้แล้ว!
-app.use('/api/diseases', diseaseRoutes); // 🔥 เปิดทางให้ /api/diseases เข้าได้แล้ว!
 
 // -------------------------------------------------------------
 // Static files (frontend)
@@ -91,6 +98,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // -------------------------------------------------------------
 app.get('/status', async (req, res) => {
     const pythonUrl = process.env.PYTHON_API_URL;
+
     const status = {
         status: '✅ Server Running',
         mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
@@ -99,6 +107,7 @@ app.get('/status', async (req, res) => {
         python: { reachable: false },
         missing_envs: global.MISSING_PROD_ENVS || []
     };
+
     if (pythonUrl) {
         try {
             const r = await fetch(pythonUrl.replace(/\/predict\/?$/, '/') );
@@ -114,6 +123,7 @@ app.get('/status', async (req, res) => {
     } else {
         status.python = { reachable: false, error: 'PYTHON_API_URL not configured' };
     }
+
     res.json(status);
 });
 
@@ -133,16 +143,18 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
         }
 
         const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
+        // Check API_KEY first (as set on Render), fallback to PYTHON_API_KEY
         const apiKey = (process.env.API_KEY || process.env.PYTHON_API_KEY)?.trim();
 
         console.log('📤 Bridge → Python:', pythonUrl);
-        
+        console.log('🔑 API Key (configured):', apiKey ? (apiKey.slice(0, 4) + '***') : '(not set)');
+
         const headers = { ...formData.getHeaders() };
         if (apiKey) headers['X-API-Key'] = apiKey;
 
         const response = await axios.post(pythonUrl, formData, {
             headers,
-            timeout: 30000 
+            timeout: 30000 // 30 วินาที
         });
 
         res.json(response.data);
@@ -152,12 +164,18 @@ app.post('/api/bridge/analyze', upload.single('image'), async (req, res) => {
         let statusCode = 500;
         let message = "เชื่อมต่อ AI Server ไม่ได้";
         
-        if (error.code === 'ECONNREFUSED') message = "ไม่สามารถเชื่อมต่อ Python Server";
-        else if (error.code === 'ETIMEDOUT') { statusCode = 504; message = "Python Server ตอบช้า (Timeout)"; }
-        else if (error.response?.status === 401) { statusCode = 401; message = "API Key ไม่ถูกต้อง"; }
+        if (error.code === 'ECONNREFUSED') {
+            message = "ไม่สามารถเชื่อมต่อ Python Server";
+        } else if (error.code === 'ETIMEDOUT') {
+            statusCode = 504;
+            message = "Python Server ตอบช้า (Timeout)";
+        } else if (error.response?.status === 401) {
+            statusCode = 401;
+            message = "API Key ไม่ถูกต้อง";
+        }
         
         res.status(statusCode).json({ 
-            success: false, 
+            success: false,  // ✅ แก้จาก False
             message: message,
             error: error.message
         });
@@ -191,11 +209,13 @@ app.listen(PORT, () => {
 // Graceful Shutdown
 // -------------------------------------------------------------
 process.on('SIGTERM', async () => {
+    console.log('⚠️ SIGTERM received, shutting down gracefully...');
     await mongoose.connection.close();
     process.exit(0);
 });
 
 process.on('SIGINT', async () => {
+    console.log('⚠️ SIGINT received, shutting down gracefully...');
     await mongoose.connection.close();
     process.exit(0);
 });
