@@ -137,15 +137,38 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ✏️ Update herb (Admin only)
-router.put('/:id', protect, admin, async (req, res) => {
+// ✏️ Update herb (Admin only) — support multipart/form-data with optional image
+router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const { name, scientificName, description, properties, usage } = req.body;
-    const herb = await Herb.findByIdAndUpdate(
-      req.params.id,
-      { name, scientificName, description, properties, usage },
-      { new: true, runValidators: true }
-    );
+    const name = req.body.name;
+    const scientificName = req.body.engName || req.body.scientificName || '';
+    const description = req.body.description;
+    let properties = [];
+    if (req.body.properties) {
+      try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
+    }
+    const usage = req.body.usage || '';
+    const published = String(req.body.published) === 'true';
+
+    const update = {
+      name,
+      scientificName,
+      description,
+      properties,
+      usage,
+      published
+    };
+
+    if (req.file) {
+      update.image = `/uploads/${req.file.filename}`;
+    } else if (req.body.image) {
+      update.image = req.body.image;
+    }
+
+    const herb = await Herb.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+      runValidators: true
+    });
     
     if (!herb) {
       return res.status(404).json({ success: false, error: 'ไม่พบสมุนไพรนี้' });

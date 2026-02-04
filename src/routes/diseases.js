@@ -151,15 +151,45 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ✏️ Update disease (Admin only)
-router.put('/:id', protect, admin, async (req, res) => {
+// ✏️ Update disease (Admin only) — support multipart/form-data with optional image
+router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const { name, description, symptoms } = req.body;
-    const disease = await Disease.findByIdAndUpdate(
-      req.params.id,
-      { name, description, symptoms },
-      { new: true, runValidators: true }
-    );
+    const name = req.body.name;
+    const description = req.body.description;
+    const engName = req.body.engName || '';
+    const usage = req.body.usage || '';
+    const published = String(req.body.published) === 'true';
+
+    let symptoms = [];
+    if (req.body.symptoms) {
+      try { symptoms = JSON.parse(req.body.symptoms); if (!Array.isArray(symptoms)) throw new Error('not array'); } catch (e) { symptoms = String(req.body.symptoms).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+    }
+
+    let medicines = [];
+    if (req.body.medicines) {
+      try { medicines = JSON.parse(req.body.medicines); if (!Array.isArray(medicines)) throw new Error('not array'); } catch (e) { medicines = String(req.body.medicines).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+    }
+
+    const update = {
+      name,
+      engName,
+      description,
+      symptoms,
+      medicines,
+      usage,
+      published
+    };
+
+    if (req.file) {
+      update.image = `/uploads/${req.file.filename}`;
+    } else if (req.body.image) {
+      update.image = req.body.image;
+    }
+
+    const disease = await Disease.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+      runValidators: true
+    });
     
     if (!disease) {
       return res.status(404).json({ success: false, error: 'ไม่พบโรคนี้' });

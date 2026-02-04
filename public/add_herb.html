@@ -129,6 +129,9 @@
         const modal = document.getElementById('success-modal');
         const modalCard = document.getElementById('modal-card');
         const fileListContainer = document.getElementById('file-list-container');
+        let editingHerbId = sessionStorage.getItem('editingHerbId');
+        let existingImagePath = '';
+        let preselectDiseases = [];
         
         // โหลดรายการโรคจาก API สำหรับ checkbox
         async function loadDiseases() {
@@ -153,7 +156,27 @@
                     label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
                     listEl.appendChild(label);
                 });
+
+                if (Array.isArray(preselectDiseases) && preselectDiseases.length > 0) {
+                    document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                        cb.checked = preselectDiseases.includes(cb.value);
+                    });
+                }
             } catch (e) {
+                const stored = localStorage.getItem('diseaseData');
+                if (stored) {
+                    try {
+                        const diseases = JSON.parse(stored);
+                        listEl.innerHTML = '';
+                        diseases.forEach((d) => {
+                            const label = document.createElement('label');
+                            label.className = 'flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer';
+                            label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
+                            listEl.appendChild(label);
+                        });
+                        return;
+                    } catch {}
+                }
                 listEl.innerHTML = '<div class="text-sm text-gray-500">โหลดรายการโรคไม่สำเร็จ</div>';
             }
         }
@@ -162,12 +185,38 @@
         let uploadedImageFile = null; 
 
         // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             //  ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
                 return;
+            }
+            if (editingHerbId) {
+                try {
+                    const res = await fetch(`/api/herbs/${editingHerbId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const herb = data.herb || data;
+                        document.getElementById('input-name').value = herb.name || '';
+                        document.getElementById('input-eng').value = herb.scientificName || '';
+                        document.getElementById('input-desc').value = herb.description || '';
+                        document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
+                        document.getElementById('input-usage').value = herb.usage || '';
+                        document.getElementById('input-published').checked = herb.published === true;
+                        existingImagePath = herb.image || '';
+                        preselectDiseases = Array.isArray(herb.diseases) ? herb.diseases : [];
+
+                        const finishBtn = document.getElementById('finish-btn');
+                        if (finishBtn) {
+                            finishBtn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกการแก้ไข';
+                        }
+                    }
+                } catch (e) {
+                    console.warn('โหลดข้อมูลสมุนไพรไม่สำเร็จ', e);
+                }
             }
             loadDiseases();
             // admin search handler
@@ -256,9 +305,10 @@
                 form.append('published', published);
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
+                if (!uploadedImageFile && existingImagePath) form.append('image', existingImagePath);
 
-                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
-                    method: 'POST',
+                const response = await fetch(`${API_BASE_URL}/api/herbs${editingHerbId ? `/${editingHerbId}` : ''}`, {
+                    method: editingHerbId ? 'PUT' : 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: form
                 });
@@ -271,6 +321,27 @@
                 if (response.ok && result) {
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
+                    sessionStorage.removeItem('editingHerbId');
+                    try {
+                        const stored = localStorage.getItem('herbData');
+                        const list = stored ? JSON.parse(stored) : [];
+                        const saved = result.herb || { name, scientificName, description, properties, usage, image: existingImagePath || '' };
+                        const normalized = {
+                            id: saved._id || `local-${Date.now()}`,
+                            name: saved.name || name,
+                            scientificName: saved.scientificName || scientificName,
+                            description: saved.description || description,
+                            properties: Array.isArray(saved.properties) ? saved.properties.join(', ') : (saved.properties || properties.join(', ')),
+                            usage: saved.usage || usage,
+                            image: saved.image || existingImagePath || '',
+                            date: new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                        };
+                        const filtered = list.filter(h => h.id !== normalized.id);
+                        filtered.unshift(normalized);
+                        localStorage.setItem('herbData', JSON.stringify(filtered));
+                    } catch (e) {
+                        console.warn('ไม่สามารถอัปเดต herbData ได้', e);
+                    }
                     
                     modal.classList.remove('hidden');
                     setTimeout(() => {

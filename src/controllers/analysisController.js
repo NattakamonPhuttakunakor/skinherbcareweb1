@@ -24,11 +24,26 @@ const loadExcelData = () => {
 
 const tokenize = (text) => {
     if (!text) return [];
-    return String(text)
-        .toLowerCase()
+    const normalized = String(text).toLowerCase();
+    const baseTokens = normalized
         .split(/[\s,.;:!?/\\()]+/)
         .map(t => t.trim())
         .filter(t => t.length > 1);
+
+    // Basic Thai-friendly token fallback: create short n-grams from Thai sequences
+    const thaiChunks = normalized.match(/[ก-๙]+/g) || [];
+    const grams = [];
+    thaiChunks.forEach((chunk) => {
+        if (chunk.length < 4) return;
+        for (let i = 0; i < chunk.length - 1; i += 1) {
+            const bi = chunk.slice(i, i + 2);
+            if (bi.length === 2) grams.push(bi);
+            const tri = chunk.slice(i, i + 3);
+            if (tri.length === 3) grams.push(tri);
+        }
+    });
+
+    return Array.from(new Set([...baseTokens, ...grams])).filter(t => t.length > 1);
 };
 
 const buildDiseaseText = (d) => {
@@ -109,6 +124,7 @@ const fallbackAnalyze = async (symptomsText) => {
 export const diagnoseSymptoms = async (req, res) => {
     try {
         const { symptoms } = req.body;
+        const usePython = process.env.USE_PYTHON_ANALYSIS === 'true';
 
         // 1. Validate input
         if (!symptoms || typeof symptoms !== "string" || !symptoms.trim()) {
@@ -126,18 +142,27 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         }
 
-        // 2. ???????????? Excel/?????????????????? (??????? Python)
+        // 2. วิเคราะห์จาก Excel/ฐานข้อมูลภายในก่อน (ไม่เรียก Python)
         const localResults = await fallbackAnalyze(symptoms);
         if (localResults.length > 0) {
             return res.json({
                 success: true,
                 found: true,
                 data: localResults,
-                message: '??????????????????????????'
+                message: 'วิเคราะห์จากฐานข้อมูลภายใน'
             });
         }
 
-// 2. Resolve Python service URL and key (tolerant, check both API_KEY and PYTHON_API_KEY)
+        if (!usePython) {
+            return res.json({
+                success: true,
+                found: false,
+                data: [],
+                message: 'ไม่พบข้อมูลที่ตรงกับอาการนี้ในฐานข้อมูล'
+            });
+        }
+
+        // 3. Resolve Python service URL and key (tolerant, check both API_KEY and PYTHON_API_KEY)
         let pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5001/predict';
         // Check API_KEY first (as set on Render), fallback to PYTHON_API_KEY
         const apiKey = (process.env.API_KEY || process.env.PYTHON_API_KEY)?.trim();

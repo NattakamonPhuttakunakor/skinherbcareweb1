@@ -158,6 +158,13 @@
                 });
             }
 
+            const q = new URLSearchParams(window.location.search).get('q') || '';
+            if (q) {
+                document.getElementById('search-input').value = q;
+            }
+            fetchDiseases(q);
+        });
+
         let latestDiseases = [];
         async function fetchDiseases(query = '') {
             const tableBody = document.getElementById('disease-table-body');
@@ -172,6 +179,13 @@
                 const res = await fetch(url, {
                     headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
                 });
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userRole');
+                    window.location.href = '/login.html';
+                    return;
+                }
                 if (!res.ok) throw new Error(`Server error ${res.status}`);
                 const data = await res.json();
                 const diseases = Array.isArray(data) ? data : (data.diseases || data.data || []);
@@ -217,8 +231,8 @@
                         <td class="py-4 text-center text-sm">${disease.updatedAt ? new Date(disease.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (disease.date || '—')}</td>
                         <td class="py-4 text-center">
                             <button onclick="viewDisease('${disease._id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                            <button onclick="editDisease('${disease.name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                            <button onclick="deleteDisease('${disease.name}', this)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
+                            <button onclick="editDisease('${disease._id}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                            <button onclick="deleteDisease('${disease._id}', '${disease.name}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
                             ${isAdmin ? `<button onclick="toggleDiseasePublish('${disease._id}', ${published})" class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">${publishBtnText}</button>` : ''}
                         </td>
                     `;
@@ -263,7 +277,7 @@
         }
 
         // ฟังก์ชัน ลบ
-        function deleteDisease(diseaseName, btn) {
+        async function deleteDisease(diseaseId, diseaseName) {
             if (isProcessing) return;
             
             Swal.fire({
@@ -278,37 +292,37 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     isProcessing = true;
-                    const row = btn.closest('tr');
-                    row.style.transition = "all 0.5s";
-                    row.style.opacity = "0";
-                    row.style.transform = "translateX(50px)";
-                    
-                    setTimeout(() => {
-                        row.remove();
-                        // อัปเดตข้อมูลใน LocalStorage
-                        const storedData = localStorage.getItem('diseaseData');
-                        if (storedData) {
-                            const diseases = JSON.parse(storedData);
-                            const updated = diseases.filter(d => d.name !== diseaseName);
-                            localStorage.setItem('diseaseData', JSON.stringify(updated));
-                        }
-                        
-                        Swal.fire('ลบสำเร็จ!', 'ข้อมูลโรคถูกลบเรียบร้อยแล้ว', 'success').then(() => {
+                    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                    fetch(`/api/diseases/${diseaseId}`, {
+                        method: 'DELETE',
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    })
+                        .then((res) => {
+                            if (!res.ok) throw new Error('ลบไม่สำเร็จ');
+                            return res.json().catch(() => ({}));
+                        })
+                        .then(() => {
+                            Swal.fire('ลบสำเร็จ!', 'ข้อมูลโรคถูกลบเรียบร้อยแล้ว', 'success').then(() => {
+                                isProcessing = false;
+                                const q = document.getElementById('search-input').value.trim();
+                                fetchDiseases(q);
+                            });
+                        })
+                        .catch(() => {
+                            Swal.fire('ลบไม่สำเร็จ', 'เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
                             isProcessing = false;
-                            loadDiseaseList();
                         });
-                    }, 500);
                 }
             })
         }
 
         // ฟังก์ชัน แก้ไข
-        function editDisease(diseaseName) {
+        function editDisease(diseaseId) {
             if (isProcessing) return;
             
             Swal.fire({
                 title: 'แก้ไขข้อมูลโรค',
-                text: `คุณต้องการแก้ไข "${diseaseName}" ใช่ไหม?`,
+                text: `คุณต้องการแก้ไขข้อมูลนี้ใช่ไหม?`,
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'ไปแก้ไข',
@@ -318,7 +332,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     isProcessing = true;
-                    localStorage.setItem('editingDiseaseName', diseaseName);
+                    sessionStorage.setItem('editingDiseaseId', diseaseId);
                     window.location.href = 'add_disease.html';
                 } else {
                     isProcessing = false;

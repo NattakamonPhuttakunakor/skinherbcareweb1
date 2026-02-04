@@ -158,6 +158,13 @@
                     const res = await fetch(url, {
                         headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
                     });
+                    if (res.status === 401 || res.status === 403) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('userRole');
+                        window.location.href = '/login.html';
+                        return;
+                    }
                     if (!res.ok) throw new Error(`Server returned ${res.status}`);
                     const data = await res.json();
                     const herbs = Array.isArray(data) ? data : (data.herbs || data.data || []);
@@ -171,6 +178,7 @@
                     staticData.forEach((item, index) => addTableRow(tableBody, item.name, item.date, false, `static-row-${index}`));
                 }
             }
+            window.fetchHerbs = fetchHerbs;
 
             function renderHerbRows(container, herbs, isAdmin = false) {
                 container.innerHTML = '';
@@ -202,8 +210,8 @@
                                 <button onclick='viewHerb(${JSON.stringify(h._id || idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
                                     <i class="fa-solid fa-eye"></i> ดู
                                 </button>
-                                <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                                <button onclick="deleteItem(this, 'herb-${idx}', false)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">ลบ</button>
+                                <button onclick="editHerb('${h._id || ''}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                                <button onclick="deleteHerb('${h._id || ''}', '${name}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">ลบ</button>
                                 ${isAdmin ? `
                                     <button onclick='togglePublish(${JSON.stringify(idx)})' class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">
                                         ${publishBtnText}
@@ -327,6 +335,49 @@
                 confirmButtonText: 'ไปหน้าแก้ไข'
             }).then((result) => {
                 if (result.isConfirmed) window.location.href = 'add_herb.html';
+            });
+        }
+
+        function editHerb(herbId) {
+            if (!herbId) return;
+            Swal.fire({
+                title: 'แก้ไขข้อมูลสมุนไพร',
+                text: 'ต้องการไปหน้าแก้ไขข้อมูลหรือไม่?',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'ไปแก้ไข'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sessionStorage.setItem('editingHerbId', herbId);
+                    window.location.href = 'add_herb.html';
+                }
+            });
+        }
+
+        function deleteHerb(herbId, herbName) {
+            if (!herbId) return;
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: `ต้องการลบ "${herbName}" ใช่หรือไม่`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ลบเลย'
+            }).then(async (result) => {
+                if (!result.isConfirmed) return;
+                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                try {
+                    const res = await fetch(`/api/herbs/${herbId}`, {
+                        method: 'DELETE',
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    });
+                    if (!res.ok) throw new Error('Delete failed');
+                    Swal.fire('ลบสำเร็จ!', '', 'success');
+                    const q = document.getElementById('search-input').value.trim();
+                    if (window.fetchHerbs) await window.fetchHerbs(q);
+                } catch (e) {
+                    Swal.fire('ลบไม่สำเร็จ', 'เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                }
             });
         }
 

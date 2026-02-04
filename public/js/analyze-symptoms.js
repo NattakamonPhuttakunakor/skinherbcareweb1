@@ -66,6 +66,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const results = Array.isArray(json.data) ? json.data : (json.data ? [json.data] : []);
+            if (!results.length) {
+                resultsContainer.innerHTML = `<p class="text-gray-600 text-center">ยังไม่พบข้อมูลที่ตรงกับอาการนี้</p>`;
+                return;
+            }
             const extractHerbsFromAdvice = (text) => {
                 if (!text) return [];
                 const match = text.match(/สมุนไพร[:：]\s*([^\n]+)/);

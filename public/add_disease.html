@@ -145,9 +145,11 @@
         
         // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
         let uploadedImageFile = null; // เก็บออบเจ็กต์ File
+        let editingDiseaseId = sessionStorage.getItem('editingDiseaseId');
+        let existingImagePath = '';
 
         // ตรวจสอบ Token เมื่อโหลดหน้า
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
@@ -160,6 +162,38 @@
                     const q = document.getElementById('admin-disease-search-input').value.trim();
                     window.location.href = `/disease_list.html${q ? '?q=' + encodeURIComponent(q) : ''}`;
                 });
+            }
+
+            if (editingDiseaseId) {
+                try {
+                    const res = await fetch(`/api/diseases/${editingDiseaseId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const disease = data.disease || data;
+                        document.getElementById('input-name').value = disease.name || '';
+                        document.getElementById('input-eng').value = disease.engName || '';
+                        document.getElementById('input-desc').value = disease.description || '';
+                        document.getElementById('input-prop').value = Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '');
+                        document.getElementById('input-usage').value = disease.usage || '';
+                        document.getElementById('input-published').checked = disease.published === true;
+                        existingImagePath = disease.image || '';
+
+                        if (Array.isArray(disease.medicines)) {
+                            document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                                cb.checked = disease.medicines.includes(cb.value);
+                            });
+                        }
+
+                        const finishBtn = document.getElementById('finish-btn');
+                        if (finishBtn) {
+                            finishBtn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกการแก้ไข';
+                        }
+                    }
+                } catch (e) {
+                    console.warn('โหลดข้อมูลโรคไม่สำเร็จ', e);
+                }
             }
         });
 
@@ -238,6 +272,7 @@
             form.append('usage', usage);
             form.append('published', published);
             if (uploadedImageFile) form.append('image', uploadedImageFile);
+            if (!uploadedImageFile && existingImagePath) form.append('image', existingImagePath);
 
             // UI Loading
             const finishBtn = document.getElementById('finish-btn');
@@ -262,8 +297,8 @@
 
             try {
                 // 2. ยิง API
-                const response = await fetch(`${API_BASE_URL}/api/diseases`, {
-                    method: 'POST',
+                const response = await fetch(`${API_BASE_URL}/api/diseases${editingDiseaseId ? `/${editingDiseaseId}` : ''}`, {
+                    method: editingDiseaseId ? 'PUT' : 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
@@ -278,6 +313,28 @@
                 if (response.ok && result) {
                     // สำเร็จ: โชว์ Modal
                     document.getElementById('modal-herb-name').textContent = name;
+                    sessionStorage.removeItem('editingDiseaseId');
+                    try {
+                        const stored = localStorage.getItem('diseaseData');
+                        const list = stored ? JSON.parse(stored) : [];
+                        const saved = result.disease || { name, symptoms: symptoms.join(', '), description, usage, image: existingImagePath || '' };
+                        const normalized = {
+                            id: saved._id || `local-${Date.now()}`,
+                            name: saved.name || name,
+                            engName: saved.engName || engName,
+                            description: saved.description || description,
+                            symptoms: Array.isArray(saved.symptoms) ? saved.symptoms.join(', ') : (saved.symptoms || symptoms.join(', ')),
+                            medicines: saved.medicines || medicines,
+                            usage: saved.usage || usage,
+                            image: saved.image || existingImagePath || '',
+                            date: new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                        };
+                        const filtered = list.filter(d => d.id !== normalized.id);
+                        filtered.unshift(normalized);
+                        localStorage.setItem('diseaseData', JSON.stringify(filtered));
+                    } catch (e) {
+                        console.warn('ไม่สามารถอัปเดต diseaseData ได้', e);
+                    }
 
                     if (result.savedLocally) {
                         const note = document.createElement('div');
