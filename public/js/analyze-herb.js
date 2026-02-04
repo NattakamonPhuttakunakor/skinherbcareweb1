@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-    if (!token) {
+    const userRaw = localStorage.getItem('user');
+    if (!token || !userRaw) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
         window.location.href = '/login.html';
         return;
     }
