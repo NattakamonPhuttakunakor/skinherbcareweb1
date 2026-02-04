@@ -87,45 +87,12 @@ df.columns = df.columns.str.strip()
 
 def clean_and_prepare_data(row):
     """Clean and prepare knowledge text for AI"""
-    main = str(row.get('อาการหลัก', ''))
-    sub = str(row.get('อาการรอง', '') or '')
-    loc = str(row.get('ตำแหน่งที่พบบ่อย', '') or '')
-    disease_key = 'รายชื่อโรค'
-    knowledge_text = f"{row[disease_key]} {main} {main} {sub} {loc} {loc}"
+    main = str(row.get('?????????', ''))
+    sub = str(row.get('????????', '') or '')
+    loc = str(row.get('????????????????', '') or '')
+    knowledge_text = f"{row['??????????']} {main} {main} {sub} {loc} {loc}"
     return knowledge_text
 
-
-# ===============================
-# build knowledge after final data load
-df['knowledge'] = df.apply(clean_and_prepare_data, axis=1)
-
-# 🤖 AI (TF-IDF with improved tokenizer)
-# ===============================
-vectorizer = None
-tfidf_matrix = None
-
-try:
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-
-    print("🧠 Training AI model...")
-    vectorizer = TfidfVectorizer(
-        tokenizer=thai_tokenizer,
-        ngram_range=(1, 2),
-        min_df=1,
-        sublinear_tf=True
-    )
-    tfidf_matrix = vectorizer.fit_transform(df['knowledge'])
-    print(f"✅ AI Ready ({len(df)} diseases)")
-except Exception as e:
-    print(f"⚠️ AI init error: {e}")
-    vectorizer = None
-    tfidf_matrix = None
-
-# ===============================
-# 🏥 Health Check
-# ===============================
-@app.route("/", methods=["GET"])
 def health():
     return jsonify({
         "success": True,
