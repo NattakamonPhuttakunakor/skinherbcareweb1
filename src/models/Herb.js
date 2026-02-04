@@ -7,7 +7,8 @@ const herbSchema = new mongoose.Schema({
   properties: [{ type: String }], // e.g., ['ต้านการอักเสบ', 'ลดสิว']
   usage: { type: String, required: true },
   image: { type: String, default: '/uploads/default-herb.png' }, // Path to the image
-  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  published: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Herb = mongoose.model('Herb', herbSchema);

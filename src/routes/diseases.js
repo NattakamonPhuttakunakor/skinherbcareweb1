@@ -6,8 +6,25 @@ import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// 📋 Get all diseases (support optional ?q=search)
+// 📋 Get published diseases (public)
 router.get('/', async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+    let diseases;
+    if (q) {
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      diseases = await Disease.find({ published: true, name: regex });
+    } else {
+      diseases = await Disease.find({ published: true });
+    }
+    res.json({ success: true, diseases });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 📋 Get all diseases (admin)
+router.get('/admin', protect, admin, async (req, res) => {
   try {
     const q = req.query.q?.trim();
     let diseases;
@@ -47,6 +64,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       try { medicines = JSON.parse(req.body.medicines); if (!Array.isArray(medicines)) throw new Error('not array'); } catch (e) { medicines = String(req.body.medicines).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
     }
     const usage = req.body.usage || '';
+    const published = String(req.body.published) === 'true';
     const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '');
 
     // Validate required fields
@@ -82,6 +100,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       symptoms: symptoms || [],
       medicines,
       usage,
+      published,
       image: imagePath
     });
 
@@ -98,6 +117,24 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     } else {
       res.status(500).json({ success: false, error: error.message });
     }
+  }
+});
+
+// ✅ Publish / Unpublish disease (Admin only)
+router.put('/:id/publish', protect, admin, async (req, res) => {
+  try {
+    const published = String(req.body.published) === 'true';
+    const disease = await Disease.findByIdAndUpdate(
+      req.params.id,
+      { published },
+      { new: true }
+    );
+    if (!disease) {
+      return res.status(404).json({ success: false, error: 'ไม่พบโรคนี้' });
+    }
+    res.json({ success: true, disease });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

@@ -158,15 +158,35 @@
                 });
             }
 
+        let latestDiseases = [];
         async function fetchDiseases(query = '') {
             const tableBody = document.getElementById('disease-table-body');
             const emptyState = document.getElementById('empty-state');
 
             try {
-                const res = await fetch(`/api/diseases${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                const isAdmin = !!token;
+                const url = isAdmin
+                    ? `/api/diseases/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
+                    : `/api/diseases${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+                const res = await fetch(url, {
+                    headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
+                });
                 if (!res.ok) throw new Error(`Server error ${res.status}`);
                 const data = await res.json();
                 const diseases = Array.isArray(data) ? data : (data.diseases || data.data || []);
+                latestDiseases = diseases;
+                localStorage.setItem('diseaseData', JSON.stringify(diseases.map(d => ({
+                    id: d._id,
+                    name: d.name,
+                    engName: d.engName || '',
+                    description: d.description || '',
+                    symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
+                    medicines: d.medicines || [],
+                    usage: d.usage || '',
+                    image: d.image || '',
+                    date: d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''
+                })));
 
                 if (!Array.isArray(diseases) || diseases.length === 0) {
                     tableBody.innerHTML = '';
@@ -182,17 +202,24 @@
                     const tr = document.createElement('tr');
                     tr.className = `hover:bg-gray-50 transition-colors border-b border-gray-100/50`;
 
+                    const published = disease.published === true;
+                    const statusLabel = published ? 'เผยแพร่' : 'ยังไม่เผยแพร่';
+                    const statusClass = published ? 'bg-[#E6F9F0] text-[#05CD99]' : 'bg-gray-200 text-gray-600';
+                    const publishBtnText = published ? 'ซ่อน' : 'เผยแพร่';
+                    const publishBtnClass = published ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-[#05CD99] text-white hover:bg-green-600';
+
                     tr.innerHTML = `
                         <td class="py-4 pl-4 font-bold flex items-center">
                             ${disease.name}
                         </td>
                         <td class="py-4 text-sm text-gray-600">${disease.symptoms || ''}</td>
-                        <td class="py-4 text-center"><span class="bg-[#E6F9F0] text-[#05CD99] px-3 py-1 rounded-full text-xs font-bold">เผยแพร่</span></td>
+                        <td class="py-4 text-center"><span class="${statusClass} px-3 py-1 rounded-full text-xs font-bold">${statusLabel}</span></td>
                         <td class="py-4 text-center text-sm">${disease.updatedAt ? new Date(disease.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (disease.date || '—')}</td>
                         <td class="py-4 text-center">
-                            <button onclick="viewDisease('${disease.name}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
+                            <button onclick="viewDisease('${disease._id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
                             <button onclick="editDisease('${disease.name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
                             <button onclick="deleteDisease('${disease.name}', this)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
+                            ${isAdmin ? `<button onclick="toggleDiseasePublish('${disease._id}', ${published})" class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">${publishBtnText}</button>` : ''}
                         </td>
                     `;
                     tableBody.appendChild(tr);
@@ -300,24 +327,35 @@
         }
 
         // ฟังก์ชัน ดูรายละเอียด
-        function viewDisease(diseaseName) {
+        function viewDisease(diseaseId) {
             if (isProcessing) return;
             
             isProcessing = true;
-            try {
-                const storedData = localStorage.getItem('diseaseData');
-                if (storedData) {
-                    const saved = JSON.parse(storedData);
-                    const found = saved.find(d => d.name === diseaseName);
-                    if (found && found.id) {
-                        sessionStorage.setItem('viewingDiseaseId', found.id);
-                    }
-                }
-            } catch (e) { /* ignore */ }
-            sessionStorage.setItem('viewingDiseaseName', diseaseName);
+            sessionStorage.setItem('viewingDiseaseId', diseaseId);
             setTimeout(() => {
                 window.location.href = 'disease_detail.html';
             }, 300);
+        }
+
+        async function toggleDiseasePublish(id, published) {
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+            if (!token) return;
+            try {
+                const res = await fetch(`/api/diseases/${id}/publish`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ published: !published })
+                });
+                if (!res.ok) throw new Error('Update failed');
+                const q = document.getElementById('search-input').value.trim();
+                fetchDiseases(q);
+            } catch (err) {
+                console.error(err);
+                alert('อัปเดตสถานะไม่สำเร็จ');
+            }
         }
 
         // ฟังก์ชัน Logout

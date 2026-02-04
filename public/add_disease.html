@@ -89,6 +89,10 @@
                             <label class="block text-[#111C44] font-bold mb-2">วิธีการใช้สมุนไพร</label>
                             <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"></textarea>
                         </div>
+                        <div class="flex items-center gap-3 bg-white/70 border border-gray-200 rounded-xl px-4 py-3">
+                            <input type="checkbox" id="input-published" class="w-5 h-5 accent-green-600">
+                            <label for="input-published" class="text-[#111C44] font-semibold">เผยแพร่ให้ผู้ใช้เห็น</label>
+                        </div>
                     </div>
                     <div class="mt-8 flex justify-center">
                         <button onclick="goToStep2()" class="bg-[#E2E8F0] hover:bg-white text-[#111C44] px-8 py-3 rounded-full font-bold shadow-md flex items-center gap-2 transition-all">
@@ -211,6 +215,7 @@
             const description = document.getElementById('input-desc').value.trim();
             const symptomsInput = document.getElementById('input-prop').value.trim();
             const usage = document.getElementById('input-usage').value.trim();
+            const published = document.getElementById('input-published')?.checked ? 'true' : 'false';
 
             // แปลงอาการเป็น Array (ตาม Logic เดิมที่ Server น่าจะต้องการ)
             const symptoms = symptomsInput
@@ -231,6 +236,7 @@
             form.append('symptoms', JSON.stringify(symptoms));
             form.append('medicines', JSON.stringify(medicines));
             form.append('usage', usage);
+            form.append('published', published);
             if (uploadedImageFile) form.append('image', uploadedImageFile);
 
             // UI Loading

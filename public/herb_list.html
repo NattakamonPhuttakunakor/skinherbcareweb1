@@ -147,13 +147,23 @@
             }
 
             // Fetch herbs from backend (supports optional search query)
+            let latestHerbs = [];
             async function fetchHerbs(query = '') {
                 try {
-                    const res = await fetch(`/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+                    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                    const isAdmin = !!token;
+                    const url = isAdmin
+                        ? `/api/herbs/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
+                        : `/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+                    const res = await fetch(url, {
+                        headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
+                    });
                     if (!res.ok) throw new Error(`Server returned ${res.status}`);
                     const data = await res.json();
                     const herbs = Array.isArray(data) ? data : (data.herbs || data.data || []);
-                    renderHerbRows(tableBody, herbs);
+                    latestHerbs = herbs;
+                    localStorage.setItem('herbData', JSON.stringify(herbs));
+                    renderHerbRows(tableBody, herbs, isAdmin);
                 } catch (err) {
                     console.warn('Failed to fetch herbs, falling back to static data.', err);
                     // Fallback to static data
@@ -162,7 +172,7 @@
                 }
             }
 
-            function renderHerbRows(container, herbs) {
+            function renderHerbRows(container, herbs, isAdmin = false) {
                 container.innerHTML = '';
                 if (!Array.isArray(herbs) || herbs.length === 0) {
                     const tr = document.createElement('tr');
@@ -174,9 +184,74 @@
                 herbs.forEach((h, idx) => {
                     const name = h.name || h.commonName || h.thaiName || 'Unnamed';
                     const updated = h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (h.date || '—');
+                    const published = h.published === true;
+                    const statusLabel = published ? 'เผยแพร่' : 'ยังไม่เผยแพร่';
+                    const statusClass = published ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600';
+                    const publishBtnText = published ? 'ซ่อน' : 'เผยแพร่';
+                    const publishBtnClass = published ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-[#05CD99] text-white hover:bg-green-600';
                     addTableRow(container, name, updated, false, `herb-${idx}`);
+                    const row = container.lastElementChild;
+                    if (row) {
+                        const statusCell = row.querySelector('td:nth-child(2)');
+                        if (statusCell) {
+                            statusCell.innerHTML = `<span class="${statusClass} px-3 py-1 rounded-full text-xs font-bold">${statusLabel}</span>`;
+                        }
+                        const actionCell = row.querySelector('td:nth-child(4)');
+                        if (actionCell) {
+                            actionCell.innerHTML = `
+                                <button onclick='viewHerb(${JSON.stringify(idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
+                                    <i class="fa-solid fa-eye"></i> ดู
+                                </button>
+                                <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                                <button onclick="deleteItem(this, 'herb-${idx}', false)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">ลบ</button>
+                                ${isAdmin ? `
+                                    <button onclick='togglePublish(${JSON.stringify(idx)})' class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">
+                                        ${publishBtnText}
+                                    </button>
+                                ` : ''}
+                            `;
+                        }
+                    }
                 });
             }
+
+            window.viewHerb = function (idx) {
+                const herb = latestHerbs[idx];
+                if (!herb) return;
+                const preview = {
+                    name: herb.name || '',
+                    engName: herb.scientificName || '',
+                    description: herb.description || '',
+                    properties: Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || ''),
+                    usage: herb.usage || '',
+                    diseases: herb.diseases || [],
+                    image: herb.image || ''
+                };
+                localStorage.setItem('previewHerbData', JSON.stringify(preview));
+                window.location.href = 'herb_detail.html';
+            };
+
+            window.togglePublish = async function (idx) {
+                const herb = latestHerbs[idx];
+                if (!herb || !herb._id) return;
+                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                if (!token) return;
+                try {
+                    const res = await fetch(`/api/herbs/${herb._id}/publish`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ published: !herb.published })
+                    });
+                    if (!res.ok) throw new Error('Update failed');
+                    await fetchHerbs(document.getElementById('search-input').value.trim());
+                } catch (err) {
+                    console.error(err);
+                    alert('อัปเดตสถานะไม่สำเร็จ');
+                }
+            };
 
             // Attach search handler
             const doSearch = debounce((e) => {

@@ -6,8 +6,25 @@ import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-// 📋 Get all herbs (support optional ?q=search)
+// 📋 Get published herbs (public)
 router.get('/', async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+    let herbs;
+    if (q) {
+      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      herbs = await Herb.find({ published: true, $or: [{ name: regex }, { scientificName: regex }] });
+    } else {
+      herbs = await Herb.find({ published: true });
+    }
+    res.json({ success: true, herbs });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 📋 Get all herbs (admin)
+router.get('/admin', protect, admin, async (req, res) => {
   try {
     const q = req.query.q?.trim();
     let herbs;
@@ -35,6 +52,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
     }
     const usage = req.body.usage || '';
+    const published = String(req.body.published) === 'true';
     const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '/uploads/default-herb.png');
 
     // Validate required fields
@@ -67,9 +85,10 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       scientificName: scientificName || '',
       description,
       properties: properties || [],
-      usage: usage || '',
-      image: imagePath,
-      addedBy: req.user._id
+        usage: usage || '',
+        published,
+        image: imagePath,
+        addedBy: req.user._id
     });
 
     const savedHerb = await newHerb.save();
@@ -84,6 +103,24 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     } else {
       res.status(500).json({ success: false, error: error.message });
     }
+  }
+});
+
+// ✅ Publish / Unpublish herb (Admin only)
+router.put('/:id/publish', protect, admin, async (req, res) => {
+  try {
+    const published = String(req.body.published) === 'true';
+    const herb = await Herb.findByIdAndUpdate(
+      req.params.id,
+      { published },
+      { new: true }
+    );
+    if (!herb) {
+      return res.status(404).json({ success: false, error: 'ไม่พบสมุนไพรนี้' });
+    }
+    res.json({ success: true, herb });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

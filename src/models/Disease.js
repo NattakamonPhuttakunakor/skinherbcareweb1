@@ -7,7 +7,8 @@ const diseaseSchema = new mongoose.Schema({
   symptoms: [{ type: String }],
   medicines: [{ type: String }],
   usage: { type: String, default: '' },
-  image: { type: String, default: '' }
+  image: { type: String, default: '' },
+  published: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Disease = mongoose.model('Disease', diseaseSchema);
