@@ -57,16 +57,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('image', file); // 'image' คือชื่อ field ที่ backend คาดหวัง
 
         try {
-            // Demo-only (fixed): no backend yet
-            const herbName = 'เปลือกมังคุด';
-            const scientificName = 'Garcinia mangostana';
-            const benefits = 'อุดมไปด้วยสารแซนโทน ช่วยสมานแผลและลดการอักเสบของผิวหนังได้ดี';
-            const usage = 'บดผงเปลือกมังคุดผสมน้ำสะอาดเล็กน้อย ทาบริเวณที่เป็นวันละ 1-2 ครั้ง';
-            const precautions = 'หลีกเลี่ยงบริเวณแผลเปิดลึก และหยุดใช้หากเกิดการระคายเคือง';
-            const diseases = ['โรคด่างขาว'];
-            const confidencePct = 78;
+            const res = await fetch('/api/gemini/analyze-herb-image', {
+                method: 'POST',
+                body: formData
+            });
 
-            // 4. แสดงผลลัพธ์ที่ได้จาก AI
+            const json = await res.json();
+            if (!res.ok || !json.success) {
+                throw new Error(json.message || 'ไม่สามารถวิเคราะห์ได้');
+            }
+
+            const data = json.data || {};
+            const herbName = data.name || '—';
+            const scientificName = data.scientificName || '';
+            const benefits = data.benefits || '';
+            const usage = data.usage || '';
+            const precautions = data.precautions || '';
+            const diseases = Array.isArray(data.diseases) ? data.diseases : [];
+            const confidencePct = typeof data.confidence === 'number' ? Math.round(data.confidence) : null;
+
             const resultHtml = `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
                     <div class="flex items-start justify-between">
@@ -101,7 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             resultsContainer.innerHTML = resultHtml;
 
-            // 5. บันทึกผลลัพธ์ล่าสุดลงใน localStorage เพื่อแสดงในหน้าแดชบอร์ด
             const analysisToStore = {
                 type: 'ผลการค้นหาข้อมูลจากรูปสมุนไพร',
                 result: `พบข้อมูล: ${herbName}`,
