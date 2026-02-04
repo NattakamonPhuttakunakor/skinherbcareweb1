@@ -57,12 +57,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('image', file); // 'image' คือชื่อ field ที่ backend คาดหวัง
 
         try {
-            resultsContainer.innerHTML = `
+            const fileName = file.name || '';
+            const q = fileName.replace(/\.[^/.]+$/, '').trim();
+            const res = await fetch(`/api/herbs${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+            if (!res.ok) throw new Error('ไม่สามารถดึงข้อมูลจากฐานข้อมูลได้');
+            const json = await res.json();
+            const herbs = json.herbs || json.data || [];
+            const herb = herbs[0];
+
+            if (!herb) {
+                resultsContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
+                        <p class="text-gray-700">ไม่พบข้อมูลสมุนไพรที่ตรงกับรูปนี้ในฐานข้อมูล</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const herbName = herb.name || '—';
+            const scientificName = herb.scientificName || '';
+            const benefits = herb.description || '';
+            const usage = herb.usage || '';
+            const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
+
+            const resultHtml = `
                 <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
-                    <p class="text-gray-700">ระบบวิเคราะห์รูปสมุนไพรด้วย AI ถูกปิดใช้งานชั่วคราว</p>
-                    <p class="text-sm text-gray-500 mt-2">หากต้องการเปิดใช้งานอีกครั้ง ให้ติดต่อผู้ดูแลระบบ</p>
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-[#111C44]">ผลการค้นหา: ${herbName}</h3>
+                            ${scientificName ? `<p class="text-sm text-gray-500 mt-1"><strong>ชื่อวิทยาศาสตร์:</strong> ${scientificName}</p>` : ''}
+                            ${benefits ? `<p class="text-gray-600 mt-2">${benefits}</p>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
+                            <h4 class="font-semibold text-green-700 mb-2">โรคที่บรรเทาได้</h4>
+                            ${diseases.length
+                                ? `<ul class="list-disc list-inside text-sm text-gray-700">${diseases.map(d => `<li>${d}</li>`).join('')}</ul>`
+                                : `<p class="text-sm text-gray-700">ไม่มีข้อมูล</p>`}
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                            <h4 class="font-semibold text-blue-700 mb-2">วิธีใช้เบื้องต้น</h4>
+                            <p class="text-sm text-gray-700">${usage || '—'}</p>
+                        </div>
+                    </div>
                 </div>
             `;
+            resultsContainer.innerHTML = resultHtml;
+
+            const analysisToStore = {
+                type: 'ผลการค้นหาข้อมูลจากรูปสมุนไพร',
+                result: `พบข้อมูล: ${herbName}`,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));
         } catch (error) {
             console.error('Analysis Error:', error);
             resultsContainer.innerHTML = `<p class="text-red-600">ขออภัย, เกิดข้อผิดพลาด: ${error.message}</p>`;

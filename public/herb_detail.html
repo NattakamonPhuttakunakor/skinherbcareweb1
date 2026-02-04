@@ -35,9 +35,9 @@
         
         <div class="flex flex-col items-center mt-6 mb-8">
             <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jureeporn&backgroundColor=111c44" class="w-full h-full object-cover">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jureeporn&backgroundColor=111c44" class="w-full h-full object-cover admin-sidebar-img">
             </div>
-            <h3 class="mt-3 text-lg font-medium">Jureeporn zz</h3>
+            <h3 class="mt-3 text-lg font-medium admin-sidebar-name">Jureeporn zz</h3>
             <p class="text-xs text-gray-400">Admin</p>
         </div>
 
@@ -156,7 +156,10 @@
             const imgEl = document.getElementById('display-image');
             const placeholder = document.getElementById('img-placeholder');
             if (data.image) {
-                imgEl.src = data.image;
+                const imgSrc = data.image.startsWith('/uploads')
+                    ? `${window.location.origin}${data.image}`
+                    : data.image;
+                imgEl.src = imgSrc;
                 imgEl.classList.remove('hidden');
                 placeholder.classList.add('hidden');
             } else {
@@ -209,6 +212,7 @@
             }
         });
     </script>
+    <script src="/js/profile-drawer.js"></script>
 
 </body>
 </html>

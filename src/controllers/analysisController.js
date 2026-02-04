@@ -1,4 +1,59 @@
 // Node v20+ มี fetch ให้แล้ว ไม่ต้อง import
+import Disease from '../models/Disease.js';
+
+const tokenize = (text) => {
+    if (!text) return [];
+    return String(text)
+        .toLowerCase()
+        .split(/[\s,.;:!?/\\()]+/)
+        .map(t => t.trim())
+        .filter(t => t.length > 1);
+};
+
+const buildDiseaseText = (d) => {
+    const parts = [
+        d.name,
+        d.engName,
+        d.description,
+        Array.isArray(d.symptoms) ? d.symptoms.join(' ') : d.symptoms,
+        Array.isArray(d.medicines) ? d.medicines.join(' ') : d.medicines,
+        d.usage
+    ].filter(Boolean);
+    return parts.join(' ').toLowerCase();
+};
+
+const fallbackAnalyze = async (symptomsText) => {
+    try {
+        const tokens = tokenize(symptomsText);
+        if (tokens.length === 0) return [];
+
+        const diseases = await Disease.find({}).lean();
+        if (!Array.isArray(diseases) || diseases.length === 0) return [];
+
+        const scored = diseases.map((d) => {
+            const text = buildDiseaseText(d);
+            let hits = 0;
+            tokens.forEach((t) => {
+                if (text.includes(t)) hits += 1;
+            });
+            const score = hits / tokens.length;
+            return { d, score };
+        }).filter(item => item.score > 0);
+
+        scored.sort((a, b) => b.score - a.score);
+        return scored.slice(0, 3).map(({ d, score }) => ({
+            disease: d.name,
+            confidence: Math.round(score * 100),
+            main_symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
+            secondary_symptoms: '',
+            recommendation: d.usage || d.description || '',
+            location: '',
+            cause: ''
+        }));
+    } catch (e) {
+        return [];
+    }
+};
 
 export const diagnoseSymptoms = async (req, res) => {
     try {
@@ -49,6 +104,15 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         } catch (err) {
             console.warn('⚠️ Unable to reach Python service:', err.message);
+            const fallbackResults = await fallbackAnalyze(symptoms);
+            if (fallbackResults.length > 0) {
+                return res.json({
+                    success: true,
+                    found: true,
+                    data: fallbackResults,
+                    message: 'วิเคราะห์จากฐานข้อมูลภายใน'
+                });
+            }
             return res.status(502).json({
                 success: false,
                 message: 'ไม่สามารถเชื่อมต่อบริการวิเคราะห์ (Python) ได้ในขณะนี้'
@@ -83,7 +147,15 @@ export const diagnoseSymptoms = async (req, res) => {
         if (!response.ok) {
             const text = await response.text().catch(() => '');
             console.error('❌ Python returned error:', response.status, text);
-            // Try fallback server-side heuristic
+            const fallbackResults = await fallbackAnalyze(symptoms);
+            if (fallbackResults.length > 0) {
+                return res.json({
+                    success: true,
+                    found: true,
+                    data: fallbackResults,
+                    message: 'วิเคราะห์จากฐานข้อมูลภายใน'
+                });
+            }
             return res.status(500).json({
                 success: false,
                 message: 'บริการวิเคราะห์เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง'

@@ -165,6 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
     nameEl.textContent = fullName;
     emailEl.textContent = email;
+    const sidebarNames = Array.from(document.querySelectorAll('.admin-sidebar-name'));
+    sidebarNames.forEach((el) => { el.textContent = fullName; });
+
+    const sidebarImgs = Array.from(document.querySelectorAll('.admin-sidebar-img'));
 
     const profileIconEls = Array.from(document.querySelectorAll('.profile-icon'));
     const ensureProfileIcon = (el) => {
@@ -202,6 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.style.display = 'block';
                 fb.style.display = 'none';
                 if (svg) svg.style.display = 'none';
+            });
+            sidebarImgs.forEach((img) => {
+                img.src = src;
             });
         } else {
             imgDrawer.style.display = 'none';
