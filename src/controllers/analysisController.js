@@ -1,5 +1,26 @@
 // Node v20+ มี fetch ให้แล้ว ไม่ต้อง import
 import Disease from '../models/Disease.js';
+import xlsx from 'xlsx';
+import path from 'path';
+import fs from 'fs';
+
+const EXCEL_PATH = path.join(process.cwd(), 'src', 'data.xlsx');
+let excelCache = null;
+
+const loadExcelData = () => {
+    try {
+        if (excelCache) return excelCache;
+        if (!fs.existsSync(EXCEL_PATH)) return null;
+        const wb = xlsx.readFile(EXCEL_PATH);
+        const sheetName = wb.SheetNames[0];
+        const sheet = wb.Sheets[sheetName];
+        const rows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
+        excelCache = rows;
+        return rows;
+    } catch (e) {
+        return null;
+    }
+};
 
 const tokenize = (text) => {
     if (!text) return [];
@@ -26,6 +47,36 @@ const fallbackAnalyze = async (symptomsText) => {
     try {
         const tokens = tokenize(symptomsText);
         if (tokens.length === 0) return [];
+
+        const excelRows = loadExcelData();
+        if (Array.isArray(excelRows) && excelRows.length > 0) {
+            const scored = excelRows.map((row) => {
+                const diseaseName = row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '';
+                const main = row['อาการหลัก'] || '';
+                const sub = row['อาการรอง'] || '';
+                const loc = row['ตำแหน่งที่พบบ่อย'] || '';
+                const cause = row['สาเหตุ'] || '';
+                const treat = row['วิธีรักษาเบื้อต้น'] || '';
+                const text = [diseaseName, main, sub, loc, cause, treat].filter(Boolean).join(' ').toLowerCase();
+                let hits = 0;
+                tokens.forEach((t) => {
+                    if (text.includes(t)) hits += 1;
+                });
+                const score = hits / tokens.length;
+                return { row, score };
+            }).filter(item => item.score > 0);
+
+            scored.sort((a, b) => b.score - a.score);
+            return scored.slice(0, 3).map(({ row, score }) => ({
+                disease: row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '',
+                confidence: Math.round(score * 100),
+                main_symptoms: row['อาการหลัก'] || '',
+                secondary_symptoms: row['อาการรอง'] || '',
+                recommendation: row['วิธีรักษาเบื้อต้น'] || '',
+                location: row['ตำแหน่งที่พบบ่อย'] || '',
+                cause: row['สาเหตุ'] || ''
+            }));
+        }
 
         const diseases = await Disease.find({}).lean();
         if (!Array.isArray(diseases) || diseases.length === 0) return [];
@@ -75,7 +126,18 @@ export const diagnoseSymptoms = async (req, res) => {
             });
         }
 
-        // 2. Resolve Python service URL and key (tolerant, check both API_KEY and PYTHON_API_KEY)
+        // 2. ???????????? Excel/?????????????????? (??????? Python)
+        const localResults = await fallbackAnalyze(symptoms);
+        if (localResults.length > 0) {
+            return res.json({
+                success: true,
+                found: true,
+                data: localResults,
+                message: '??????????????????????????'
+            });
+        }
+
+// 2. Resolve Python service URL and key (tolerant, check both API_KEY and PYTHON_API_KEY)
         let pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:5001/predict';
         // Check API_KEY first (as set on Render), fallback to PYTHON_API_KEY
         const apiKey = (process.env.API_KEY || process.env.PYTHON_API_KEY)?.trim();

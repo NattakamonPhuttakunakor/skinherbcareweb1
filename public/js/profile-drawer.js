@@ -114,9 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 
+    const hasAdminSidebar = document.querySelector('.admin-sidebar-img') || document.querySelector('.admin-sidebar-name');
+
     const hasProfileIcon = document.querySelector('.profile-icon');
     let fab = null;
-    if (!hasProfileIcon) {
+    if (!hasProfileIcon && !hasAdminSidebar) {
         fab = document.createElement('button');
         fab.className = 'profile-fab';
         fab.setAttribute('aria-label', 'Profile');
@@ -126,7 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const backdrop = document.createElement('div');
     backdrop.className = 'profile-backdrop';
-    document.body.appendChild(backdrop);
+    if (!hasAdminSidebar) {
+        document.body.appendChild(backdrop);
+    }
 
     const drawer = document.createElement('aside');
     drawer.className = 'profile-drawer';
@@ -148,7 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
         </div>
     `;
-    document.body.appendChild(drawer);
+    if (!hasAdminSidebar) {
+        document.body.appendChild(drawer);
+    }
 
     const nameEl = drawer.querySelector('#profile-drawer-name');
     const emailEl = drawer.querySelector('#profile-drawer-email');
@@ -246,17 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.setAttribute('aria-hidden', 'true');
     };
 
-    if (fab) fab.addEventListener('click', openDrawer);
-    drawer.querySelector('#profile-close').addEventListener('click', closeDrawer);
-    backdrop.addEventListener('click', closeDrawer);
+    if (!hasAdminSidebar) {
+        if (fab) fab.addEventListener('click', openDrawer);
+        drawer.querySelector('#profile-close').addEventListener('click', closeDrawer);
+        backdrop.addEventListener('click', closeDrawer);
+    }
 
-    drawer.querySelector('#profile-logout').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
-        // keep per-user profile images
-        window.location.href = '/login.html';
-    });
+    if (!hasAdminSidebar) {
+        drawer.querySelector('#profile-logout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userRole');
+            // keep per-user profile images
+            window.location.href = '/login.html';
+        });
+    }
 
     imageInput.addEventListener('change', () => {
         const file = imageInput.files && imageInput.files[0];
