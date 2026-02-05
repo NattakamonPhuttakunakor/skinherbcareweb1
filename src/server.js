@@ -15,6 +15,7 @@ import authRoutes from './routes/auth.js';
 import herbRoutes from './routes/herbs.js';
 import diseaseRoutes from './routes/diseases.js';
 import geminiRoutes from './routes/gemini.js';
+import pythonRoutes from './routes/python.js';
 
 console.log("2. Import ไลบรารีสำเร็จ...");
 
@@ -91,6 +92,7 @@ app.use('/api/analysis', analysisRoutes);
 app.use('/api/herbs', herbRoutes);
 app.use('/api/diseases', diseaseRoutes);
 app.use('/api/gemini', geminiRoutes);
+app.use('/api/python', pythonRoutes);
 
 // -------------------------------------------------------------
 // Static files (frontend)

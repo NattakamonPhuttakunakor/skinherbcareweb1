@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const analyzeWithGemini = async (formData) => {
-        const res = await fetch('/api/gemini/analyze-herb-image', {
+        const res = await fetch('/api/python/predict', {
             method: 'POST',
             body: formData
         });
@@ -99,7 +99,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             const msg = (json && (json.message || json.error)) || 'Image analysis failed.';
             throw new Error(msg);
         }
-        return normalizeHerb(json.data || {});
+        return normalizeHerb(json.data || json);
+    };
+
+    const debugUpload = async (formData) => {
+        const res = await fetch('/api/python/debug', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json || json.success === false) {
+            const msg = (json && (json.message || json.error)) || 'Upload debug failed.';
+            throw new Error(msg);
+        }
+        console.log('Upload debug (file received):', json.file);
+        return json.file;
+    };
+
+    const buildFormData = (file) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        return formData;
     };
 
     const findHerbFromApi = async (fileMeta) => {
@@ -158,8 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
 
-        const formData = new FormData();
-        formData.append('image', file);
         const fileMeta = getFileMeta(file);
 
         try {
@@ -168,7 +186,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let lastError = null;
 
             try {
-                herb = await analyzeWithGemini(formData);
+                // 1) Debug upload: confirm backend receives the file
+                await debugUpload(buildFormData(file));
+                // 2) Actual analysis
+                herb = await analyzeWithGemini(buildFormData(file));
                 source = 'AI analysis';
             } catch (err) {
                 lastError = err;
