@@ -122,74 +122,104 @@ export const analyzeDiseaseImage = async (req, res) => {
 };
 
 export const analyzeHerbImage = async (req, res) => {
+    console.log('------------------------------------------------');
+    console.log('Herb analyze start');
+
     try {
         if (!req.file) {
-            return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
+            return res.status(400).json({ success: false, message: 'Image file is required.' });
         }
 
-        
         console.log('Herb image received', {
             originalName: req.file.originalname,
             mimeType: req.file.mimetype,
             size: req.file.size,
             path: req.file.path
         });
-if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
-            console.error('❌ GEMINI_API_KEY not configured on Render');
-            return res.status(500).json({ 
-                success: false, 
-                message: "ระบบยังไม่ได้ตั้งค่า API Key สำหรับ AI กรุณาติดต่อผู้ดูแลระบบ",
-                detail: "GEMINI_API_KEY is not configured on Render environment"
+
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey || apiKey.includes('your-')) {
+            console.error('GEMINI_API_KEY not configured');
+            const fallback = await findHerbFallback(req.file);
+            if (fallback) {
+                return res.json({ success: true, data: fallback, message: 'Fallback: database match by file name.' });
+            }
+            return res.status(503).json({
+                success: false,
+                message: 'Server configuration missing GEMINI_API_KEY.'
             });
         }
+        console.log(`GEMINI_API_KEY present (prefix: ${apiKey.slice(0, 4)}***)`);
 
         const imageBuffer = fs.readFileSync(req.file.path);
         const base64Image = imageBuffer.toString('base64');
         const mimeType = req.file.mimetype;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        const prompt = `วิเคราะห์รูปภาพสมุนไพรนี้ และให้ความเห็นว่า:
-1. ชื่อสมุนไพรคืออะไร
-2. มีประโยชน์ต่อสุขภาพผิวหนังอย่างไร
-3. รักษา/บรรเทาโรคผิวหนังอะไรได้บ้าง
-4. ความมั่นใจโดยรวม (0-100)
-5. วิธีใช้และปริมาณที่แนะนำ
-6. ข้อควรระวังและข้อห้าม
-ตอบในรูป JSON โดยมี keys: "name", "scientificName", "benefits", "diseases", "confidence", "usage", "precautions"`;
+        const prompt = `Analyze this herb image and respond with JSON only.
+Required keys: "name", "scientificName", "benefits", "diseases", "confidence", "usage", "precautions".
+Notes:
+1) name: herb name
+2) scientificName: scientific name if known
+3) benefits: skin-related benefits
+4) diseases: list of skin issues it helps
+5) confidence: 0-100
+6) usage: suggested usage
+7) precautions: cautions or contraindications`;
 
+        console.log('Sending request to Gemini...');
         const result = await model.generateContent([
             {
                 inlineData: {
                     data: base64Image,
-                    mimeType: mimeType,
-                },
+                    mimeType: mimeType
+                }
             },
-            prompt,
+            prompt
         ]);
 
         const response = await result.response;
         const text = response.text();
+        console.log('Gemini raw response (first 300 chars):', text.slice(0, 300));
 
         const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const data = JSON.parse(cleanedText);
+        let data;
+        try {
+            data = JSON.parse(cleanedText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError.message);
+            data = {
+                name: 'Unable to parse response',
+                scientificName: '',
+                benefits: cleanedText,
+                diseases: [],
+                confidence: 0,
+                usage: '',
+                precautions: ''
+            };
+        }
 
-        // ลบไฟล์ upload ชั่วคราว
         fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
-
-        res.json({ success: true, data: data });
-
+        return res.json({ success: true, data });
     } catch (error) {
-        console.error("Gemini Herb Analysis Error:", error);
+        console.error('Gemini Herb Analysis Error:', error);
         if (req.file) fs.unlink(req.file.path, (err) => {});
+
         const fallback = await findHerbFallback(req.file);
         if (fallback) {
-            return res.json({ success: true, data: fallback, message: '????????????????????????????????????????????????????????? (fallback)' });
+            return res.json({ success: true, data: fallback, message: 'Fallback: database match by file name.' });
         }
-        res.status(500).json({ success: false, message: "?????????????????????????????????????????????????????????????????????????????????????????????????????????" });
+
+        let message = 'Image analysis failed.';
+        if (String(error?.message || '').includes('API key')) message = 'Invalid API key.';
+        if (String(error?.message || '').includes('403')) message = 'Permission denied.';
+
+        return res.status(500).json({ success: false, message });
     }
 };
+
 
 
 export const debugHerbImageUpload = async (req, res) => {
