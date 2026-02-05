@@ -17,5 +17,5 @@ files.forEach(fileName => {
       console.log('Sample data (first 2 rows):');
       console.log(JSON.stringify(data.slice(0, 2), null, 2));
     }
-  });
+  
 });

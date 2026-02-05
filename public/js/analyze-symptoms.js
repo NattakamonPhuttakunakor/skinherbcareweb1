@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Ensure results are visible
+        resultsContainer.classList.remove('hidden');
+
         // Loading state
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = '⏳ กำลังวิเคราะห์...';

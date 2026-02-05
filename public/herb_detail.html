@@ -129,9 +129,9 @@
             </div>
             
             <div class="flex gap-4 w-full max-w-4xl mx-auto mt-6">
-                <a href="add_herb.html" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
+                <button id="edit-current-herb" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
                     <i class="fa-solid fa-pen"></i> แก้ไขข้อมูล
-                </a>
+                </button>
                 <a href="herb_list.html" class="flex-1 bg-[#111C44] hover:bg-[#0d1430] text-white py-3 rounded-xl font-bold shadow-lg text-center transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-check-circle"></i> ยืนยันและกลับหน้ารายการ
                 </a>
@@ -207,6 +207,14 @@
                 document.getElementById('display-name').textContent = "ไม่พบข้อมูล";
                 document.getElementById('display-desc').textContent = "กรุณากรอกข้อมูลในหน้าเพิ่มสมุนไพรก่อนครับ";
             }
+        });
+
+        document.getElementById('edit-current-herb')?.addEventListener('click', () => {
+            const herbId = sessionStorage.getItem('viewingHerbId');
+            if (herbId) {
+                sessionStorage.setItem('editingHerbId', herbId);
+            }
+            window.location.href = 'add_herb.html';
         });
     </script>
     <script src="/js/profile-drawer.js"></script>
