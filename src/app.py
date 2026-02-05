@@ -1,4 +1,5 @@
 import os
+import io
 import pandas as pd
 import numpy as np
 from flask import Flask, request, jsonify
@@ -6,8 +7,35 @@ from flask_cors import CORS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+try:
+    from ultralytics import YOLO
+    from PIL import Image
+    YOLO_AVAILABLE = True
+except Exception as e:
+    YOLO_AVAILABLE = False
+    YOLO_IMPORT_ERROR = str(e)
+
 app = Flask(__name__)
 CORS(app)
+
+# ===============================
+# Base Directory
+# ===============================
+base_dir = os.path.dirname(__file__)
+
+# ===============================
+# YOLO Model (Image)
+# ===============================
+yolo_model = None
+YOLO_MODEL_PATH = os.environ.get("YOLO_MODEL_PATH") or os.path.join(base_dir, "best.pt")
+if YOLO_AVAILABLE:
+    try:
+        yolo_model = YOLO(YOLO_MODEL_PATH)
+        print(f"YOLO model loaded: {YOLO_MODEL_PATH}")
+    except Exception as e:
+        print(f"YOLO model load failed: {e}")
+else:
+    print(f"YOLO not available: {YOLO_IMPORT_ERROR}")
 
 # ===============================
 # API KEY
@@ -74,7 +102,6 @@ def thai_tokenizer(text):
 # ===============================
 
 df = None
-base_dir = os.path.dirname(__file__)
 
 candidate_files = [
     os.path.join(base_dir, "data.xlsx"),
@@ -175,6 +202,58 @@ def predict():
             return jsonify({"success": False, "message": "API Key not found"}), 401
         if client_key != API_KEY:
             return jsonify({"success": False, "message": "API Key mismatch"}), 401
+
+    # ---------------------------
+    # Image path (YOLO)
+    # ---------------------------
+    if "file" in request.files:
+        if yolo_model is None:
+            return jsonify({
+                "success": False,
+                "message": "YOLO model not loaded on server"
+            }), 500
+
+        file = request.files["file"]
+        if not file or file.filename == "":
+            return jsonify({"success": False, "message": "Empty file"}), 400
+
+        try:
+            img_bytes = file.read()
+            img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+            results = yolo_model(img)
+
+            predictions = []
+            top_prediction = {"class_name": "Unknown", "confidence": 0.0}
+
+            for r in results:
+                for box in getattr(r, "boxes", []):
+                    conf = float(box.conf[0]) if hasattr(box, "conf") else 0.0
+                    cls = int(box.cls[0]) if hasattr(box, "cls") else -1
+                    class_name = yolo_model.names.get(cls, "Unknown") if hasattr(yolo_model, "names") else "Unknown"
+                    box_xyxy = box.xyxy[0].tolist() if hasattr(box, "xyxy") else []
+
+                    predictions.append({
+                        "class_name": class_name,
+                        "confidence": round(conf, 4),
+                        "box": box_xyxy
+                    })
+
+                    if conf > top_prediction["confidence"]:
+                        top_prediction = {
+                            "class_name": class_name,
+                            "confidence": round(conf, 4)
+                        }
+
+            return jsonify({
+                "success": True,
+                "type": "image",
+                "top_prediction": top_prediction["class_name"],
+                "confidence": top_prediction["confidence"],
+                "detections": predictions
+            })
+        except Exception as e:
+            print(f"YOLO error: {e}")
+            return jsonify({"success": False, "message": f"Image processing failed: {str(e)}"}), 500
 
     data = request.get_json(silent=True)
     if not data or "symptoms" not in data:
