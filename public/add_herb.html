@@ -207,6 +207,9 @@
                         document.getElementById('input-usage').value = herb.usage || '';
                         document.getElementById('input-published').checked = herb.published === true;
                         existingImagePath = herb.image || '';
+                        if (herb.imageOriginalName) {
+                            // keep original image name for edit if needed
+                        }
                         preselectDiseases = Array.isArray(herb.diseases) ? herb.diseases : [];
 
                         const finishBtn = document.getElementById('finish-btn');
@@ -306,6 +309,12 @@
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
                 if (!uploadedImageFile && existingImagePath) form.append('image', existingImagePath);
+                if (uploadedImageFile && uploadedImageFile.name) {
+                    form.append('imageOriginalName', uploadedImageFile.name);
+                } else if (existingImagePath) {
+                    // keep original image name if stored
+                    form.append('imageOriginalName', '');
+                }
 
                 const response = await fetch(`${API_BASE_URL}/api/herbs${editingHerbId ? `/${editingHerbId}` : ''}`, {
                     method: editingHerbId ? 'PUT' : 'POST',

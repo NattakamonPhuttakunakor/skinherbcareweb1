@@ -135,10 +135,10 @@ export const diagnoseSymptoms = async (req, res) => {
         }
 
         // เพิ่มการตรวจสอบความยาวขั้นต่ำเพื่อป้องกัน 422 จาก AI Server
-        if (symptoms.trim().length < 3) {
+        if (symptoms.trim().length < 2) {
             return res.status(422).json({
                 success: false,
-                message: "กรุณาระบุรายละเอียดเพิ่มเติม (อย่างน้อย 3 ตัวอักษร)"
+                message: "กรุณาระบุรายละเอียดเพิ่มเติม (อย่างน้อย 2 ตัวอักษร)"
             });
         }
 

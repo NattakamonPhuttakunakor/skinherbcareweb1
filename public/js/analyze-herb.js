@@ -58,8 +58,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const fileName = file.name || '';
-            const q = fileName.replace(/\.[^/.]+$/, '').trim();
-            const res = await fetch(`/api/herbs${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+            const baseName = fileName.replace(/\.[^/.]+$/, '').trim();
+            const query = new URLSearchParams();
+            if (baseName) query.set('q', baseName);
+            if (fileName) query.set('imageName', fileName);
+            const res = await fetch(`/api/herbs${query.toString() ? `?${query.toString()}` : ''}`);
             if (!res.ok) throw new Error('ไม่สามารถดึงข้อมูลจากฐานข้อมูลได้');
             const json = await res.json();
             const herbs = json.herbs || json.data || [];

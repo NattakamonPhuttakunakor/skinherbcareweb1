@@ -10,10 +10,19 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const q = req.query.q?.trim();
+    const imageName = req.query.imageName?.trim();
     let herbs;
-    if (q) {
-      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      herbs = await Herb.find({ published: true, $or: [{ name: regex }, { scientificName: regex }] });
+    if (q || imageName) {
+      const queryParts = [];
+      if (q) {
+        const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        queryParts.push({ name: regex }, { scientificName: regex }, { imageOriginalName: regex });
+      }
+      if (imageName) {
+        const imageRegex = new RegExp(imageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        queryParts.push({ imageOriginalName: imageRegex });
+      }
+      herbs = await Herb.find({ published: true, $or: queryParts });
     } else {
       herbs = await Herb.find({ published: true });
     }
@@ -27,10 +36,19 @@ router.get('/', async (req, res) => {
 router.get('/admin', protect, admin, async (req, res) => {
   try {
     const q = req.query.q?.trim();
+    const imageName = req.query.imageName?.trim();
     let herbs;
-    if (q) {
-      const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      herbs = await Herb.find({ $or: [{ name: regex }, { scientificName: regex }] });
+    if (q || imageName) {
+      const queryParts = [];
+      if (q) {
+        const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        queryParts.push({ name: regex }, { scientificName: regex }, { imageOriginalName: regex });
+      }
+      if (imageName) {
+        const imageRegex = new RegExp(imageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        queryParts.push({ imageOriginalName: imageRegex });
+      }
+      herbs = await Herb.find({ $or: queryParts });
     } else {
       herbs = await Herb.find();
     }
@@ -54,6 +72,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     const usage = req.body.usage || '';
     const published = String(req.body.published) === 'true';
     const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '/uploads/default-herb.png');
+    const imageOriginalName = req.file ? req.file.originalname : (req.body.imageOriginalName || '');
 
     // Validate required fields
     if (!name || !description) {
@@ -74,6 +93,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
         properties: properties || [],
         usage: usage || '',
         image: imagePath,
+        imageOriginalName,
         addedBy: req.user ? req.user._id : null,
         savedLocally: true
       };
@@ -88,6 +108,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
         usage: usage || '',
         published,
         image: imagePath,
+        imageOriginalName,
         addedBy: req.user._id
     });
 
@@ -161,8 +182,10 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
 
     if (req.file) {
       update.image = `/uploads/${req.file.filename}`;
+      update.imageOriginalName = req.file.originalname || '';
     } else if (req.body.image) {
       update.image = req.body.image;
+      if (req.body.imageOriginalName) update.imageOriginalName = req.body.imageOriginalName;
     }
 
     const herb = await Herb.findByIdAndUpdate(req.params.id, update, {
