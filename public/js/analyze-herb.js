@@ -41,12 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const normalizeHerbRecord = (raw, fallbackName = '') => {
         if (!raw) return null;
+        const benefitsList = Array.isArray(raw.benefits) ? raw.benefits : null;
         return normalizeHerb({
             name: raw.name || raw.thaiName || fallbackName || '-',
-            scientificName: raw.scientificName || '',
-            benefits: raw.benefits || raw.properties || raw.description || '',
+            scientificName: raw.scientificName || raw.scientific_name || '',
+            benefits: benefitsList ? benefitsList.join(', ') : (raw.benefits || raw.properties || raw.description || ''),
             usage: raw.usage || '',
-            diseases: Array.isArray(raw.diseases) ? raw.diseases : [],
+            diseases: Array.isArray(raw.diseases) ? raw.diseases : (benefitsList || []),
             precautions: raw.precautions || ''
         });
     };
@@ -70,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             Object.keys(json).forEach((key) => {
                 const herb = normalizeHerbRecord(json[key], key);
                 if (herb) list.push(herb);
+                const keyLower = String(key || '').toLowerCase();
+                if (herb && keyLower && !byNameLower[keyLower]) byNameLower[keyLower] = herb;
             });
         }
 
@@ -203,6 +206,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         return trimmed;
     };
 
+    const buildNameCandidates = (raw) => {
+        if (!raw) return [];
+        const base = String(raw).trim();
+        if (!base) return [];
+        const candidates = new Set();
+        candidates.add(base);
+        candidates.add(base.replace(/_/g, ' '));
+        if (base.includes('_')) {
+            candidates.add(base.split('_')[0]);
+        }
+        candidates.add(base.replace(/_(peel|leaf|root|seed|flower|bark|stem|fruit)$/i, ''));
+        candidates.add(base.replace(/_(peel|leaf|root|seed|flower|bark|stem|fruit)$/i, '').replace(/_/g, ' '));
+        return Array.from(candidates).filter(Boolean);
+    };
+
     const extractPrediction = (payload) => {
         if (!payload || !payload.top_prediction) return { label: '', confidence: null };
         let raw = payload.top_prediction;
@@ -280,12 +298,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const findHerbByNameFromApi = async (name) => {
         if (!name) return null;
-        const query = new URLSearchParams({ q: name });
-        const res = await fetch(`/api/herbs?${query.toString()}`);
-        if (!res.ok) return null;
-        const json = await res.json().catch(() => null);
-        const herbs = (json && (json.herbs || json.data)) || [];
-        return normalizeHerb(herbs[0]);
+        const candidates = buildNameCandidates(name);
+        for (const candidate of candidates) {
+            const query = new URLSearchParams({ q: candidate });
+            const res = await fetch(`/api/herbs?${query.toString()}`);
+            if (!res.ok) continue;
+            const json = await res.json().catch(() => null);
+            const herbs = (json && (json.herbs || json.data)) || [];
+            const herb = normalizeHerb(herbs[0]);
+            if (herb) return herb;
+        }
+        return null;
     };
 
     const findHerbFromLocalFile = async (fileMeta) => {
@@ -311,18 +334,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const findHerbByNameFromLocalFile = async (name) => {
         if (!name) return null;
         try {
-            const needle = String(name).toLowerCase();
             if (!herbDbCache.loaded) {
                 await loadHerbData();
             }
-            const direct = herbDbCache.byNameLower[needle];
-            if (direct) return normalizeHerb(direct);
+            const candidates = buildNameCandidates(name);
+            for (const candidate of candidates) {
+                const needle = String(candidate).toLowerCase();
+                const direct = herbDbCache.byNameLower[needle];
+                if (direct) return normalizeHerb(direct);
+            }
 
             const list = herbDbCache.list || [];
             const match = list.find((h) => {
                 const n = String(h.name || '').toLowerCase();
                 const sci = String(h.scientificName || '').toLowerCase();
-                return n.includes(needle) || sci.includes(needle);
+                return candidates.some((c) => {
+                    const needle = String(c).toLowerCase();
+                    return n.includes(needle) || sci.includes(needle);
+                });
             });
             return normalizeHerb(match);
         } catch {
