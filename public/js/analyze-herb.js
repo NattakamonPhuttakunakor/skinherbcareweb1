@@ -89,15 +89,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultsContainer.innerHTML = resultHtml;
     };
 
+    const parseJsonSafe = async (res) => {
+        try {
+            return await res.json();
+        } catch {
+            return null;
+        }
+    };
+
+    const buildHttpError = (res, json, fallbackBody) => {
+        const message = (json && (json.message || json.error)) || fallbackBody || res.statusText || 'Request failed';
+        const err = new Error(message);
+        err.status = res.status;
+        err.statusText = res.statusText || '';
+        err.details = (json && (json.details || json.error)) || null;
+        return err;
+    };
+
     const analyzeWithGemini = async (formData) => {
         const res = await fetch('/api/python/predict', {
             method: 'POST',
             body: formData
         });
-        const json = await res.json().catch(() => null);
+        const json = await parseJsonSafe(res);
         if (!res.ok || !json || json.success === false) {
-            const msg = (json && (json.message || json.error)) || 'Image analysis failed.';
-            throw new Error(msg);
+            const fallbackBody = json ? null : await res.text().catch(() => null);
+            throw buildHttpError(res, json, fallbackBody);
         }
         return normalizeHerb(json.data || json);
     };
@@ -107,10 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             method: 'POST',
             body: formData
         });
-        const json = await res.json().catch(() => null);
+        const json = await parseJsonSafe(res);
         if (!res.ok || !json || json.success === false) {
-            const msg = (json && (json.message || json.error)) || 'Upload debug failed.';
-            throw new Error(msg);
+            const fallbackBody = json ? null : await res.text().catch(() => null);
+            throw buildHttpError(res, json, fallbackBody);
         }
         console.log('Upload debug (file received):', json.file);
         return json.file;
@@ -174,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p>Analyzing... Please wait.</p>
+                <p>กำลังวิเคราะห์... กรุณารอสักครู่</p>
             </div>
         `;
 
@@ -225,7 +242,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));
         } catch (error) {
             console.error('Analysis Error:', error);
-            resultsContainer.innerHTML = `<p class="text-red-600">Sorry, an error occurred: ${error.message}</p>`;
+            const status = typeof error.status === 'number' ? error.status : null;
+            const statusLine = status ? ` (HTTP ${status})` : '';
+            let helpText = 'ไม่สามารถเชื่อมต่อ AI Server ได้';
+            if (status === 401 || status === 403) helpText = 'การยืนยันตัวตนล้มเหลว (API Key)';
+            if (status === 404) helpText = 'ไม่พบ Endpoint ของ API';
+            if (status === 413) helpText = 'ไฟล์ใหญ่เกินไป';
+            if (status === 415 || status === 422) helpText = 'รูปแบบไฟล์ไม่ถูกต้อง';
+            if (status && status >= 500) helpText = 'ฝั่ง Server มีข้อผิดพลาด';
+
+            const details = error.details ? `<div class="text-xs text-gray-500 mt-2 break-words">${String(error.details)}</div>` : '';
+
+            resultsContainer.innerHTML = `
+                <div class="text-red-600">
+                    <p>ขออภัย เกิดข้อผิดพลาด: ${error.message}${statusLine}</p>
+                    <p class="text-sm mt-1">${helpText}</p>
+                    <p class="text-xs text-gray-500 mt-2">แนะนำ: ตรวจสอบสถานะ Server และ Logs ที่ Render แล้วลองใหม่อีกครั้ง</p>
+                    ${details}
+                </div>
+            `;
         } finally {
             analyzeBtn.disabled = false;
         }
