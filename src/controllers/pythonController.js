@@ -44,7 +44,7 @@ export const analyzeWithPython = async (req, res) => {
             headers,
             maxBodyLength: Infinity,
             maxContentLength: Infinity,
-            timeout: 60000
+            timeout: 300000
         });
 
         return res.json({ success: true, data: response.data });
