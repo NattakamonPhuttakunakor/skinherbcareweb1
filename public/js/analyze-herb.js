@@ -33,6 +33,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resultsContainer = document.getElementById('results-container');
     const fileInput = document.getElementById('herb-image-upload');
 
+    const herbDbCache = {
+        loaded: false,
+        list: [],
+        byNameLower: {}
+    };
+
+    const normalizeHerbRecord = (raw, fallbackName = '') => {
+        if (!raw) return null;
+        return normalizeHerb({
+            name: raw.name || raw.thaiName || fallbackName || '-',
+            scientificName: raw.scientificName || '',
+            benefits: raw.benefits || raw.properties || raw.description || '',
+            usage: raw.usage || '',
+            diseases: Array.isArray(raw.diseases) ? raw.diseases : [],
+            precautions: raw.precautions || ''
+        });
+    };
+
+    const buildHerbIndex = (json) => {
+        const list = [];
+        const byNameLower = {};
+
+        if (Array.isArray(json)) {
+            json.forEach((item) => {
+                const herb = normalizeHerbRecord(item);
+                if (herb) list.push(herb);
+            });
+        } else if (json && Array.isArray(json.herbs || json.data)) {
+            const items = json.herbs || json.data;
+            items.forEach((item) => {
+                const herb = normalizeHerbRecord(item);
+                if (herb) list.push(herb);
+            });
+        } else if (json && typeof json === 'object') {
+            Object.keys(json).forEach((key) => {
+                const herb = normalizeHerbRecord(json[key], key);
+                if (herb) list.push(herb);
+            });
+        }
+
+        list.forEach((herb) => {
+            const nameKey = String(herb.name || '').toLowerCase();
+            if (nameKey && !byNameLower[nameKey]) byNameLower[nameKey] = herb;
+            const sciKey = String(herb.scientificName || '').toLowerCase();
+            if (sciKey && !byNameLower[sciKey]) byNameLower[sciKey] = herb;
+        });
+
+        return { list, byNameLower };
+    };
+
+    const loadHerbData = async () => {
+        try {
+            const res = await fetch('/data/herbs.json');
+            if (!res.ok) {
+                console.warn('Could not load herb database.');
+                return false;
+            }
+            const json = await res.json();
+            const { list, byNameLower } = buildHerbIndex(json);
+            herbDbCache.list = list;
+            herbDbCache.byNameLower = byNameLower;
+            herbDbCache.loaded = true;
+            console.log('Herb database loaded:', list.length, 'items');
+            return true;
+        } catch (e) {
+            console.error('Error loading herb database:', e);
+            return false;
+        }
+    };
+
+    // Warm the cache (non-blocking)
+    loadHerbData();
+
     const getFileMeta = (file) => {
         const fileName = file?.name || '';
         const baseName = fileName.replace(/\.[^/.]+$/, '').trim();
@@ -106,6 +179,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         return err;
     };
 
+    const parsePredictionLabel = (raw) => {
+        if (!raw || typeof raw !== 'string') return '';
+        const trimmed = raw.trim();
+        // Expected formats: "Mangosteen 0.85" or "Mangosteen"
+        const parts = trimmed.split(/\s+/);
+        if (parts.length <= 1) return trimmed;
+        const last = parts[parts.length - 1];
+        if (!Number.isNaN(Number(last))) {
+            return parts.slice(0, -1).join(' ');
+        }
+        return trimmed;
+    };
+
     const analyzeWithGemini = async (formData) => {
         const res = await fetch('/api/python/predict', {
             method: 'POST',
@@ -116,7 +202,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fallbackBody = json ? null : await res.text().catch(() => null);
             throw buildHttpError(res, json, fallbackBody);
         }
-        return normalizeHerb(json.data || json);
+        const payload = json.data || json;
+        if (payload && payload.top_prediction) {
+            const label = parsePredictionLabel(payload.top_prediction);
+            const confidence = typeof payload.confidence === 'number'
+                ? payload.confidence * 100
+                : (typeof payload.top_prediction === 'string' && payload.top_prediction.trim().match(/\d+(?:\.\d+)?$/)
+                    ? Number(payload.top_prediction.trim().match(/\d+(?:\.\d+)?$/)[0]) * 100
+                    : null);
+            return normalizeHerb({
+                name: label || payload.top_prediction,
+                confidence: Number.isFinite(confidence) ? confidence : null
+            });
+        }
+        return normalizeHerb(payload);
     };
 
     const debugUpload = async (formData) => {
@@ -151,19 +250,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         return normalizeHerb(herbs[0]);
     };
 
+    const findHerbByNameFromApi = async (name) => {
+        if (!name) return null;
+        const query = new URLSearchParams({ q: name });
+        const res = await fetch(`/api/herbs?${query.toString()}`);
+        if (!res.ok) return null;
+        const json = await res.json().catch(() => null);
+        const herbs = (json && (json.herbs || json.data)) || [];
+        return normalizeHerb(herbs[0]);
+    };
+
     const findHerbFromLocalFile = async (fileMeta) => {
         if (!fileMeta.baseName && !fileMeta.fileName) return null;
         try {
-            const res = await fetch('/data/herbs.json');
-            if (!res.ok) return null;
-            const json = await res.json();
-            const list = json.herbs || json.data || json || [];
+            if (!herbDbCache.loaded) {
+                await loadHerbData();
+            }
+            const list = herbDbCache.list || [];
             const needle = (fileMeta.baseName || fileMeta.fileName || '').toLowerCase();
             const match = list.find((h) => {
                 const name = String(h.name || '').toLowerCase();
                 const sci = String(h.scientificName || '').toLowerCase();
                 const img = String(h.imageOriginalName || '').toLowerCase();
                 return name.includes(needle) || sci.includes(needle) || img.includes(needle);
+            });
+            return normalizeHerb(match);
+        } catch {
+            return null;
+        }
+    };
+
+    const findHerbByNameFromLocalFile = async (name) => {
+        if (!name) return null;
+        try {
+            const needle = String(name).toLowerCase();
+            if (!herbDbCache.loaded) {
+                await loadHerbData();
+            }
+            const direct = herbDbCache.byNameLower[needle];
+            if (direct) return normalizeHerb(direct);
+
+            const list = herbDbCache.list || [];
+            const match = list.find((h) => {
+                const n = String(h.name || '').toLowerCase();
+                const sci = String(h.scientificName || '').toLowerCase();
+                return n.includes(needle) || sci.includes(needle);
             });
             return normalizeHerb(match);
         } catch {
@@ -210,6 +341,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 source = 'AI analysis';
             } catch (err) {
                 lastError = err;
+            }
+
+            if (herb && herb.name && (!herb.benefits && !herb.usage && (!herb.diseases || herb.diseases.length === 0))) {
+                const apiByName = await findHerbByNameFromApi(herb.name);
+                if (apiByName) {
+                    herb = { ...apiByName, confidence: herb.confidence ?? apiByName.confidence };
+                    source = 'Database lookup (AI name)';
+                }
+            }
+
+            if (herb && herb.name && (!herb.benefits && !herb.usage && (!herb.diseases || herb.diseases.length === 0))) {
+                const localByName = await findHerbByNameFromLocalFile(herb.name);
+                if (localByName) {
+                    herb = { ...localByName, confidence: herb.confidence ?? localByName.confidence };
+                    source = 'Local file (AI name)';
+                }
+            }
+            if (herb && herb.name && (!herb.benefits && !herb.usage && (!herb.diseases || herb.diseases.length === 0))) {
+                console.warn(`Missing herb data for "${herb.name}". Please add to /data/herbs.json`);
             }
 
             if (!herb) {
