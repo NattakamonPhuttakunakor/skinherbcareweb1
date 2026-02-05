@@ -112,10 +112,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         return { fileName, baseName };
     };
 
+    const normalizeHerbName = (value) => {
+        if (!value) return '-';
+        if (typeof value === 'string') return value;
+        if (typeof value === 'object') {
+            if (typeof value.class_name === 'string') return value.class_name;
+            if (typeof value.name === 'string') return value.name;
+            if (typeof value.label === 'string') return value.label;
+        }
+        return '-';
+    };
+
     const normalizeHerb = (herb) => {
         if (!herb) return null;
         return {
-            name: herb.name || '-',
+            name: normalizeHerbName(herb.name),
             scientificName: herb.scientificName || '',
             benefits: herb.benefits || herb.description || '',
             usage: herb.usage || '',
@@ -192,6 +203,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         return trimmed;
     };
 
+    const extractPrediction = (payload) => {
+        if (!payload || !payload.top_prediction) return { label: '', confidence: null };
+        let raw = payload.top_prediction;
+        if (raw && typeof raw === 'object') {
+            raw = raw.class_name || raw.name || raw.label || '';
+        }
+        const label = parsePredictionLabel(raw);
+        let confidence = null;
+        if (typeof payload.confidence === 'number') {
+            confidence = payload.confidence * 100;
+        } else if (typeof payload.top_prediction === 'object') {
+            if (typeof payload.top_prediction.confidence === 'number') {
+                confidence = payload.top_prediction.confidence * 100;
+            } else if (typeof payload.top_prediction.score === 'number') {
+                confidence = payload.top_prediction.score * 100;
+            }
+        } else if (typeof raw === 'string' && raw.trim().match(/\d+(?:\.\d+)?$/)) {
+            confidence = Number(raw.trim().match(/\d+(?:\.\d+)?$/)[0]) * 100;
+        }
+        return { label, confidence: Number.isFinite(confidence) ? confidence : null };
+    };
+
     const analyzeWithGemini = async (formData) => {
         const res = await fetch('/api/python/predict', {
             method: 'POST',
@@ -204,15 +237,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const payload = json.data || json;
         if (payload && payload.top_prediction) {
-            const label = parsePredictionLabel(payload.top_prediction);
-            const confidence = typeof payload.confidence === 'number'
-                ? payload.confidence * 100
-                : (typeof payload.top_prediction === 'string' && payload.top_prediction.trim().match(/\d+(?:\.\d+)?$/)
-                    ? Number(payload.top_prediction.trim().match(/\d+(?:\.\d+)?$/)[0]) * 100
-                    : null);
+            const { label, confidence } = extractPrediction(payload);
             return normalizeHerb({
                 name: label || payload.top_prediction,
-                confidence: Number.isFinite(confidence) ? confidence : null
+                confidence
             });
         }
         return normalizeHerb(payload);
