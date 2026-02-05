@@ -36,7 +36,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const herbDbCache = {
         loaded: false,
         list: [],
-        byNameLower: {}
+        byNameLower: {},
+        byKeyNormalized: {}
+    };
+
+    const normalizeKey = (value) => {
+        if (!value) return '';
+        return String(value)
+            .toLowerCase()
+            .replace(/[_\s-]+/g, '')
+            .replace(/[^a-z0-9ก-๙]/g, '');
     };
 
     const normalizeHerbRecord = (raw, fallbackName = '') => {
@@ -55,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buildHerbIndex = (json) => {
         const list = [];
         const byNameLower = {};
+        const byKeyNormalized = {};
 
         if (Array.isArray(json)) {
             json.forEach((item) => {
@@ -73,6 +83,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (herb) list.push(herb);
                 const keyLower = String(key || '').toLowerCase();
                 if (herb && keyLower && !byNameLower[keyLower]) byNameLower[keyLower] = herb;
+                const keyNorm = normalizeKey(key);
+                if (herb && keyNorm && !byKeyNormalized[keyNorm]) byKeyNormalized[keyNorm] = herb;
             });
         }
 
@@ -81,9 +93,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nameKey && !byNameLower[nameKey]) byNameLower[nameKey] = herb;
             const sciKey = String(herb.scientificName || '').toLowerCase();
             if (sciKey && !byNameLower[sciKey]) byNameLower[sciKey] = herb;
+
+            const nameNorm = normalizeKey(herb.name);
+            if (nameNorm && !byKeyNormalized[nameNorm]) byKeyNormalized[nameNorm] = herb;
+            const sciNorm = normalizeKey(herb.scientificName);
+            if (sciNorm && !byKeyNormalized[sciNorm]) byKeyNormalized[sciNorm] = herb;
         });
 
-        return { list, byNameLower };
+        return { list, byNameLower, byKeyNormalized };
     };
 
     const loadHerbData = async () => {
@@ -94,9 +111,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return false;
             }
             const json = await res.json();
-            const { list, byNameLower } = buildHerbIndex(json);
+            const { list, byNameLower, byKeyNormalized } = buildHerbIndex(json);
             herbDbCache.list = list;
             herbDbCache.byNameLower = byNameLower;
+            herbDbCache.byKeyNormalized = byKeyNormalized;
             herbDbCache.loaded = true;
             console.log('Herb database loaded:', list.length, 'items');
             return true;
@@ -342,6 +360,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const needle = String(candidate).toLowerCase();
                 const direct = herbDbCache.byNameLower[needle];
                 if (direct) return normalizeHerb(direct);
+
+                const norm = normalizeKey(candidate);
+                const directNorm = herbDbCache.byKeyNormalized[norm];
+                if (directNorm) return normalizeHerb(directNorm);
             }
 
             const list = herbDbCache.list || [];
@@ -350,7 +372,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const sci = String(h.scientificName || '').toLowerCase();
                 return candidates.some((c) => {
                     const needle = String(c).toLowerCase();
-                    return n.includes(needle) || sci.includes(needle);
+                    if (n.includes(needle) || sci.includes(needle)) return true;
+                    const candNorm = normalizeKey(c);
+                    const nNorm = normalizeKey(h.name);
+                    const sNorm = normalizeKey(h.scientificName);
+                    return (candNorm && (nNorm.includes(candNorm) || sNorm.includes(candNorm) || candNorm.includes(nNorm)));
                 });
             });
             return normalizeHerb(match);
