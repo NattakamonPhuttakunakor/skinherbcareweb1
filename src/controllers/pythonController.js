@@ -16,6 +16,8 @@ export const analyzeWithPython = async (req, res) => {
 
         const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
         const apiKey = process.env.PYTHON_API_KEY || process.env.API_KEY || '';
+        console.log('Python URL:', pythonUrl);
+        console.log('Python API key present:', apiKey ? `${apiKey.slice(0, 4)}***` : '(missing)');
 
         const formData = new FormData();
         // IMPORTANT: Python expects field name "file"
