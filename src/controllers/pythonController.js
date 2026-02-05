@@ -19,6 +19,13 @@ export const analyzeWithPython = async (req, res) => {
         console.log('Python URL:', pythonUrl);
         console.log('Python API key present:', apiKey ? `${apiKey.slice(0, 4)}***` : '(missing)');
 
+        if (!apiKey) {
+            return res.status(500).json({
+                success: false,
+                message: 'Missing API key for AI server. Please set PYTHON_API_KEY.'
+            });
+        }
+
         const formData = new FormData();
         // IMPORTANT: Python expects field name "file"
         formData.append('file', req.file.buffer, {
