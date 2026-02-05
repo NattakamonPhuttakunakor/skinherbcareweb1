@@ -13,7 +13,7 @@ const findHerbFallback = async (file) => {
         const herb = await Herb.findOne({ name: new RegExp(escapeRegex(baseName), 'i') }).lean();
         if (!herb) return null;
         return {
-            name: herb.name || '?',
+            name: herb.name || '-',
             scientificName: herb.scientificName || '',
             benefits: herb.description || '',
             diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
@@ -66,33 +66,49 @@ export const suggestHerbs = async (req, res) => {
 // สำหรับ analyzeDiseaseImage และ analyzeHerbImage ต้องใช้ model: "gemini-1.5-flash" 
 // และต้องแปลงไฟล์รูปภาพเป็น base64 ก่อนส่งไปหา API
 export const analyzeDiseaseImage = async (req, res) => {
+    console.log('------------------------------------------------');
+    console.log('Disease analysis start');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
     try {
         if (!req.file) {
-            return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
+            return res.status(400).json({ success: false, message: 'Please upload an image for analysis.' });
         }
 
-        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
-            console.error('❌ GEMINI_API_KEY not configured on Render');
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey || apiKey.includes('your-')) {
+            console.error('GEMINI_API_KEY not configured');
             return res.status(500).json({ 
                 success: false, 
-                message: "ระบบยังไม่ได้ตั้งค่า API Key สำหรับ AI กรุณาติดต่อผู้ดูแลระบบ",
-                detail: "GEMINI_API_KEY is not configured on Render environment"
+                message: 'Server configuration missing GEMINI_API_KEY.',
+                detail: 'GEMINI_API_KEY is not configured on Render environment'
             });
         }
+        console.log(`GEMINI_API_KEY present (prefix: ${apiKey.slice(0, 4)}***)`);
 
-        const imageBuffer = fs.readFileSync(req.file.path);
+        console.log('Disease image received', {
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+            path: req.file.path
+        });
+
+        const imageBuffer = req.file.buffer || fs.readFileSync(req.file.path);
         const base64Image = imageBuffer.toString('base64');
         const mimeType = req.file.mimetype;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const prompt = `วิเคราะห์รูปภาพผิวหนังนี้ และให้ความเห็นว่า:
-1. มีอาการผิวหนังแบบไหน
-2. โรคที่คาดว่าเป็นคืออะไร
-3. สมุนไพรไทยที่แนะนำในการรักษา 2-3 ชนิด พร้อมวิธีใช้
-ตอบในรูป JSON โดยมี keys: "diagnosis", "disease", "confidence", "herbs", "advice"`;
+        const prompt = `Analyze this skin condition image and respond with JSON only.
+Required keys: "name", "symptoms", "treatment".
+Notes:
+1) name: likely disease name (Thai name if possible)
+2) symptoms: possible symptoms in short text
+3) treatment: basic suggestion or next steps
+Do not include markdown code blocks.`;
 
+        console.log('Sending request to Gemini...');
         const result = await model.generateContent([
             {
                 inlineData: {
@@ -105,25 +121,38 @@ export const analyzeDiseaseImage = async (req, res) => {
 
         const response = await result.response;
         const text = response.text();
+        console.log('Gemini raw response (first 300 chars):', text.slice(0, 300));
 
         const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const data = JSON.parse(cleanedText);
+        let data;
+        try {
+            data = JSON.parse(cleanedText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError.message);
+            data = {
+                name: 'Unable to parse response',
+                symptoms: cleanedText,
+                treatment: 'Please consult a dermatologist for accurate diagnosis.'
+            };
+        }
 
-        // ลบไฟล์ upload ชั่วคราว
-        fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
-
-        res.json({ success: true, data: data });
-
+        if (req.file) fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
+        return res.json({ success: true, data: data });
     } catch (error) {
-        console.error("Gemini Disease Analysis Error:", error);
+        console.error('Gemini Disease Analysis Error:', error);
         if (req.file) fs.unlink(req.file.path, (err) => {});
-        res.status(500).json({ success: false, message: "ไม่สามารถวิเคราะห์รูปภาพได้ในขณะนี้" });
+        let message = 'Internal Server Error during analysis.';
+        if (String(error?.message || '').includes('403')) message = 'API Permission Denied. Check API Key or Quota.';
+        if (String(error?.message || '').includes('429')) message = 'Too many requests. Please try again later.';
+        return res.status(500).json({ success: false, message, debug_error: error.message });
     }
 };
+
 
 export const analyzeHerbImage = async (req, res) => {
     console.log('------------------------------------------------');
     console.log('Herb analyze start');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     try {
         if (!req.file) {
@@ -151,7 +180,7 @@ export const analyzeHerbImage = async (req, res) => {
         }
         console.log(`GEMINI_API_KEY present (prefix: ${apiKey.slice(0, 4)}***)`);
 
-        const imageBuffer = fs.readFileSync(req.file.path);
+        const imageBuffer = req.file.buffer || fs.readFileSync(req.file.path);
         const base64Image = imageBuffer.toString('base64');
         const mimeType = req.file.mimetype;
 
@@ -224,7 +253,7 @@ Notes:
 
 export const debugHerbImageUpload = async (req, res) => {
     if (!req.file) {
-        return res.status(400).json({ success: false, message: '??????????????????????????????????????????????????????' });
+        return res.status(400).json({ success: false, message: '------------------' });
     }
     return res.json({
         success: true,

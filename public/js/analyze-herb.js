@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const normalizeHerb = (herb) => {
         if (!herb) return null;
         return {
-            name: herb.name || '?',
+            name: herb.name || '-',
             scientificName: herb.scientificName || '',
             benefits: herb.benefits || herb.description || '',
             usage: herb.usage || '',
@@ -57,30 +57,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-left">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="text-xl font-bold text-[#111C44]">??????????: ${herb.name}</h3>
-                        ${sourceLabel ? `<p class="text-xs text-gray-500 mt-1">???????????: ${sourceLabel}</p>` : ''}
-                        ${herb.scientificName ? `<p class="text-sm text-gray-500 mt-1"><strong>???????????????:</strong> ${herb.scientificName}</p>` : ''}
+                        <h3 class="text-xl font-bold text-[#111C44]">Result: ${herb.name}</h3>
+                        ${sourceLabel ? `<p class="text-xs text-gray-500 mt-1">Source: ${sourceLabel}</p>` : ''}
+                        ${herb.scientificName ? `<p class="text-sm text-gray-500 mt-1"><strong>Scientific name:</strong> ${herb.scientificName}</p>` : ''}
                         ${herb.benefits ? `<p class="text-gray-600 mt-2">${herb.benefits}</p>` : ''}
-                        ${herb.confidence !== null ? `<p class="text-sm text-gray-500 mt-2"><strong>??????????:</strong> ${Math.round(herb.confidence)}%</p>` : ''}
+                        ${herb.confidence !== null ? `<p class="text-sm text-gray-500 mt-2"><strong>Confidence:</strong> ${Math.round(herb.confidence)}%</p>` : ''}
                     </div>
                 </div>
 
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="bg-green-50 border border-green-100 p-3 rounded-lg">
-                        <h4 class="font-semibold text-green-700 mb-2">???????????????</h4>
+                        <h4 class="font-semibold text-green-700 mb-2">Helps with</h4>
                         ${herb.diseases.length
                             ? `<ul class="list-disc list-inside text-sm text-gray-700">${herb.diseases.map(d => `<li>${d}</li>`).join('')}</ul>`
-                            : `<p class="text-sm text-gray-700">???????????</p>`}
+                            : `<p class="text-sm text-gray-700">No data</p>`}
                     </div>
 
                     <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                        <h4 class="font-semibold text-blue-700 mb-2">????????????????</h4>
-                        <p class="text-sm text-gray-700">${herb.usage || '?'}</p>
+                        <h4 class="font-semibold text-blue-700 mb-2">Usage</h4>
+                        <p class="text-sm text-gray-700">${herb.usage || '-'}</p>
                     </div>
                 </div>
                 ${herb.precautions ? `
                     <div class="mt-3 bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
-                        <h4 class="font-semibold text-yellow-700 mb-2">???????????</h4>
+                        <h4 class="font-semibold text-yellow-700 mb-2">Precautions</h4>
                         <p class="text-sm text-gray-700">${herb.precautions}</p>
                     </div>
                 ` : ''}
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const json = await res.json().catch(() => null);
         if (!res.ok || !json || json.success === false) {
-            const msg = (json && (json.message || json.error)) || '???????????????????????????????????';
+            const msg = (json && (json.message || json.error)) || 'Image analysis failed.';
             throw new Error(msg);
         }
         return normalizeHerb(json.data || {});
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? new File([rawFile], 'capture.jpg', { type: rawFile.type || 'image/jpeg' })
                     : null);
         if (!file) {
-            alert('??????????????????????');
+            alert('Please upload an image first.');
             return;
         }
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p>????????????????... ??????????????</p>
+                <p>Analyzing... Please wait.</p>
             </div>
         `;
 
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 herb = await analyzeWithGemini(formData);
-                source = 'AI ??????????????????';
+                source = 'AI analysis';
             } catch (err) {
                 lastError = err;
             }
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const apiHerb = await findHerbFromApi(fileMeta);
                 if (apiHerb) {
                     herb = apiHerb;
-                    source = '????????????? (??????????????)';
+                    source = 'Database lookup (file name)';
                 }
             }
 
@@ -186,25 +186,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const localHerb = await findHerbFromLocalFile(fileMeta);
                 if (localHerb) {
                     herb = localHerb;
-                    source = '??????????????? (/data/herbs.json)';
+                    source = 'Local file (/data/herbs.json)';
                 }
             }
 
             if (!herb) {
-                throw lastError || new Error('?????????????????????????????');
+                throw lastError || new Error('No matching data found for this image.');
             }
 
             renderResult(herb, source);
 
             const analysisToStore = {
-                type: '?????????????????????????????',
-                result: `????????: ${herb.name}`,
+                type: 'Herb image analysis',
+                result: `Result: ${herb.name}`,
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('latestAnalysis', JSON.stringify(analysisToStore));
         } catch (error) {
             console.error('Analysis Error:', error);
-            resultsContainer.innerHTML = `<p class="text-red-600">??????, ??????????????: ${error.message}</p>`;
+            resultsContainer.innerHTML = `<p class="text-red-600">Sorry, an error occurred: ${error.message}</p>`;
         } finally {
             analyzeBtn.disabled = false;
         }
