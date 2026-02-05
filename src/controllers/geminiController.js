@@ -1,5 +1,30 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
+import path from 'path';
+import Herb from '../models/Herb.js';
+
+
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const findHerbFallback = async (file) => {
+    try {
+        const baseName = path.parse(file?.originalname || '').name.trim();
+        if (!baseName) return null;
+        const herb = await Herb.findOne({ name: new RegExp(escapeRegex(baseName), 'i') }).lean();
+        if (!herb) return null;
+        return {
+            name: herb.name || '?',
+            scientificName: herb.scientificName || '',
+            benefits: herb.description || '',
+            diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
+            confidence: 0,
+            usage: herb.usage || '',
+            precautions: herb.precautions || ''
+        };
+    } catch (error) {
+        return null;
+    }
+};
 
 // @desc    วิเคราะห์อาการและแนะนำสมุนไพร
 export const suggestHerbs = async (req, res) => {
@@ -158,6 +183,26 @@ if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-'))
     } catch (error) {
         console.error("Gemini Herb Analysis Error:", error);
         if (req.file) fs.unlink(req.file.path, (err) => {});
-        res.status(500).json({ success: false, message: "ไม่สามารถวิเคราะห์รูปภาพได้ในขณะนี้" });
+        const fallback = await findHerbFallback(req.file);
+        if (fallback) {
+            return res.json({ success: true, data: fallback, message: '????????????????????????????????????????????????????????? (fallback)' });
+        }
+        res.status(500).json({ success: false, message: "?????????????????????????????????????????????????????????????????????????????????????????????????????????" });
     }
+};
+
+
+export const debugHerbImageUpload = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: '??????????????????????????????????????????????????????' });
+    }
+    return res.json({
+        success: true,
+        file: {
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+            path: req.file.path
+        }
+    });
 };
