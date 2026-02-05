@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             '<p class="text-gray-500 text-center">กำลังประมวลผล กรุณารอสักครู่...</p>';
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
             // ✅ API ที่ถูกต้อง (ใช้ relative URL เพื่อให้ทำงานบน localhost และ Render)
             const res = await fetch('/api/analysis/diagnose', {
                 method: 'POST',
@@ -55,7 +58,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ symptoms }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
             const json = await res.json();
 
@@ -137,6 +142,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error:', error);
+            if (error.name === 'AbortError') {
+                resultsContainer.innerHTML =
+                    `<p class="text-red-500 text-center">
+                        ⏱️ ระบบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง
+                    </p>`;
+                return;
+            }
             resultsContainer.innerHTML =
                 `<p class="text-red-500 text-center">
                     ❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้<br>
