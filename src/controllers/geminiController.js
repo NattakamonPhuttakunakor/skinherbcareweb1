@@ -102,7 +102,14 @@ export const analyzeHerbImage = async (req, res) => {
             return res.status(400).json({ success: false, message: 'กรุณาอัพโหลดรูปภาพ' });
         }
 
-        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
+        
+        console.log('Herb image received', {
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+            path: req.file.path
+        });
+if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.includes('your-')) {
             console.error('❌ GEMINI_API_KEY not configured on Render');
             return res.status(500).json({ 
                 success: false, 
