@@ -104,7 +104,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // -------------------------------------------------------------
 // Skin disease proxy (avoid CORS by calling from server)
 // -------------------------------------------------------------
-app.post('/api/skin/predict', upload.single('image'), async (req, res) => {
+app.post('/api/skin/predict', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'No image file provided.' });
