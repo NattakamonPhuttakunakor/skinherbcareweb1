@@ -335,6 +335,8 @@
                 if (window.runSkinAnalysis) {
                     return window.runSkinAnalysis({ currentImageBlob, analyzeBtn });
                 }
+                alert('Skin analysis not ready');
+                return;
                 if (!currentImageBlob) return alert('โปรดเลือกรูปภาพ');
                 analyzeBtn.disabled = true;
                 analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';

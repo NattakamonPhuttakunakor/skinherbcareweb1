@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const loadHerbData = async () => {
         try {
-            const res = await fetch('/data/herbs.json');
+            const res = await fetch(`/data/herbs.json?v=${Date.now()}`, { cache: 'no-store' });
             if (!res.ok) {
                 console.warn('Could not load herb database.');
                 return false;

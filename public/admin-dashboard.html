@@ -398,6 +398,8 @@
             if (nameDrawer) nameDrawer.textContent = fullName;
             if (emailDrawer) emailDrawer.textContent = email;
 
+            const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
+
             const applyImage = (src) => {
                 if (src) {
                     imgSidebar.src = src;
@@ -413,7 +415,11 @@
                     fallbackDrawer.style.display = 'flex';
                 }
             };
-            applyImage(localStorage.getItem('profileImage'));
+            const legacyImage = localStorage.getItem('profileImage');
+            if (!localStorage.getItem(storageKey) && legacyImage) {
+                localStorage.setItem(storageKey, legacyImage);
+            }
+            applyImage(localStorage.getItem(storageKey));
 
             const openDrawer = () => {
                 if (!token) { window.location.href = '/login.html'; return; }
@@ -443,6 +449,7 @@
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const src = e.target.result;
+                        localStorage.setItem(storageKey, src);
                         localStorage.setItem('profileImage', src);
                         applyImage(src);
                     };
