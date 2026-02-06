@@ -5,19 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>วิเคราะห์จากอาการ - SkinHerbCare</title>
     
-    <script>
-        // ตรวจสอบ Login ก่อนโหลดหน้า
-        (function () {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                // ถ้าไม่มี Token ให้เด้งไปหน้า Login (เปิดบรรทัดล่างเมื่อใช้งานจริง)
-                // window.location.href = '/login.html';
-            }
-        })();
-    </script>
-
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
@@ -26,19 +14,15 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Sarabun', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: "#059669",
-                    }
+                    fontFamily: { sans: ['Sarabun', 'sans-serif'] },
+                    colors: { primary: "#059669" }
                 }
             }
         }
     </script>
     
     <style>
-        /* Animation & Basic Styles */
+        /* CSS เดิม */
         body, div, p, span, button, input { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
         body { background-image: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%); }
         .dark body { background-image: linear-gradient(160deg, #0f172a 0%, #064e3b 100%); }
@@ -46,7 +30,6 @@
         .glass-light { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.6); }
         .dark .glass-light { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 78, 59, 0.2); border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -57,7 +40,6 @@
         @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
         .leaf-bg { position: fixed; z-index: -1; pointer-events: none; color: rgba(255, 255, 255, 0.5); transition: opacity 0.3s; }
         .dark .leaf-bg { opacity: 0.1; }
-        /* ซ่อน Scrollbar แนวนอนของปุ่มแนะนำ */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -78,9 +60,6 @@
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-600 dark:text-yellow-300 transition-all transform hover:scale-110">
                     <span id="theme-icon" class="material-icons-round text-xl">dark_mode</span>
                 </button>
-                <div class="w-8 h-8 rounded-full bg-white/80 dark:bg-white/10 flex items-center justify-center cursor-pointer shadow-sm border border-green-100 dark:border-white/10">
-                    <span class="material-icons-round text-green-700 dark:text-white text-lg">person</span>
-                </div>
             </div>
         </div>
     </nav>
@@ -94,11 +73,10 @@
                         <div class="w-10 h-10 bg-green-600 dark:bg-green-700 rounded-full flex items-center justify-center shadow-lg shadow-green-600/20">
                             <span class="material-icons-round text-white">smart_toy</span>
                         </div>
-                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></div>
                     </div>
                     <div>
                         <h2 class="text-lg font-bold text-green-900 dark:text-white">AI Assistant</h2>
-                        <p class="text-xs text-green-700 dark:text-gray-400">ผู้ช่วยวิเคราะห์อาการเบื้องต้น</p>
+                        <p class="text-xs text-green-700 dark:text-gray-400">ผู้ช่วยวิเคราะห์อาการ (Online)</p>
                     </div>
                 </div>
                 <a href="/" class="text-sm text-gray-500 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 flex items-center gap-1 transition">
@@ -107,25 +85,15 @@
             </div>
 
             <div id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar space-y-4 bg-white/30 dark:bg-black/20">
-                <div class="flex justify-center mb-4">
-                    <span class="text-[10px] bg-green-50 dark:bg-white/10 text-green-800 dark:text-gray-300 px-3 py-1 rounded-full font-semibold opacity-70">วันนี้</span>
-                </div>
-
                 <div class="flex items-start gap-3 max-w-[85%] msg-animate">
                     <div class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center shrink-0 mt-1 shadow-md">
                         <span class="material-icons-round text-white text-sm">spa</span>
                     </div>
                     <div class="bg-white/90 dark:bg-white/10 p-4 rounded-2xl rounded-tl-none shadow-sm text-green-900 dark:text-gray-100 border border-white dark:border-white/5">
-                        <p class="leading-relaxed">สวัสดีครับ! 👋 ผมคือ AI ผู้ช่วยวิเคราะห์สุขภาพผิว<br>
-                        บอกอาการที่คุณกังวลมาได้เลย เช่น <b>"มีสิวอักเสบ"</b> หรือ <b>"ผิวแห้งลอก"</b> เดี๋ยวผมช่วยแนะนำสมุนไพรให้ครับ</p>
+                        <p class="leading-relaxed">สวัสดีครับ! 👋 ระบบกำลังเชื่อมต่อกับฐานข้อมูล...<br>
+                        บอกอาการของคุณมาได้เลยครับ</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar shrink-0 bg-white/40 dark:bg-black/30 backdrop-blur-sm border-t border-green-50 dark:border-white/5">
-                <button onclick="handleQuickReply('รักษาสิวอักเสบยังไง')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-green-100 dark:border-white/10 text-xs text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-white/10 transition shadow-sm">สิวอักเสบ</button>
-                <button onclick="handleQuickReply('แก้ปัญหาหน้าหมองคล้ำ')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-green-100 dark:border-white/10 text-xs text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-white/10 transition shadow-sm">หน้าหมองคล้ำ</button>
-                <button onclick="handleQuickReply('ผิวแพ้ง่ายใช้อะไรดี')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-green-100 dark:border-white/10 text-xs text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-white/10 transition shadow-sm">ผิวแพ้ง่าย</button>
             </div>
 
             <div class="p-4 bg-white/60 dark:bg-black/40 backdrop-blur-md border-t border-white/50 dark:border-white/5 shrink-0">
@@ -133,7 +101,6 @@
                     <input type="text" id="user-input" 
                         class="w-full bg-white dark:bg-black/30 border-0 ring-1 ring-green-100 dark:ring-white/10 rounded-full pl-5 pr-12 py-3 focus:ring-2 focus:ring-green-500 transition shadow-inner placeholder-gray-400 dark:placeholder-gray-500 text-gray-700 dark:text-white"
                         placeholder="พิมพ์อาการของคุณที่นี่..." autocomplete="off">
-                    
                     <button type="submit" class="absolute right-2 bg-green-600 hover:bg-green-700 text-white p-2 rounded-full shadow-lg transition transform active:scale-95 flex items-center justify-center">
                         <span class="material-icons-round text-xl">send</span>
                     </button>
@@ -143,14 +110,22 @@
     </main>
 
     <script>
-        // --- Configuration ---
-        const API_BASE_URL = window.location.origin;
+        // =========================================================
+        // ⚙️ ตั้งค่าการเชื่อมต่อ (สำคัญมาก แก้ตรงนี้)
+        // =========================================================
+        
+        // 1. ถ้า Backend อยู่คนละที่ ให้ใส่ URL เต็มๆ เช่น 'https://my-backend-api.onrender.com'
+        // 2. ถ้า Backend อยู่ที่เดียวกัน (Host เดียวกัน) ให้ใส่เป็นค่าว่าง '' หรือ '/'
+        const API_BASE_URL = ''; 
 
-        // --- 1. Theme Toggle Logic ---
+        // 3. ตรวจสอบชื่อ Route ใน Backend ของคุณว่าใช้ชื่ออะไร?
+        //    (ถ้าใน Python/Node คุณใช้ @app.route('/predict') ก็ต้องแก้ตรงนี้เป็น '/predict')
+        const API_ROUTE = '/api/analyze/symptoms'; 
+        // =========================================================
+
         function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
-            
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 icon.innerText = 'dark_mode';
@@ -161,13 +136,11 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
             document.getElementById('theme-icon').innerText = 'light_mode';
         }
 
-        // --- 2. Chat Logic (Connected to Backend) ---
         const chatHistory = document.getElementById('chat-history');
         const userInput = document.getElementById('user-input');
 
@@ -176,55 +149,66 @@
             const text = userInput.value.trim();
             if (!text) return;
 
-            // 1. แสดงข้อความ User ทันที
             appendMessage(text, 'user');
             userInput.value = '';
             
-            // 2. ส่งไป Backend
+            // ส่งข้อมูลไป Backend
             await sendMessageToBackend(text);
         }
 
-        async function handleQuickReply(text) {
-            appendMessage(text, 'user');
-            await sendMessageToBackend(text);
-        }
-
-        // ฟังก์ชันหลักในการเชื่อมต่อกับ Backend
         async function sendMessageToBackend(message) {
-            showTypingIndicator();
+            showTypingIndicator(); // แสดงว่ากำลังคิด (ให้ความรู้สึก Real-time/Lag นิดๆ ตามการประมวลผลจริง)
 
             try {
                 const token = localStorage.getItem('token');
                 
-                // ยิง Request ไปที่ API
-                const response = await fetch(`${API_BASE_URL}/api/analyze/symptoms`, {
+                // รวม URL เพื่อยิง Request
+                const fullUrl = `${API_BASE_URL}${API_ROUTE}`;
+                console.log("Connecting to:", fullUrl); // ดูใน Console ว่ายิงไปถูกที่ไหม
+
+                const response = await fetch(fullUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // ส่ง Token ไปยืนยันตัวตน
+                        'Authorization': token ? `Bearer ${token}` : ''
                     },
-                    body: JSON.stringify({ symptom: message })
+                    body: JSON.stringify({ symptom: message }) // ส่งข้อมูล { symptom: "อาการ..." }
                 });
+
+                // ลบตัวหมุนๆ ออกเมื่อได้คำตอบ
+                removeTypingIndicator();
+
+                // เช็คว่า Server ส่งอะไรกลับมา (สำคัญสำหรับการแก้ Error 404/HTML)
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    // ถ้าไม่ใช่ JSON (เช่น เป็น HTML Error Page)
+                    const text = await response.text();
+                    console.error("Server returned non-JSON:", text);
+                    throw new Error("Server ไม่ได้ตอบกลับเป็นข้อมูล JSON (อาจผิด URL หรือ Route ไม่ถูกต้อง)");
+                }
 
                 const data = await response.json();
 
-                // ลบตัวหมุนๆ ออก
-                removeTypingIndicator();
-
                 if (response.ok) {
-                    // กรณีสำเร็จ: แสดงผลลัพธ์จาก AI (สมมติว่า Backend ส่งกลับมาใน key ชื่อ result หรือ message)
-                    const botReply = data.result || data.message || data.analysis || "ได้รับข้อมูลแล้ว แต่ไม่สามารถแสดงผลได้";
+                    // แสดงผลลัพธ์จาก Backend
+                    const botReply = data.result || data.message || data.analysis || JSON.stringify(data);
                     appendMessage(botReply, 'bot');
                 } else {
-                    // กรณี Error จาก Server
-                    console.error('Server Error:', data);
-                    appendMessage(`เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'}`, 'bot');
+                    console.error('API Error:', data);
+                    appendMessage(`เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถวิเคราะห์ข้อมูลได้'}`, 'bot');
                 }
 
             } catch (error) {
                 removeTypingIndicator();
-                console.error('Network Error:', error);
-                appendMessage("ขออภัย ไม่สามารถเชื่อมต่อกับระบบ AI ได้ในขณะนี้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต", 'bot');
+                console.error('Fetch Error:', error);
+                
+                let errorMsg = "ขออภัย ระบบขัดข้อง";
+                if (error.message.includes("JSON")) {
+                    errorMsg = "⚠️ เชื่อมต่อ Backend ไม่สำเร็จ (404 Not Found)<br>กรุณาเช็ค URL หรือ Route API ในโค้ด";
+                } else {
+                    errorMsg = "ไม่สามารถเชื่อมต่อ Server ได้ กรุณาเช็คอินเทอร์เน็ต";
+                }
+                appendMessage(errorMsg, 'bot');
             }
         }
 
