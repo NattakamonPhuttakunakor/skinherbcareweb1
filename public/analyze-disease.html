@@ -332,6 +332,9 @@
             });
 
             analyzeBtn.addEventListener('click', async () => {
+                if (window.runSkinAnalysis) {
+                    return window.runSkinAnalysis({ currentImageBlob, analyzeBtn });
+                }
                 if (!currentImageBlob) return alert('โปรดเลือกรูปภาพ');
                 analyzeBtn.disabled = true;
                 analyzeBtn.textContent = '⏳ กำลังวิเคราะห์...';
@@ -379,6 +382,7 @@
             });
         });
     </script>
+    <script src="/js/analyze-skin.js"></script>
     <script src="/js/profile-drawer.js"></script>
 </body>
 </html>
