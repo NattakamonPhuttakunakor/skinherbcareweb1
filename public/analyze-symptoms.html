@@ -116,11 +116,11 @@
         
         // 1. ถ้า Backend อยู่คนละที่ ให้ใส่ URL เต็มๆ เช่น 'https://my-backend-api.onrender.com'
         // 2. ถ้า Backend อยู่ที่เดียวกัน (Host เดียวกัน) ให้ใส่เป็นค่าว่าง '' หรือ '/'
-        const API_BASE_URL = ''; 
+        const API_BASE_URL = window.location.origin; 
 
         // 3. ตรวจสอบชื่อ Route ใน Backend ของคุณว่าใช้ชื่ออะไร?
         //    (ถ้าใน Python/Node คุณใช้ @app.route('/predict') ก็ต้องแก้ตรงนี้เป็น '/predict')
-        const API_ROUTE = '/api/analyze/symptoms'; 
+        const API_ROUTE = '/api/analysis/analyze'; 
         // =========================================================
 
         function toggleTheme() {
@@ -160,7 +160,7 @@
             showTypingIndicator(); // แสดงว่ากำลังคิด (ให้ความรู้สึก Real-time/Lag นิดๆ ตามการประมวลผลจริง)
 
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
                 
                 // รวม URL เพื่อยิง Request
                 const fullUrl = `${API_BASE_URL}${API_ROUTE}`;
@@ -172,7 +172,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': token ? `Bearer ${token}` : ''
                     },
-                    body: JSON.stringify({ symptom: message }) // ส่งข้อมูล { symptom: "อาการ..." }
+                    body: JSON.stringify({ symptoms: message }) // ส่งข้อมูล { symptoms: "อาการ..." }
                 });
 
                 // ลบตัวหมุนๆ ออกเมื่อได้คำตอบ
