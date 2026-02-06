@@ -6,12 +6,12 @@
     <title>วิเคราะห์จากอาการ - SkinHerbCare</title>
     
     <script>
+        // ตรวจสอบ Login ก่อนโหลดหน้า
         (function () {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-            const userRaw = localStorage.getItem('user');
-            if (!token || !userRaw) {
-                // localStorage.clear();
-                // window.location.replace('/login.html'); 
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // ถ้าไม่มี Token ให้เด้งไปหน้า Login (เปิดบรรทัดล่างเมื่อใช้งานจริง)
+                // window.location.href = '/login.html';
             }
         })();
     </script>
@@ -31,10 +31,6 @@
                     },
                     colors: {
                         primary: "#059669",
-                        dark: {
-                            bg: "#0f172a",
-                            card: "rgba(30, 41, 59, 0.7)"
-                        }
                     }
                 }
             }
@@ -43,62 +39,27 @@
     
     <style>
         /* Animation & Basic Styles */
-        body, div, p, span, button, input {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-
-        body { 
-            background-image: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
-        }
-        
-        .dark body {
-            background-image: linear-gradient(160deg, #0f172a 0%, #064e3b 100%);
-        }
-
-        .glass-panel {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .glass-light {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-
-        .dark .glass-light {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
+        body, div, p, span, button, input { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        body { background-image: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%); }
+        .dark body { background-image: linear-gradient(160deg, #0f172a 0%, #064e3b 100%); }
+        .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-light { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.6); }
+        .dark .glass-light { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 78, 59, 0.2); border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .msg-animate { animation: slideUp 0.3s ease-out forwards; }
-
         .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .leaf-bg {
-            position: fixed;
-            z-index: -1;
-            pointer-events: none;
-            color: rgba(255, 255, 255, 0.5);
-            transition: opacity 0.3s;
-        }
-        .dark .leaf-bg {
-            opacity: 0.1;
-        }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .leaf-bg { position: fixed; z-index: -1; pointer-events: none; color: rgba(255, 255, 255, 0.5); transition: opacity 0.3s; }
+        .dark .leaf-bg { opacity: 0.1; }
+        /* ซ่อน Scrollbar แนวนอนของปุ่มแนะนำ */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 
@@ -112,14 +73,11 @@
             <a href="/" class="text-xl font-bold text-green-900 dark:text-green-400 flex items-center gap-2 no-underline">
                 🌿 SkinHerbCare
             </a>
-            
             <div class="flex items-center gap-3">
                 <a href="/" class="hidden md:block px-3 py-1.5 text-sm font-semibold text-green-800 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-white/10 rounded-lg transition">Home</a>
-                
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-600 dark:text-yellow-300 transition-all transform hover:scale-110">
                     <span id="theme-icon" class="material-icons-round text-xl">dark_mode</span>
                 </button>
-
                 <div class="w-8 h-8 rounded-full bg-white/80 dark:bg-white/10 flex items-center justify-center cursor-pointer shadow-sm border border-green-100 dark:border-white/10">
                     <span class="material-icons-round text-green-700 dark:text-white text-lg">person</span>
                 </div>
@@ -128,7 +86,6 @@
     </nav>
 
     <main class="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-hidden relative z-10">
-        
         <div class="w-full max-w-4xl h-full md:h-[85vh] flex flex-col glass-panel glass-light rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
             
             <div class="px-6 py-4 border-b border-green-100 dark:border-white/10 flex items-center justify-between shrink-0 bg-white/40 dark:bg-black/20">
@@ -186,6 +143,9 @@
     </main>
 
     <script>
+        // --- Configuration ---
+        const API_BASE_URL = window.location.origin;
+
         // --- 1. Theme Toggle Logic ---
         function toggleTheme() {
             const html = document.documentElement;
@@ -207,44 +167,65 @@
             document.getElementById('theme-icon').innerText = 'light_mode';
         }
 
-        // --- 2. Chat Logic ---
+        // --- 2. Chat Logic (Connected to Backend) ---
         const chatHistory = document.getElementById('chat-history');
         const userInput = document.getElementById('user-input');
 
-        function handleChatSubmit(e) {
+        async function handleChatSubmit(e) {
             e.preventDefault();
             const text = userInput.value.trim();
             if (!text) return;
 
+            // 1. แสดงข้อความ User ทันที
             appendMessage(text, 'user');
             userInput.value = '';
             
-            showTypingIndicator();
-
-            setTimeout(() => {
-                removeTypingIndicator();
-                const reply = generateBotResponse(text);
-                appendMessage(reply, 'bot');
-            }, 1500);
+            // 2. ส่งไป Backend
+            await sendMessageToBackend(text);
         }
 
-        function handleQuickReply(text) {
+        async function handleQuickReply(text) {
             appendMessage(text, 'user');
-            showTypingIndicator();
-            setTimeout(() => {
-                removeTypingIndicator();
-                const reply = generateBotResponse(text);
-                appendMessage(reply, 'bot');
-            }, 1500);
+            await sendMessageToBackend(text);
         }
 
-        function generateBotResponse(input) {
-            const lowerInput = input.toLowerCase();
-            if (lowerInput.includes('สิว')) return `<b>ผลการวิเคราะห์:</b> มีแนวโน้มเป็นปัญหาสิวอักเสบ<br><br><b>🌿 สมุนไพรแนะนำ:</b><br>1. <b>ขมิ้นชัน:</b> ผสมน้ำผึ้งพอกหน้า<br>2. <b>ใบบัวบก:</b> ปั่นคั้นน้ำทา`;
-            else if (lowerInput.includes('หมอง') || lowerInput.includes('ขาว')) return `แนะนำ <b>มะขามเปียก</b> ครับ มี AHA ธรรมชาติช่วยผลัดเซลล์ผิวให้กระจ่างใส`;
-            else if (lowerInput.includes('แห้ง')) return `แนะนำ <b>ว่านหางจระเข้</b> หรือ <b>น้ำมันมะพร้าวสกัดเย็น</b> ช่วยเติมน้ำให้ผิวครับ`;
-            else if (lowerInput.includes('แพ้') || lowerInput.includes('คัน')) return `แนะนำ <b>ใบบัวบก</b> หรือ <b>แตงกวา</b> แช่เย็นประคบ ช่วยลดอาการระคายเคืองครับ`;
-            else return `รับทราบอาการ "<b>${input}</b>" ครับ<br>แนะนำให้ลองพักผ่อนให้เพียงพอและดื่มน้ำเยอะๆ หากอาการไม่ดีขึ้นควรปรึกษาแพทย์ครับ`;
+        // ฟังก์ชันหลักในการเชื่อมต่อกับ Backend
+        async function sendMessageToBackend(message) {
+            showTypingIndicator();
+
+            try {
+                const token = localStorage.getItem('token');
+                
+                // ยิง Request ไปที่ API
+                const response = await fetch(`${API_BASE_URL}/api/analyze/symptoms`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // ส่ง Token ไปยืนยันตัวตน
+                    },
+                    body: JSON.stringify({ symptom: message })
+                });
+
+                const data = await response.json();
+
+                // ลบตัวหมุนๆ ออก
+                removeTypingIndicator();
+
+                if (response.ok) {
+                    // กรณีสำเร็จ: แสดงผลลัพธ์จาก AI (สมมติว่า Backend ส่งกลับมาใน key ชื่อ result หรือ message)
+                    const botReply = data.result || data.message || data.analysis || "ได้รับข้อมูลแล้ว แต่ไม่สามารถแสดงผลได้";
+                    appendMessage(botReply, 'bot');
+                } else {
+                    // กรณี Error จาก Server
+                    console.error('Server Error:', data);
+                    appendMessage(`เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'}`, 'bot');
+                }
+
+            } catch (error) {
+                removeTypingIndicator();
+                console.error('Network Error:', error);
+                appendMessage("ขออภัย ไม่สามารถเชื่อมต่อกับระบบ AI ได้ในขณะนี้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต", 'bot');
+            }
         }
 
         function appendMessage(text, sender) {
