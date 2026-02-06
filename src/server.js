@@ -95,6 +95,48 @@ app.use('/api/gemini', geminiRoutes);
 app.use('/api/python', pythonRoutes);
 
 // -------------------------------------------------------------
+// Skin disease proxy (avoid CORS by calling from server)
+// -------------------------------------------------------------
+app.post('/api/skin/predict', upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No image file provided.' });
+        }
+
+        const skinUrl = process.env.SKIN_API_URL || 'https://b37b065bacf4.ngrok-free.app/predict';
+        const skinKey = (process.env.SKIN_API_KEY || 'skin-func-66xe25').trim();
+
+        const formData = new FormData();
+        formData.append('file', req.file.buffer, {
+            filename: req.file.originalname || 'upload.jpg',
+            contentType: req.file.mimetype || 'image/jpeg'
+        });
+
+        const headers = { ...formData.getHeaders() };
+        if (skinKey) headers['X-API-Key'] = skinKey;
+        headers['ngrok-skip-browser-warning'] = '69420';
+
+        const response = await axios.post(skinUrl, formData, {
+            headers,
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+            timeout: 60000
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Skin API proxy error:', error.message);
+        const status = error.response?.status || 500;
+        res.status(status).json({
+            success: false,
+            message: 'Skin API request failed',
+            error: error.message,
+            details: error.response?.data
+        });
+    }
+});
+
+// -------------------------------------------------------------
 // Static files (frontend)
 // -------------------------------------------------------------
 app.use(express.static(path.join(__dirname, '../public')));

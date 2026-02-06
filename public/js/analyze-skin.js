@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const API_URL = 'https://b37b065bacf4.ngrok-free.app/predict';
-    const API_KEY = 'skin-func-66xe25';
+    const API_URL = '/api/skin/predict';
 
     const setLoading = (isLoading) => {
         analyzeBtn.disabled = isLoading;
@@ -127,9 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const res = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'X-API-Key': API_KEY
-                },
                 body: formData
             });
 
