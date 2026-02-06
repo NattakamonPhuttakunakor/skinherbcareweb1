@@ -113,6 +113,12 @@ app.post('/api/skin/predict', upload.single('image'), async (req, res) => {
         const skinUrl = process.env.SKIN_API_URL || 'https://b37b065bacf4.ngrok-free.app/predict';
         const skinKey = (process.env.SKIN_API_KEY || 'skin-func-66xe25').trim();
 
+        console.log('[Skin Proxy] Incoming file:', {
+            name: req.file.originalname,
+            size: req.file.size,
+            type: req.file.mimetype
+        });
+
         const formData = new FormData();
         formData.append('file', req.file.buffer, {
             filename: req.file.originalname || 'upload.jpg',
@@ -132,13 +138,18 @@ app.post('/api/skin/predict', upload.single('image'), async (req, res) => {
 
         res.json(response.data);
     } catch (error) {
-        console.error('Skin API proxy error:', error.message);
         const status = error.response?.status || 500;
+        const details = error.response?.data;
+        console.error('Skin API proxy error:', {
+            status,
+            message: error.message,
+            details
+        });
         res.status(status).json({
             success: false,
             message: 'Skin API request failed',
             error: error.message,
-            details: error.response?.data
+            details
         });
     }
 });

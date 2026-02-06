@@ -124,19 +124,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             formData.append('file', currentImageBlob);
 
+            console.log('[Skin] Preparing upload:', {
+                name: currentImageBlob.name,
+                type: currentImageBlob.type,
+                size: currentImageBlob.size
+            });
+
             const res = await fetch(API_URL, {
                 method: 'POST',
                 body: formData
             });
 
+            console.log('[Skin] Response status:', res.status);
+
             if (!res.ok) {
-                throw new Error(`API Error: ${res.status} ${res.statusText}`);
+                const contentType = res.headers.get('content-type') || '';
+                const errBody = contentType.includes('application/json')
+                    ? await res.json().catch(() => ({}))
+                    : { message: await res.text().catch(() => res.statusText) };
+                const detail = errBody.detail || errBody.message || errBody.error || res.statusText;
+                throw new Error(`API Error ${res.status}: ${detail}`);
             }
 
             const data = await res.json();
             const diseaseInfo = await fetchDiseaseInfo(data.label_th, data.label_en);
             renderResult(data, diseaseInfo);
         } catch (err) {
+            console.error('[Skin] Request failed:', err);
             renderError(err.message || 'ไม่สามารถเชื่อมต่อ API ได้');
         } finally {
             setLoading(false);
