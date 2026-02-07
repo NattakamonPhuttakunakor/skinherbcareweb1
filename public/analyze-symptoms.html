@@ -190,9 +190,29 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // แสดงผลลัพธ์จาก Backend
-                    const botReply = data.result || data.message || data.analysis || JSON.stringify(data);
-                    appendMessage(botReply, 'bot');
+                    const results = Array.isArray(data.data) ? data.data : [];
+                    if (results.length > 0) {
+                        const itemsHtml = results.map((item) => {
+                            const name = item.disease || item.name || 'ไม่ระบุชื่อโรค';
+                            const confidence = typeof item.confidence === 'number' ? `${item.confidence}%` : '-';
+                            const main = item.main_symptoms || '';
+                            const secondary = item.secondary_symptoms || '';
+                            const recommendation = item.recommendation || item.treatment || '';
+                            return `
+                                <li style="margin-bottom:10px;">
+                                    <b style="color:#064e3b">${name}</b> (${confidence})<br>
+                                    ${main ? `<div style="margin-top:4px;"><b>อาการหลัก:</b> ${main}</div>` : ''}
+                                    ${secondary ? `<div style="margin-top:4px;"><b>อาการรอง:</b> ${secondary}</div>` : ''}
+                                    ${recommendation ? `<div style="margin-top:4px;"><b>คำแนะนำ:</b> ${recommendation}</div>` : ''}
+                                </li>
+                            `;
+                        }).join('');
+                        const botReply = `<b>ผลการวิเคราะห์เบื้องต้น</b><ul style="margin-left:15px;margin-top:6px;">${itemsHtml}</ul>`;
+                        appendMessage(botReply, 'bot');
+                    } else {
+                        const botReply = data.message || "ขออภัยครับ ไม่พบข้อมูลที่ตรงกับอาการนี้ในฐานข้อมูล";
+                        appendMessage(botReply, 'bot');
+                    }
                 } else {
                     console.error('API Error:', data);
                     appendMessage(`เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถวิเคราะห์ข้อมูลได้'}`, 'bot');
