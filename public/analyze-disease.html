@@ -150,7 +150,37 @@
             max-height: 100%;
             object-fit: contain;
         }
-    </style>
+    
+        .admin-btn {
+          background-color: #FFC107;
+          color: #111C44;
+          border-radius: 8px;
+          padding: 6px 12px;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .admin-btn:hover {
+          background-color: #FFD54F;
+          transform: translateY(-1px);
+        }
+        .logout-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          color: var(--primary-text);
+          font-weight: 600;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.95rem;
+        }
+        .logout-btn:hover {
+          background: rgba(255,255,255,0.6);
+        }
+</style>
 </head>
 
 <body>
