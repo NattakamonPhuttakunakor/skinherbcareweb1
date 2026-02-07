@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const API_URL = '/api/skin/predict';
+    const baseUrl = window.API_BASE_URL || window.location.origin;
+    const API_URL = `${baseUrl}/api/skin/predict`;
 
     const setLoading = (isLoading) => {
         analyzeBtn.disabled = isLoading;
