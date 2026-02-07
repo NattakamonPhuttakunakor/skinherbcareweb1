@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const baseUrl = window.API_BASE_URL || window.location.origin;
-    const API_URL = `${baseUrl}/api/skin/predict`;
+    const directUrl = window.SKIN_API_URL || '';
+    const apiKey = window.SKIN_API_KEY || '';
+    const API_URL = directUrl || `${baseUrl}/api/skin/predict`;
 
     const setLoading = (isLoading) => {
         analyzeBtn.disabled = isLoading;
@@ -131,8 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 size: currentImageBlob.size
             });
 
+            const headers = {};
+            if (apiKey) headers['X-API-Key'] = apiKey;
+
             const res = await fetch(API_URL, {
                 method: 'POST',
+                headers,
                 body: formData
             });
 
