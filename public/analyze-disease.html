@@ -155,20 +155,36 @@
 
 <body>
     <nav class="top-nav">
-        <div class="nav-container">
-            <a href="/" class="logo">🌿 SkinHerbCare</a>
-            <div class="auth-links">
-                <a href="/" class="login-btn">Home</a>
-                <a href="/login.html" class="login-btn">Log In</a>
-                <a href="/register.html" class="login-btn">Sign Up</a>
-                <div class="profile-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </nav>
+  <div class="nav-container">
+    <a href="/" class="logo">?? SkinHerbCare</a>
+    
+    <!-- Guest Navigation -->
+    <div class="auth-links" id="guest-nav">
+      <a href="/">Home</a>
+      <a href="/login.html">Log In</a>
+      <a href="/register.html">Sign Up</a>
+      <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-guest">??</span>
+      </button>
+    </div>
+
+    <!-- Admin Navigation -->
+    <div class="auth-links" id="admin-nav" style="display: none;">
+      <a href="/">Home</a>
+      <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+        ?? ??????????
+      </a>
+      <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
+        Log Out
+      </button>
+      <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
+        <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
+        <span id="profile-fallback-admin">??</span>
+      </button>
+    </div>
+  </div>
+</nav>
 
     <main class="flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-12">
         <div class="main-card">
@@ -387,6 +403,35 @@
         });
     </script>
     <script src="/js/analyze-skin.js"></script>
-    <script src="/js/profile-drawer.js"></script>
+    
+  <script>
+    function checkLoginStatus() {
+      const userRole = localStorage.getItem('userRole');
+      const guestNav = document.getElementById('guest-nav');
+      const adminNav = document.getElementById('admin-nav');
+
+      if (userRole === 'admin') {
+        if (guestNav) guestNav.style.display = 'none';
+        if (adminNav) adminNav.style.display = 'flex';
+      } else {
+        if (guestNav) guestNav.style.display = 'flex';
+        if (adminNav) adminNav.style.display = 'none';
+      }
+    }
+
+    function logout() {
+      if (confirm('? ?????????????????????????')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        location.reload();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLoginStatus();
+    });
+  </script>
+<script src="/js/profile-drawer.js"></script>
 </body>
 </html>
