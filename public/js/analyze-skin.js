@@ -26,10 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    const renderResult = (data, diseaseInfo) => {
-        const labelEn = String(data.label_en || '').toLowerCase();
-        const labelTh = data.label_th || 'ไม่ระบุ';
-        const scoreRaw = typeof data.score === 'number' ? data.score : Number(data.score);
+    const normalizeSkinResponse = (payload) => {
+        if (!payload) return {};
+        if (payload.data && typeof payload.data === 'object') return payload.data;
+        return payload;
+    };
+
+    const renderResult = (rawData, diseaseInfo) => {
+        const data = normalizeSkinResponse(rawData);
+        const labelCandidate = data.label_th || data.label_en || data.label || data.prediction || data.class || data.disease || '';
+        const labelEn = String(data.label_en || data.label || data.prediction || '').toLowerCase();
+        const labelTh = data.label_th || labelCandidate || 'ไม่ระบุ';
+        const scoreRaw = typeof data.score === 'number'
+            ? data.score
+            : (typeof data.confidence === 'number' ? data.confidence : Number(data.score || data.confidence));
         const scorePct = Number.isFinite(scoreRaw) ? `${(scoreRaw * 100).toFixed(1)}%` : '-';
 
         const info = diseaseInfo || {
@@ -154,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await res.json();
+            console.log('[Skin] Raw API data:', data);
             const diseaseInfo = await fetchDiseaseInfo(data.label_th, data.label_en);
             renderResult(data, diseaseInfo);
         } catch (err) {
