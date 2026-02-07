@@ -156,83 +156,95 @@
             await sendMessageToBackend(text);
         }
 
-        async function sendMessageToBackend(message) {
-            showTypingIndicator(); // แสดงว่ากำลังคิด (ให้ความรู้สึก Real-time/Lag นิดๆ ตามการประมวลผลจริง)
+        
 
-            try {
-                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-                
-                // รวม URL เพื่อยิง Request
-                const fullUrl = `${API_BASE_URL}${API_ROUTE}`;
-                console.log("Connecting to:", fullUrl); // ดูใน Console ว่ายิงไปถูกที่ไหม
+async function sendMessageToBackend(message) {
+    showTypingIndicator();
 
-                const response = await fetch(fullUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
-                    },
-                    body: JSON.stringify({ symptoms: message }) // ส่งข้อมูล { symptoms: "อาการ..." }
-                });
+    try {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        const fullUrl = `${API_BASE_URL}${API_ROUTE}`;
+        console.log("Connecting to:", fullUrl);
 
-                // ลบตัวหมุนๆ ออกเมื่อได้คำตอบ
-                removeTypingIndicator();
+        const response = await fetch(fullUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            },
+            body: JSON.stringify({ symptoms: message })
+        });
 
-                // เช็คว่า Server ส่งอะไรกลับมา (สำคัญสำหรับการแก้ Error 404/HTML)
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    // ถ้าไม่ใช่ JSON (เช่น เป็น HTML Error Page)
-                    const text = await response.text();
-                    console.error("Server returned non-JSON:", text);
-                    throw new Error("Server ไม่ได้ตอบกลับเป็นข้อมูล JSON (อาจผิด URL หรือ Route ไม่ถูกต้อง)");
-                }
+        const contentType = response.headers.get("content-type") || "";
+        const isJson = contentType.includes("application/json");
+        const data = isJson ? await response.json() : null;
+        const rawText = !isJson ? await response.text() : "";
 
-                const data = await response.json();
+        removeTypingIndicator();
 
-                if (response.ok) {
-                    const results = Array.isArray(data.data) ? data.data : [];
-                    if (results.length > 0) {
-                        const itemsHtml = results.map((item) => {
-                            const name = item.disease || item.name || 'ไม่ระบุชื่อโรค';
-                            const confidence = typeof item.confidence === 'number' ? `${item.confidence}%` : '-';
-                            const main = item.main_symptoms || '';
-                            const secondary = item.secondary_symptoms || '';
-                            const recommendation = item.recommendation || item.treatment || '';
-                            return `
-                                <li style="margin-bottom:10px;">
-                                    <b style="color:#064e3b">${name}</b> (${confidence})<br>
-                                    ${main ? `<div style="margin-top:4px;"><b>อาการหลัก:</b> ${main}</div>` : ''}
-                                    ${secondary ? `<div style="margin-top:4px;"><b>อาการรอง:</b> ${secondary}</div>` : ''}
-                                    ${recommendation ? `<div style="margin-top:4px;"><b>คำแนะนำ:</b> ${recommendation}</div>` : ''}
-                                </li>
-                            `;
-                        }).join('');
-                        const botReply = `<b>ผลการวิเคราะห์เบื้องต้น</b><ul style="margin-left:15px;margin-top:6px;">${itemsHtml}</ul>`;
-                        appendMessage(botReply, 'bot');
-                    } else {
-                        const botReply = data.message || "ขออภัยครับ ไม่พบข้อมูลที่ตรงกับอาการนี้ในฐานข้อมูล";
-                        appendMessage(botReply, 'bot');
-                    }
-                } else {
-                    console.error('API Error:', data);
-                    appendMessage(`เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถวิเคราะห์ข้อมูลได้'}`, 'bot');
-                }
-
-            } catch (error) {
-                removeTypingIndicator();
-                console.error('Fetch Error:', error);
-                
-                let errorMsg = "ขออภัย ระบบขัดข้อง";
-                if (error.message.includes("JSON")) {
-                    errorMsg = "⚠️ เชื่อมต่อ Backend ไม่สำเร็จ (404 Not Found)<br>กรุณาเช็ค URL หรือ Route API ในโค้ด";
-                } else {
-                    errorMsg = "ไม่สามารถเชื่อมต่อ Server ได้ กรุณาเช็คอินเทอร์เน็ต";
-                }
-                appendMessage(errorMsg, 'bot');
-            }
+        if (!response.ok) {
+            const msg = (data && (data.message || data.error)) || rawText || `API Error ${response.status}`;
+            appendMessage(`Error: ${msg}`, 'bot');
+            return;
         }
 
-        function appendMessage(text, sender) {
+        const results = normalizeResults(data);
+        if (results.length === 0) {
+            const msg = (data && data.message) ? data.message : "No matching data found in the database.";
+            appendMessage(msg, 'bot');
+            return;
+        }
+
+        appendMessage(renderResults(results, data && data.message), 'bot');
+    } catch (error) {
+        removeTypingIndicator();
+        console.error('Fetch Error:', error);
+        appendMessage("Unable to reach server. Please try again.", 'bot');
+    }
+}
+
+function normalizeResults(data) {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    if (Array.isArray(data.results)) return data.results;
+    if (data.prediction) {
+        return [{
+            disease: data.prediction,
+            confidence: data.confidence ?? 0,
+            recommendation: data.recommendation || data.treatment || data.message || ""
+        }];
+    }
+    return [];
+}
+
+function renderResults(results, headerMessage) {
+    const itemsHtml = results.map((item) => {
+        const name = item.disease || item.name || 'Unknown disease';
+        const confidence = (typeof item.confidence === 'number') ? `${item.confidence}%` : '-';
+        const main = item.main_symptoms || item.symptoms || '';
+        const secondary = item.secondary_symptoms || '';
+        const recommendation = item.recommendation || item.treatment || item.herbs || '';
+        const location = item.location || '';
+        const cause = item.cause || '';
+        return `
+            <li style=\"margin-bottom:10px;\">
+                <b style=\"color:#064e3b\">${name}</b> (${confidence})<br>
+                ${main ? `<div style=\"margin-top:4px;\"><b>Main symptoms:</b> ${main}</div>` : ''}
+                ${secondary ? `<div style=\"margin-top:4px;\"><b>Secondary symptoms:</b> ${secondary}</div>` : ''}
+                ${location ? `<div style=\"margin-top:4px;\"><b>Common location:</b> ${location}</div>` : ''}
+                ${cause ? `<div style=\"margin-top:4px;\"><b>Cause:</b> ${cause}</div>` : ''}
+                ${recommendation ? `<div style=\"margin-top:4px;\"><b>Recommendation:</b> ${recommendation}</div>` : ''}
+            </li>
+        `;
+    }).join('');
+
+    const title = headerMessage ? `<div style=\"margin-bottom:6px;\">${headerMessage}</div>` : '';
+    return `${title}<b>Analysis result</b><ul style=\"margin-left:15px;margin-top:6px;\">${itemsHtml}</ul>`;
+}
+
+
+function appendMessage(text, sender) {
             const isBot = sender === 'bot';
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
