@@ -149,7 +149,60 @@
             };
         }
 
+        function resolveProfileImageUrl(raw) {
+            if (!raw) return '';
+            if (raw.startsWith('http') || raw.startsWith('data:')) return raw;
+            return `${API_BASE_URL}/${raw.replace(/^\\//, '')}`;
+        }
+
+        async function syncAdminProfile() {
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+            if (!token) return;
+
+            let user = null;
+            try {
+                const userRaw = localStorage.getItem('user');
+                if (userRaw) user = JSON.parse(userRaw);
+            } catch {}
+
+            if (!user) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const json = await res.json();
+                        user = json.user || json.data || null;
+                        if (user) localStorage.setItem('user', JSON.stringify(user));
+                    }
+                } catch {}
+            }
+
+            const nameEl = document.querySelector('.admin-sidebar-name');
+            const imgEl = document.querySelector('.admin-sidebar-img');
+            if (nameEl && user) {
+                const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ')
+                    || user.name || user.username || user.email || 'User';
+                nameEl.textContent = fullName;
+            }
+            if (imgEl) {
+                const rawUrl = user ? (user.profileImage || user.profile_image || user.avatar || user.image || user.photo || '') : '';
+                const resolved = resolveProfileImageUrl(rawUrl);
+                imgEl.src = resolved || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User&backgroundColor=111c44';
+                imgEl.onerror = () => {
+                    imgEl.onerror = null;
+                    imgEl.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=User&backgroundColor=111c44';
+                };
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            syncAdminProfile();
             const searchInput = document.getElementById('search-input');
             searchInput.addEventListener('input', debounce((e) => fetchDiseases(e.target.value.trim()), 350));
 

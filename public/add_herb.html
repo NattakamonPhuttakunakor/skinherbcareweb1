@@ -131,6 +131,7 @@
         const modal = document.getElementById('success-modal');
         const modalCard = document.getElementById('modal-card');
         const fileListContainer = document.getElementById('file-list-container');
+        const IMAGE_CACHE_KEY = 'addHerbImageCache';
         let editingHerbId = sessionStorage.getItem('editingHerbId');
         let existingImagePath = '';
         let preselectDiseases = [];
@@ -224,6 +225,7 @@
                 }
             }
             loadDiseases();
+            restoreCachedImage();
             // admin search handler
             const searchBtn = document.getElementById('admin-herb-search-btn');
             if (searchBtn) {
@@ -235,6 +237,63 @@
         });
 
         // 2. จัดการรูปภาพ (File Handling)git
+        
+        const cacheSelectedImage = (file, dataUrl) => {
+            try {
+                localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify({
+                    name: file.name,
+                    type: file.type || 'image/jpeg',
+                    dataUrl
+                }));
+            } catch (e) {
+                console.warn('??????????????????????????', e);
+            }
+        };
+
+        const clearCachedImage = () => {
+            localStorage.removeItem(IMAGE_CACHE_KEY);
+        };
+
+        const dataUrlToFile = async (dataUrl, name, type) => {
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            return new File([blob], name, { type: type || blob.type || 'image/jpeg' });
+        };
+
+        const renderSelectedImage = (dataUrl, name) => {
+            fileListContainer.innerHTML = '';
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
+            fileItem.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${dataUrl}" class="w-10 h-10 object-cover rounded-md">
+                    <span class="text-gray-700 text-sm truncate max-w-[150px]">${name}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" id="remove-selected-image" class="text-red-500 hover:text-red-700 text-sm font-semibold">ลบรูป</button>
+                    <i class="fa-solid fa-check text-green-500"></i>
+                </div>
+            `;
+            fileListContainer.appendChild(fileItem);
+            const removeBtn = document.getElementById('remove-selected-image');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', removeSelectedImage);
+            }
+        };
+
+        const restoreCachedImage = async () => {
+            const cached = localStorage.getItem(IMAGE_CACHE_KEY);
+            if (!cached) return;
+            try {
+                const payload = JSON.parse(cached);
+                if (!payload || !payload.dataUrl) return;
+                renderSelectedImage(payload.dataUrl, payload.name || 'image');
+                uploadedImageFile = await dataUrlToFile(payload.dataUrl, payload.name || 'upload.jpg', payload.type);
+            } catch (e) {
+                console.warn('???????????????????????', e);
+            }
+        };
+
         function handleFiles(files) {
             if (!files.length) return;
             fileListContainer.innerHTML = '';
@@ -244,19 +303,19 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
-                fileItem.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <img src="${e.target.result}" class="w-10 h-10 object-cover rounded-md">
-                        <span class="text-gray-700 text-sm truncate max-w-[150px]">${file.name}</span>
-                    </div>
-                    <i class="fa-solid fa-check text-green-500"></i>
-                `;
-                fileListContainer.appendChild(fileItem);
+                renderSelectedImage(e.target.result, file.name);
+                cacheSelectedImage(file, e.target.result);
             };
 
             reader.readAsDataURL(file);
+        }
+
+        function removeSelectedImage() {
+            uploadedImageFile = null;
+            clearCachedImage();
+            fileListContainer.innerHTML = '';
+            const input = document.getElementById('image-upload');
+            if (input) input.value = '';
         }
 
         // 3. ฟังก์ชันบันทึกข้อมูลไปยัง Server (Save Logic)
@@ -333,6 +392,7 @@
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
                     sessionStorage.removeItem('editingHerbId');
+                    clearCachedImage();
                     try {
                         const stored = localStorage.getItem('herbData');
                         const list = stored ? JSON.parse(stored) : [];
