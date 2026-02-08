@@ -154,7 +154,7 @@
         function resolveProfileImageUrl(raw) {
             if (!raw) return '';
             if (raw.startsWith('http') || raw.startsWith('data:')) return raw;
-            return `${API_BASE_URL}/${raw.replace(/^\\//, '')}`;
+            return `${API_BASE_URL}/${raw.replace(/^\//, '')}`;
         }
 
         function getProfileStorageKey() {
