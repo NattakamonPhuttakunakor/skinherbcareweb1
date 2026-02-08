@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgDrawer = drawer.querySelector('#profile-drawer-img');
     const fallbackDrawer = drawer.querySelector('#profile-drawer-fallback');
     const imgFab = fab ? fab.querySelector('#profile-fab-img') : null;
-        fab.innerHTML = `<img id="profile-fab-img" alt=""><span id="profile-fab-fallback">${DEFAULT_FALLBACK}</span>`;
+    const fallbackFab = fab ? fab.querySelector('#profile-fab-fallback') : null;
     const imageInput = drawer.querySelector('#profile-image-input');
 
     const fullName = user
@@ -250,6 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (svg) svg.style.display = '';
                 el.classList.remove('has-image');
             });
+            sidebarImgs.forEach((img) => {
+                img.src = '';
+            });
         }
     };
     const legacyImage = localStorage.getItem('profileImage');
@@ -300,4 +303,39 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         reader.readAsDataURL(file);
     });
+
+    // Admin sidebar: allow clicking avatar to change image (no drawer on admin pages)
+    if (hasAdminSidebar) {
+        const sidebarInput = document.createElement('input');
+        sidebarInput.type = 'file';
+        sidebarInput.accept = 'image/*';
+        sidebarInput.style.display = 'none';
+        document.body.appendChild(sidebarInput);
+
+        const onPickImage = () => {
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            sidebarInput.click();
+        };
+
+        sidebarImgs.forEach((img) => {
+            const wrapper = img.closest('div') || img;
+            wrapper.style.cursor = 'pointer';
+            wrapper.addEventListener('click', onPickImage);
+        });
+
+        sidebarInput.addEventListener('change', () => {
+            const file = sidebarInput.files && sidebarInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const src = e.target.result;
+                localStorage.setItem(storageKey, src);
+                applyImage(src);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 });
