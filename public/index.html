@@ -525,7 +525,12 @@ header p {
         nameEl.textContent = fullName;
         emailEl.textContent = email;
 
-        const savedImage = localStorage.getItem('profileImage');
+        const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
+        const legacyImage = localStorage.getItem('profileImage');
+        if (!localStorage.getItem(storageKey) && legacyImage) {
+            localStorage.setItem(storageKey, legacyImage);
+        }
+        const savedImage = localStorage.getItem(storageKey);
         const applyImage = (src) => {
             if (src) {
                 imgDrawer.src = src;
@@ -560,7 +565,7 @@ header p {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const src = e.target.result;
-                    localStorage.setItem('profileImage', src);
+                    localStorage.setItem(storageKey, src);
                     applyImage(src);
                 };
                 reader.readAsDataURL(file);
