@@ -76,6 +76,14 @@ async function startServer() {
       next(err);
     });
 
+    // Global error handler (capture upload/cloudinary/multer errors)
+    app.use((err, req, res, next) => {
+      if (!err) return next();
+      console.error('❌ Unhandled Error:', err);
+      const message = err?.message || 'Internal Server Error';
+      res.status(500).json({ success: false, error: message });
+    });
+
     // ===============================
     // 🏠 Root Route
     // ===============================
