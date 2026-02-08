@@ -299,6 +299,54 @@
             }
 
             // โหลดข้อมูลจริงจาก API (แสดงล่าสุดให้แอดมินเห็นทันที)
+            const safeParse = (value, fallback) => {
+                try { return JSON.parse(value); } catch { return fallback; }
+            };
+
+            const loadLocalStats = () => {
+                const herbs = safeParse(localStorage.getItem('herbData') || '[]', []);
+                const diseases = safeParse(localStorage.getItem('diseaseData') || '[]', []);
+                const totalHerbEl = document.getElementById('total-products');
+                const totalDiseaseEl = document.getElementById('total-diseases');
+                if (totalHerbEl) totalHerbEl.textContent = Array.isArray(herbs) ? herbs.length : 0;
+                if (totalDiseaseEl) totalDiseaseEl.textContent = Array.isArray(diseases) ? diseases.length : 0;
+
+                const tableBody = document.getElementById('disease-table-body');
+                if (tableBody) {
+                    tableBody.innerHTML = '';
+                    const latest = Array.isArray(diseases) ? diseases.slice(0, 6) : [];
+                    if (latest.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="p-8 text-center text-gray-400">
+                                    ไม่มีข้อมูลโรคในเครื่อง
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        latest.forEach((d) => {
+                            const tr = document.createElement('tr');
+                            tr.className = 'border-b last:border-none';
+                            tr.innerHTML = `
+                                <td class="p-4">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <i class="fa-solid fa-disease"></i>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-bold text-[#111C44]">${d.name || '-'}</td>
+                                <td class="p-4">
+                                    <span class="bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold">ออฟไลน์</span>
+                                </td>
+                                <td class="p-4 text-center space-x-2">
+                                    <a href="disease_list.html" class="text-blue-500 hover:text-blue-600 text-sm font-semibold">ไปจัดการ</a>
+                                </td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
+                    }
+                }
+            };
+
             (async function loadAdminStats() {
                 const token = localStorage.getItem('token') || localStorage.getItem('userToken');
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -358,6 +406,7 @@
                     }
                 } catch (err) {
                     console.error('Failed to load admin stats', err);
+                    loadLocalStats();
                 }
             })();
 
