@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinHerb Care - ?????????????????�???????????�?????????????????????</title>
+    <title>SkinHerb Care - รายละเอียดสมุนไพร</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -42,17 +42,17 @@
         </div>
 
         <nav class="flex-1 px-4 space-y-3">
-            <a href="admin-dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+            <a href="admin.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
                 <div class="w-6 text-center"><i class="fa-solid fa-table-columns"></i></div>
                 <span>Dashboard</span>
             </a>
             <a href="#" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
                 <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div>
-                <span>?????????????????????</span>
+                <span>สมุนไพร</span>
             </a>
             <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
                 <div class="w-6 text-center"><i class="fa-solid fa-virus"></i></div>
-                <span>??????????????????????????????</span>
+                <span>โรคผิวหนัง</span>
             </a>
         </nav>
 
@@ -68,9 +68,12 @@
 
         <div class="relative z-10 p-6 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-[#111C44]">?????????????????�???????????�?????????????????????</h1>
-                <p class="text-sm text-gray-500">??�???????????????????????�????????�?????�?????????????????????????????????????????????</p>
+                <h1 class="text-2xl font-bold text-[#111C44]">รายละเอียดสมุนไพร</h1>
+                <p class="text-sm text-gray-500">ตัวอย่างการแสดงผลข้อมูลในระบบ</p>
             </div>
+            <a href="add_herb.html" class="bg-white hover:bg-gray-50 text-[#111C44] px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium transition-all">
+                <i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูล
+            </a>
         </div>
 
         <div class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-6 pb-20">
@@ -90,9 +93,9 @@
                     </div>
 
                     <div class="glass-panel p-5">
-                        <h3 class="font-bold text-[#111C44] mb-3 border-b pb-2"><i class="fa-solid fa-virus text-pink-500 mr-2"></i>????????�???????????????</h3>
+                        <h3 class="font-bold text-[#111C44] mb-3 border-b pb-2"><i class="fa-solid fa-virus text-pink-500 mr-2"></i>รักษาโรค</h3>
                         <div id="disease-list" class="flex flex-wrap gap-2">
-                            <span class="text-gray-400 text-sm">- ?????????????????????????????????????????? -</span>
+                            <span class="text-gray-400 text-sm">- ไม่มีข้อมูลโรค -</span>
                         </div>
                     </div>
                 </div>
@@ -102,7 +105,7 @@
                     <div class="glass-panel p-6">
                         <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
                             <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-circle-info"></i></span>
-                            ????????????????????????
+                            คำอธิบาย
                         </h3>
                         <p id="display-desc" class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">...</p>
                     </div>
@@ -110,7 +113,7 @@
                     <div class="glass-panel p-6">
                         <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
                             <span class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center mr-3"><i class="fa-solid fa-star"></i></span>
-                            ????????????????????�
+                            สรรพคุณ
                         </h3>
                         <p id="display-prop" class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">...</p>
                     </div>
@@ -118,7 +121,7 @@
                     <div class="glass-panel p-6">
                         <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
                             <span class="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center mr-3"><i class="fa-solid fa-mortar-pestle"></i></span>
-                            ??????????????�???????????????
+                            วิธีการใช้
                         </h3>
                         <div class="bg-yellow-50/50 rounded-xl p-4 border border-yellow-100">
                             <p id="display-usage" class="text-gray-700 leading-relaxed text-sm whitespace-pre-line">...</p>
@@ -129,11 +132,11 @@
             </div>
             
             <div class="flex gap-4 w-full max-w-4xl mx-auto mt-6">
-                <button id="edit-current-herb" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
-                    <i class="fa-solid fa-pen"></i> ??�??�???????????????????????????
-                </button>
+                <a href="add_herb.html" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
+                    <i class="fa-solid fa-pen"></i> แก้ไขข้อมูล
+                </a>
                 <a href="herb_list.html" class="flex-1 bg-[#111C44] hover:bg-[#0d1430] text-white py-3 rounded-xl font-bold shadow-lg text-center transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check-circle"></i> ????????????????????�????????�????????????????????????????????�??????
+                    <i class="fa-solid fa-check-circle"></i> ยืนยันและกลับหน้ารายการ
                 </a>
             </div>
 
@@ -141,54 +144,6 @@
     </main>
 
     <script>
-        const API_BASE_URL = window.location.hostname.includes('netlify.app')
-            ? 'https://skinherbcareweb1.onrender.com'
-            : window.location.origin;
-        const resolveProfileImageUrl = (raw) => {
-            if (!raw) return '';
-            if (raw.startsWith('http') || raw.startsWith('data:')) return raw;
-            return `${API_BASE_URL}/${raw.replace(/^\\//, '')}`;
-        };
-
-        async function syncAdminProfile() {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-            if (!token) return;
-            let user = null;
-            try {
-                const userRaw = localStorage.getItem('user');
-                if (userRaw) user = JSON.parse(userRaw);
-            } catch {}
-
-            if (!user) {
-                try {
-                    const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        const json = await res.json();
-                        user = json.user || json.data || null;
-                        if (user) localStorage.setItem('user', JSON.stringify(user));
-                    }
-                } catch {}
-            }
-
-            const nameEl = document.querySelector('.admin-sidebar-name');
-            const imgEl = document.querySelector('.admin-sidebar-img');
-            if (nameEl && user) {
-                const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ')
-                    || user.name || user.username || user.email || 'User';
-                nameEl.textContent = fullName;
-            }
-            if (imgEl) {
-                const rawUrl = user ? (user.profileImage || user.profile_image || user.avatar || user.image || user.photo || '') : '';
-                const resolved = resolveProfileImageUrl(rawUrl);
-                imgEl.src = resolved || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User&backgroundColor=111c44';
-                imgEl.onerror = () => {
-                    imgEl.onerror = null;
-                    imgEl.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=User&backgroundColor=111c44';
-                };
-            }
-        }
         function applyHerbData(data) {
             if (!data) return;
             document.getElementById('display-name').textContent = data.name || '-';
@@ -201,7 +156,10 @@
             const imgEl = document.getElementById('display-image');
             const placeholder = document.getElementById('img-placeholder');
             if (data.image) {
-                imgEl.src = resolveProfileImageUrl(data.image);
+                const imgSrc = data.image.startsWith('/uploads')
+                    ? `${window.location.origin}${data.image}`
+                    : data.image;
+                imgEl.src = imgSrc;
                 imgEl.classList.remove('hidden');
                 placeholder.classList.add('hidden');
             } else {
@@ -220,13 +178,13 @@
                     diseaseContainer.appendChild(badge);
                 });
             } else {
-                diseaseContainer.innerHTML = '<span class="text-gray-400 text-sm">- ?????????????????????????????????????????? -</span>';
+                diseaseContainer.innerHTML = '<span class="text-gray-400 text-sm">- ไม่มีข้อมูลโรค -</span>';
             }
         }
 
         async function loadHerbFromApi(id) {
             try {
-                const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`);
+                const res = await fetch(`/api/herbs/${id}`);
                 if (!res.ok) throw new Error('not found');
                 const json = await res.json();
                 const herb = json.herb || json.data || json;
@@ -238,12 +196,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-            if (!token) {
-                window.location.href = '/login.html';
-                return;
-            }
-            syncAdminProfile();
             const herbId = sessionStorage.getItem('viewingHerbId');
             if (herbId) {
                 const ok = await loadHerbFromApi(herbId);
@@ -255,22 +207,12 @@
                 const data = JSON.parse(storedData);
                 applyHerbData(data);
             } else {
-                document.getElementById('display-name').textContent = "?????????????????????????????????";
-                document.getElementById('display-desc').textContent = "??�????????�?????�????????�??????????????????????????????????????�???????????????????????????????????�?????????????????????";
+                document.getElementById('display-name').textContent = "ไม่พบข้อมูล";
+                document.getElementById('display-desc').textContent = "กรุณากรอกข้อมูลในหน้าเพิ่มสมุนไพรก่อนครับ";
             }
-        });
-
-        document.getElementById('edit-current-herb')?.addEventListener('click', () => {
-            const herbId = sessionStorage.getItem('viewingHerbId');
-            if (herbId) {
-                sessionStorage.setItem('editingHerbId', herbId);
-            }
-            window.location.href = 'add_herb.html';
         });
     </script>
-    <script src="/js/profile-drawer.js?v=20260208"></script>
+    <script src="/js/profile-drawer.js"></script>
 
 </body>
 </html>
-
-

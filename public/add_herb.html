@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinHerb Care - ??�???????????????????????????????????????????????????</title>
+    <title>SkinHerb Care - เพิ่มข้อมูลสมุนไพร</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,11 +24,11 @@
         </div>
         <nav class="flex-1 px-4 space-y-3 mt-6">
             <div class="px-4 py-3">
-                <input id="admin-herb-search-input" type="search" placeholder="????????????????????????????????????..." class="w-full px-3 py-2 rounded-lg border border-gray-200 mb-2">
-                <button id="admin-herb-search-btn" class="w-full bg-green-600 text-white py-2 rounded-lg">???????????????</button>
+                <input id="admin-herb-search-input" type="search" placeholder="ค้นหาสมุนไพร..." class="w-full px-3 py-2 rounded-lg border border-gray-200 mb-2">
+                <button id="admin-herb-search-btn" class="w-full bg-green-600 text-white py-2 rounded-lg">ค้นหา</button>
             </div>
             <a href="#" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
-                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>??�?????????????????????????????????</span>
+                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>เพิ่มสมุนไพร</span>
             </a>
         </nav>
     </aside>
@@ -37,7 +37,7 @@
         <div class="absolute inset-0 bg-gradient-to-b from-[#A5F3BC] to-[#60a5fa] z-0"></div>
 
         <div class="relative z-10 p-6 pb-2">
-            <h1 class="text-2xl font-bold text-[#111C44] mb-4">??�???????????????????????????????????????????????????</h1>
+            <h1 class="text-2xl font-bold text-[#111C44] mb-4">เพิ่มข้อมูลสมุนไพร</h1>
             <div class="flex justify-center items-center gap-4 mb-6">
                 <div id="circle-1" class="w-10 h-10 rounded-full bg-[#A5F3BC] border-2 border-[#111C44] flex items-center justify-center text-[#111C44] font-bold text-lg shadow-sm">1</div>
                 <div class="w-24 h-0.5 border-t-2 border-dashed border-gray-500"></div>
@@ -51,59 +51,59 @@
                 <div id="step-1-content">
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">????????????????????????????????? (?????�???) *</label>
-                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="??�????????? ????????????????????????">
+                            <label class="block text-[#111C44] font-bold mb-2">ชื่อสมุนไพร (ไทย) *</label>
+                            <input type="text" id="input-name" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ขมิ้นชัน">
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">????????????????????�?????????????????�?????? (Scientific Name)</label>
-                            <input type="text" id="input-eng" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="??�????????? Curcuma longa">
+                            <label class="block text-[#111C44] font-bold mb-2">ชื่อวิทยาศาสตร์ (Scientific Name)</label>
+                            <input type="text" id="input-eng" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น Curcuma longa">
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">???????????????????????? *</label>
-                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="?????????????????�???????????�??�???????????????"></textarea>
+                            <label class="block text-[#111C44] font-bold mb-2">คำอธิบาย *</label>
+                            <textarea id="input-desc" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="รายละเอียดทั่วไป"></textarea>
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">????????????????????�</label>
-                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="??�????????? ?????�??�??????????????�??�??????, ???????????�??????????????�????????�?????�????????? (??????????????�????????????????????�?????? ???????????????????????????????????�?????�????????????)"></textarea>
+                            <label class="block text-[#111C44] font-bold mb-2">สรรพคุณ</label>
+                            <textarea id="input-prop" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="เช่น ลดการอักเสบ, ฆ่าเชื้อแบคทีเรีย (คั่นด้วยจุลภาค หรือขึ้นบรรทัดใหม่)"></textarea>
                         </div>
                         <div>
-                            <label class="block text-[#111C44] font-bold mb-2">??????????????�???????????????</label>
-                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="??????????????�???????????????????????????????????�??????"></textarea>
+                            <label class="block text-[#111C44] font-bold mb-2">วิธีการใช้</label>
+                            <textarea id="input-usage" rows="4" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400" placeholder="วิธีการนำไปใช้รักษา"></textarea>
                         </div>
                     </div>
                     <div class="mt-8 flex justify-center">
                         <button onclick="goToStep2()" class="bg-[#E2E8F0] hover:bg-white text-[#111C44] px-8 py-3 rounded-full font-bold shadow-md flex items-center gap-2 transition-all">
-                            ??�?????�?????? <i class="fa-solid fa-angles-right"></i>
+                            ถัดไป <i class="fa-solid fa-angles-right"></i>
                         </button>
                     </div>
                 </div>
 
                 <div id="step-2-content" class="hidden">
                         <div class="bg-white/50 rounded-xl p-4 mb-6 border border-white">
-                            <label class="block text-[#111C44] font-bold mb-4">????????????????????????????????�???????????????????????�???????????�???</label>
+                            <label class="block text-[#111C44] font-bold mb-4">โรคผิวหนังที่ใช้รักษาได้</label>
                         <div class="space-y-3 max-h-60 overflow-y-auto pr-2" id="disease-list">
-                            <div class="text-sm text-gray-500">??�???????????????????????�???????????�???????????????...</div>
+                            <div class="text-sm text-gray-500">กำลังโหลดรายการโรค...</div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-inner">
-                        <label class="block text-[#111C44] font-bold mb-3">??�???????????????????????�???????????????????????????</label>
+                        <label class="block text-[#111C44] font-bold mb-3">เพิ่มรูปภาพสมุนไพร</label>
                         <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleFiles(this.files)">
                         <div id="file-list-container" class="space-y-2 mb-3"></div>
                         <div class="text-center mt-4">
                             <button onclick="document.getElementById('image-upload').click()" class="text-blue-500 hover:text-blue-700 underline text-sm cursor-pointer">
-                                <i class="fa-solid fa-cloud-arrow-up"></i> ????????????????????�???????????�??????
+                                <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปภาพ
                             </button>
                         </div>
                     </div>
                     <div class="mt-4 flex items-center gap-3 bg-white/70 border border-gray-200 rounded-xl px-4 py-3">
                         <input type="checkbox" id="input-published" class="w-5 h-5 accent-green-600">
-                        <label for="input-published" class="text-[#111C44] font-semibold">??�????????�??????????????????????????????????????�?????????</label>
+                        <label for="input-published" class="text-[#111C44] font-semibold">เผยแพร่ให้ผู้ใช้เห็น</label>
                     </div>
 
                     <div class="mt-8 flex justify-between gap-4">
-                        <button onclick="goToStep1()" class="flex-1 bg-[#CBD5E1] text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition"><i class="fa-solid fa-angles-left"></i> ??????????????�?????????</button>
-                        <button id="finish-btn" onclick="saveDataToServer()" class="flex-1 bg-[#86EFAC] hover:bg-green-400 text-[#064E3B] py-3 rounded-xl font-bold shadow-md transition"><i class="fa-solid fa-check"></i> ??�????????????????????????</button>
+                        <button onclick="goToStep1()" class="flex-1 bg-[#CBD5E1] text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition"><i class="fa-solid fa-angles-left"></i> ย้อนกลับ</button>
+                        <button id="finish-btn" onclick="saveDataToServer()" class="flex-1 bg-[#86EFAC] hover:bg-green-400 text-[#064E3B] py-3 rounded-xl font-bold shadow-md transition"><i class="fa-solid fa-check"></i> เสร็จสิ้น</button>
                     </div>
                 </div>
 
@@ -113,17 +113,15 @@
 
     <div id="success-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity duration-300 opacity-0">
         <div class="bg-[#6EE7B7] p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center relative transform scale-90 transition-transform duration-300" id="modal-card">
-            <h2 class="text-xl font-bold text-[#064E3B] mb-2">??� ???????????�?????�??????????????????????????�?????????!</h2>
+            <h2 class="text-xl font-bold text-[#064E3B] mb-2">✅ บันทึกข้อมูลสำเร็จ!</h2>
             <div class="text-3xl font-extrabold text-[#111C44] my-4 drop-shadow-sm" id="modal-herb-name">-</div>
-            <p class="text-sm text-gray-700 mb-4">????????????????????�?????�???????????�?????�??????????????�??????????????????????????�??????????????????????????�?????????</p>
-            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">??�???????????????????????? Admin Dashboard</button>
+            <p class="text-sm text-gray-700 mb-4">ข้อมูลถูกบันทึกลงในฐานข้อมูลเรียบร้อยแล้ว</p>
+            <button onclick="goToAdmin()" class="bg-[#A7F3D0] hover:bg-[#34D399] text-[#065F46] w-full py-3 rounded-xl font-bold border-2 border-[#059669]/20 shadow-sm transition-all hover:scale-105">กลับไปยัง Admin Dashboard</button>
         </div>
     </div>
 
     <script>
-        const API_BASE_URL = window.location.hostname.includes('netlify.app')
-            ? 'https://skinherbcareweb1.onrender.com'
-            : window.location.origin;
+        const API_BASE_URL = window.location.origin;
         const step1 = document.getElementById('step-1-content');
         const step2 = document.getElementById('step-2-content');
         const circle1 = document.getElementById('circle-1');
@@ -131,25 +129,21 @@
         const modal = document.getElementById('success-modal');
         const modalCard = document.getElementById('modal-card');
         const fileListContainer = document.getElementById('file-list-container');
-        const IMAGE_CACHE_KEY = 'addHerbImageCache';
-        let editingHerbId = sessionStorage.getItem('editingHerbId');
-        let existingImagePath = '';
-        let preselectDiseases = [];
         
-        // ???????????�???????????�???????????????????????� API ?????????????????? checkbox
+        // โหลดรายการโรคจาก API สำหรับ checkbox
         async function loadDiseases() {
             const listEl = document.getElementById('disease-list');
             if (!listEl) return;
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             try {
-                const res = await fetch(`${API_BASE_URL}/api/diseases/admin`, {
+                const res = await fetch('/api/diseases/admin', {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
-                if (!res.ok) throw new Error('???????????�??????????????????????????�?????????');
+                if (!res.ok) throw new Error('โหลดโรคไม่สำเร็จ');
                 const json = await res.json();
                 const diseases = json.diseases || json.data || [];
                 if (!Array.isArray(diseases) || diseases.length === 0) {
-                    listEl.innerHTML = '<div class="text-sm text-gray-500">??????????????????????????????????????????</div>';
+                    listEl.innerHTML = '<div class="text-sm text-gray-500">ไม่มีโรคในระบบ</div>';
                     return;
                 }
                 listEl.innerHTML = '';
@@ -159,73 +153,23 @@
                     label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
                     listEl.appendChild(label);
                 });
-
-                if (Array.isArray(preselectDiseases) && preselectDiseases.length > 0) {
-                    document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
-                        cb.checked = preselectDiseases.includes(cb.value);
-                    });
-                }
             } catch (e) {
-                const stored = localStorage.getItem('diseaseData');
-                if (stored) {
-                    try {
-                        const diseases = JSON.parse(stored);
-                        listEl.innerHTML = '';
-                        diseases.forEach((d) => {
-                            const label = document.createElement('label');
-                            label.className = 'flex items-center gap-3 p-2 hover:bg-white/60 rounded-lg cursor-pointer';
-                            label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
-                            listEl.appendChild(label);
-                        });
-                        return;
-                    } catch {}
-                }
-                listEl.innerHTML = '<div class="text-sm text-gray-500">???????????�???????????�????????????????????????????????�?????????</div>';
+                listEl.innerHTML = '<div class="text-sm text-gray-500">โหลดรายการโรคไม่สำเร็จ</div>';
             }
         }
 
-        // ??�??�??????????????????????????????????????� input (?????????????????�????????? FormData)
+        // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
         let uploadedImageFile = null; 
 
-        // 1. ??�????????????????????�?????? Login (Auth Check) - ????????�??????????????????????????�??????????????�??�???????????????
-        window.addEventListener('load', async () => {
-            //  ??�??� ????????�??�????????�????????? Login ???????????????????????? ??�???????????????????????�??�????????????????????�?????�???????????????????????�???
+        // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
+        window.addEventListener('load', () => {
+            //  ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
                 return;
             }
-            if (editingHerbId) {
-                try {
-                    const res = await fetch(`${API_BASE_URL}/api/herbs/${editingHerbId}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const herb = data.herb || data;
-                        document.getElementById('input-name').value = herb.name || '';
-                        document.getElementById('input-eng').value = herb.scientificName || '';
-                        document.getElementById('input-desc').value = herb.description || '';
-                        document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
-                        document.getElementById('input-usage').value = herb.usage || '';
-                        document.getElementById('input-published').checked = herb.published === true;
-                        existingImagePath = herb.image || '';
-                        if (herb.imageOriginalName) {
-                            // keep original image name for edit if needed
-                        }
-                        preselectDiseases = Array.isArray(herb.diseases) ? herb.diseases : [];
-
-                        const finishBtn = document.getElementById('finish-btn');
-                        if (finishBtn) {
-                            finishBtn.innerHTML = '<i class="fa-solid fa-save"></i> ???????????�?????�??�????????�??�?????????';
-                        }
-                    }
-                } catch (e) {
-                    console.warn('???????????�????????????????????????????????????????????????????????�?????????', e);
-                }
-            }
             loadDiseases();
-            restoreCachedImage();
             // admin search handler
             const searchBtn = document.getElementById('admin-herb-search-btn');
             if (searchBtn) {
@@ -236,98 +180,41 @@
             }
         });
 
-        // 2. ????????�??�?????????????????�?????? (File Handling)git
-        
-        const cacheSelectedImage = (file, dataUrl) => {
-            try {
-                localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify({
-                    name: file.name,
-                    type: file.type || 'image/jpeg',
-                    dataUrl
-                }));
-            } catch (e) {
-                console.warn('??????????????????????????', e);
-            }
-        };
-
-        const clearCachedImage = () => {
-            localStorage.removeItem(IMAGE_CACHE_KEY);
-        };
-
-        const dataUrlToFile = async (dataUrl, name, type) => {
-            const res = await fetch(dataUrl);
-            const blob = await res.blob();
-            return new File([blob], name, { type: type || blob.type || 'image/jpeg' });
-        };
-
-        const renderSelectedImage = (dataUrl, name) => {
-            fileListContainer.innerHTML = '';
-            const fileItem = document.createElement('div');
-            fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
-            fileItem.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${dataUrl}" class="w-10 h-10 object-cover rounded-md">
-                    <span class="text-gray-700 text-sm truncate max-w-[150px]">${name}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button type="button" id="remove-selected-image" class="text-red-500 hover:text-red-700 text-sm font-semibold">???????????????</button>
-                    <i class="fa-solid fa-check text-green-500"></i>
-                </div>
-            `;
-            fileListContainer.appendChild(fileItem);
-            const removeBtn = document.getElementById('remove-selected-image');
-            if (removeBtn) {
-                removeBtn.addEventListener('click', removeSelectedImage);
-            }
-        };
-
-        const restoreCachedImage = async () => {
-            const cached = localStorage.getItem(IMAGE_CACHE_KEY);
-            if (!cached) return;
-            try {
-                const payload = JSON.parse(cached);
-                if (!payload || !payload.dataUrl) return;
-                renderSelectedImage(payload.dataUrl, payload.name || 'image');
-                uploadedImageFile = await dataUrlToFile(payload.dataUrl, payload.name || 'upload.jpg', payload.type);
-            } catch (e) {
-                console.warn('???????????????????????', e);
-            }
-        };
-
+        // 2. จัดการรูปภาพ (File Handling)git
         function handleFiles(files) {
             if (!files.length) return;
             fileListContainer.innerHTML = '';
             
-            const file = files[0]; // ??�????????�????????????????????�?????�
-            uploadedImageFile = file; // ??�??�??????????????????????????�????????? FormData
+            const file = files[0]; // เอาแค่ไฟล์แรก
+            uploadedImageFile = file; // เก็บไว้ส่งเป็น FormData
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                renderSelectedImage(e.target.result, file.name);
-                cacheSelectedImage(file, e.target.result);
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${e.target.result}" class="w-10 h-10 object-cover rounded-md">
+                        <span class="text-gray-700 text-sm truncate max-w-[150px]">${file.name}</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500"></i>
+                `;
+                fileListContainer.appendChild(fileItem);
             };
 
             reader.readAsDataURL(file);
         }
 
-        function removeSelectedImage() {
-            uploadedImageFile = null;
-            clearCachedImage();
-            fileListContainer.innerHTML = '';
-            const input = document.getElementById('image-upload');
-            if (input) input.value = '';
-        }
-
-        // 3. ???????????�???????????????????????�?????�????????????????????????????????? Server (Save Logic)
+        // 3. ฟังก์ชันบันทึกข้อมูลไปยัง Server (Save Logic)
         async function saveDataToServer() {
-            // ??�??� ????????�??�????????�????????? Token ????????????????????????
+            // ⚠️ ปิดการเช็ค Token ชั่วคราว
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login.html';
                 return;
             }
 
-            // ??�???????????????????????� Form
+            // ดึงค่าจาก Form
             const name = document.getElementById('input-name').value.trim();
             const scientificName = document.getElementById('input-eng').value.trim();
             const description = document.getElementById('input-desc').value.trim();
@@ -335,20 +222,20 @@
             const usage = document.getElementById('input-usage').value.trim();
             const published = document.getElementById('input-published')?.checked ? 'true' : 'false';
 
-            // ??�???????????????????????� Checkbox ?????????
+            // ดึงค่าจาก Checkbox โรค
             const diseases = [];
             document.querySelectorAll('#disease-list input:checked').forEach((checkbox) => {
                 diseases.push(checkbox.value);
             });
 
-            // ??�????????????????????????????????????????????�?????????
+            // ตรวจสอบข้อมูลจำเป็น
             if (!name || !description) {
-                alert('?�? ??�????????�?????�????????�???????????????????????????????????�??????????????????????????????');
+                alert('❌ กรุณากรอกชื่อสมุนไพรและคำอธิบาย');
                 goToStep1();
                 return;
             }
 
-            // ??�?????????????????????????????�??�????????? Array
+            // แปลงสรรพคุณเป็น Array
             const properties = propertiesInput
                 ? propertiesInput.split(/[\n,]+/).map(p => p.trim()).filter(p => p)
                 : [];
@@ -356,29 +243,22 @@
             // UI Loading
             const finishBtn = document.getElementById('finish-btn');
             finishBtn.disabled = true;
-            finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ??�???????????????????????�?????�...';
+            finishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
 
             try {
-                // ????????????????????????????????? API ??�????????? FormData (???????????????????????�????????? binary)
+                // ส่งข้อมูลไป API เป็น FormData (ไฟล์ส่งเป็น binary)
                 const form = new FormData();
                 form.append('name', name);
                 form.append('engName', scientificName);
                 form.append('description', description);
-                form.append('properties', JSON.stringify(properties)); // ??� ??�??�?????�???????????????: ????????? properties ??�??�??? data
+                form.append('properties', JSON.stringify(properties)); // ✅ แก้ตรงนี้: ใช้ properties แทน data
                 form.append('usage', usage);
                 form.append('published', published);
                 form.append('diseases', JSON.stringify(diseases));
                 if (uploadedImageFile) form.append('image', uploadedImageFile);
-                if (!uploadedImageFile && existingImagePath) form.append('image', existingImagePath);
-                if (uploadedImageFile && uploadedImageFile.name) {
-                    form.append('imageOriginalName', uploadedImageFile.name);
-                } else if (existingImagePath) {
-                    // keep original image name if stored
-                    form.append('imageOriginalName', '');
-                }
 
-                const response = await fetch(`${API_BASE_URL}/api/herbs${editingHerbId ? `/${editingHerbId}` : ''}`, {
-                    method: editingHerbId ? 'PUT' : 'POST',
+                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
+                    method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: form
                 });
@@ -389,30 +269,8 @@
                     : null;
 
                 if (response.ok && result) {
-                    // ????????�?????????: ??�?????�??? Modal
+                    // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
-                    sessionStorage.removeItem('editingHerbId');
-                    clearCachedImage();
-                    try {
-                        const stored = localStorage.getItem('herbData');
-                        const list = stored ? JSON.parse(stored) : [];
-                        const saved = result.herb || { name, scientificName, description, properties, usage, image: existingImagePath || '' };
-                        const normalized = {
-                            id: saved._id || `local-${Date.now()}`,
-                            name: saved.name || name,
-                            scientificName: saved.scientificName || scientificName,
-                            description: saved.description || description,
-                            properties: Array.isArray(saved.properties) ? saved.properties.join(', ') : (saved.properties || properties.join(', ')),
-                            usage: saved.usage || usage,
-                            image: saved.image || existingImagePath || '',
-                            date: new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                        };
-                        const filtered = list.filter(h => h.id !== normalized.id);
-                        filtered.unshift(normalized);
-                        localStorage.setItem('herbData', JSON.stringify(filtered));
-                    } catch (e) {
-                        console.warn('??????????????????????????�???????????�??�??� herbData ?????�???', e);
-                    }
                     
                     modal.classList.remove('hidden');
                     setTimeout(() => {
@@ -421,18 +279,18 @@
                         modalCard.classList.add('scale-100');
                     }, 10);
                 } else {
-                    // ?????????????????�?????????
-                    const errMsg = (result && (result.message || result.error)) || '???????????�?????????????????�?????�???';
-                    alert(`?�? ??�??�?????�?????????????????�???????????�: ${errMsg}`);
+                    // ไม่สำเร็จ
+                    const errMsg = (result && (result.message || result.error)) || 'ไม่ทราบสาเหตุ';
+                    alert(`❌ เกิดข้อผิดพลาด: ${errMsg}`);
                     finishBtn.disabled = false;
-                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ??�????????????????????????';
+                    finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                alert('?�? ??????????????????????????�??�?????????????????�????????�????????�?????????????????�?????????????????�???');
+                alert('❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
                 finishBtn.disabled = false;
-                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> ??�????????????????????????';
+                finishBtn.innerHTML = '<i class="fa-solid fa-check"></i> เสร็จสิ้น';
             }
         }
 
@@ -443,7 +301,7 @@
 
         function goToStep2() {
             const name = document.getElementById('input-name').value.trim();
-            if(!name) { alert('??�????????�?????�????????�?????????????????????????????????'); return; }
+            if(!name) { alert('กรุณากรอกชื่อสมุนไพร'); return; }
 
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
@@ -460,5 +318,3 @@
     </script>
 </body>
 </html>
-
-
