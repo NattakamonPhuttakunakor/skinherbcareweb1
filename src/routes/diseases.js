@@ -65,7 +65,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     }
     const usage = req.body.usage || '';
     const published = String(req.body.published) === 'true';
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '');
+    const imagePath = req.file ? (req.file.path || `/uploads/${req.file.filename}`) : (req.body.image || '');
 
     // Validate required fields
     if (!name || !description) {
@@ -181,7 +181,7 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
     };
 
     if (req.file) {
-      update.image = `/uploads/${req.file.filename}`;
+      update.image = req.file.path || `/uploads/${req.file.filename}`;
     } else if (req.body.image) {
       update.image = req.body.image;
     }

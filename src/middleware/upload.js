@@ -1,13 +1,6 @@
 import multer from 'multer';
-import path from 'path';
-
-// Set up storage engine
-const storage = multer.diskStorage({
-  destination: './public/uploads/',
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 // Check file type
 function checkFileType(file, cb) {
@@ -22,9 +15,23 @@ function checkFileType(file, cb) {
   }
 }
 
-// Init upload
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: process.env.CLOUDINARY_FOLDER || 'skin-herb-users',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+  },
+});
+
+// Init upload (Cloudinary)
 const upload = multer({
-  storage: storage,
+  storage,
   limits: { fileSize: Number(process.env.MAX_FILE_SIZE) || 10000000 }, // Use from .env or default to 10MB
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
