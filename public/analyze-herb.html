@@ -112,18 +112,18 @@
       background-color: rgba(255, 255, 255, 0.5);
     }
     .profile-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.5);
-      border: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    @media (max-width: 640px) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+@media (max-width: 640px) {
       .top-nav {
         padding: 10px 12px;
       }
@@ -198,6 +198,7 @@
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
+  display: block;
 }
 </style>
 </head>
