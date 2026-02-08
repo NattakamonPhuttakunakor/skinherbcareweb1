@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const normalizeSkinResponse = (payload) => {
         if (!payload) return {};
+        if (payload.top1 && typeof payload.top1 === 'object') return payload.top1;
         if (payload.data && typeof payload.data === 'object') return payload.data;
         return payload;
     };
@@ -39,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelTh = data.label_th || labelCandidate || 'ไม่ระบุ';
         const scoreRaw = typeof data.score === 'number'
             ? data.score
-            : (typeof data.confidence === 'number' ? data.confidence : Number(data.score || data.confidence));
+            : (typeof data.confidence === 'number'
+                ? data.confidence
+                : Number(data.score || data.confidence));
         const scorePct = Number.isFinite(scoreRaw) ? `${(scoreRaw * 100).toFixed(1)}%` : '-';
 
         const info = diseaseInfo || {
