@@ -12,6 +12,7 @@
 
     <style>
         body { font-family: 'Kanit', sans-serif; }
+        .admin-sidebar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     </style>
 </head>
 <body class="bg-[#F4F7FE] flex h-screen overflow-hidden">
@@ -118,15 +119,59 @@
         const API_BASE_URL = window.location.hostname.includes('netlify.app')
             ? 'https://skinherbcareweb1.onrender.com'
             : window.location.origin;
+        const AUTH_TOKEN = localStorage.getItem('token') || localStorage.getItem('userToken');
         const resolveProfileImageUrl = (raw) => {
             if (!raw) return '';
             if (raw.startsWith('http') || raw.startsWith('data:')) return raw;
             return `${API_BASE_URL}/${raw.replace(/^\\//, '')}`;
         };
 
+        function getProfileStorageKey() {
+            try {
+                const userRaw = localStorage.getItem('user');
+                const user = userRaw ? JSON.parse(userRaw) : null;
+                const email = user && user.email ? user.email : '';
+                return email ? `profileImage:${email}` : 'profileImage:guest';
+            } catch {
+                return 'profileImage:guest';
+            }
+        }
+
+        function setupSidebarAvatarUpload() {
+            const imgEl = document.querySelector('.admin-sidebar-img');
+            if (!imgEl) return;
+            const wrapper = imgEl.closest('div');
+            if (!wrapper) return;
+            wrapper.style.cursor = 'pointer';
+
+            let input = document.getElementById('admin-avatar-input');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.id = 'admin-avatar-input';
+                input.style.display = 'none';
+                document.body.appendChild(input);
+            }
+
+            wrapper.addEventListener('click', () => input.click());
+            input.addEventListener('change', () => {
+                const file = input.files && input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const dataUrl = reader.result;
+                    const storageKey = getProfileStorageKey();
+                    localStorage.setItem(storageKey, dataUrl);
+                    localStorage.setItem('profileImage', dataUrl);
+                    imgEl.src = dataUrl;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function syncAdminProfile() {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-            if (!token) return;
+            if (!AUTH_TOKEN) return;
             let user = null;
             try {
                 const userRaw = localStorage.getItem('user');
@@ -136,7 +181,7 @@
             if (!user) {
                 try {
                     const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
                     });
                     if (res.ok) {
                         const json = await res.json();
@@ -154,7 +199,10 @@
                 nameEl.textContent = fullName;
             }
             if (imgEl) {
-                const rawUrl = user ? (user.profileImage || user.profile_image || user.avatar || user.image || user.photo || '') : '';
+                const email = user && user.email ? user.email : '';
+                const storageKey = email ? `profileImage:${email}` : 'profileImage:guest';
+                const stored = localStorage.getItem(storageKey) || localStorage.getItem('profileImage');
+                const rawUrl = stored || (user ? (user.profileImage || user.profile_image || user.avatar || user.image || user.photo || '') : '');
                 const resolved = resolveProfileImageUrl(rawUrl);
                 imgEl.src = resolved || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User&backgroundColor=111c44';
                 imgEl.onerror = () => {
@@ -174,12 +222,12 @@
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-            if (!token) {
+            if (!AUTH_TOKEN) {
                 window.location.href = '/login.html';
                 return;
             }
             syncAdminProfile();
+            setupSidebarAvatarUpload();
             const tableBody = document.getElementById('herb-table-body');
             const searchInput = document.getElementById('search-input');
 
@@ -204,13 +252,9 @@
             let latestHerbs = [];
             async function fetchHerbs(query = '') {
                 try {
-                    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-                    const isAdmin = !!token;
-                    const url = isAdmin
-                        ? `${API_BASE_URL}/api/herbs/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
-                        : `${API_BASE_URL}/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+                    const url = `${API_BASE_URL}/api/herbs/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`;
                     const res = await fetch(url, {
-                        headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
+                        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
                     });
                     if (res.status === 401 || res.status === 403) {
                         localStorage.removeItem('token');
@@ -221,10 +265,10 @@
                     }
                     if (!res.ok) throw new Error(`Server returned ${res.status}`);
                     const data = await res.json();
-                    const herbs = Array.isArray(data) ? data : (data.herbs || data.data || []);
+                    const herbs = Array.isArray(data) ? data : (data.herbs || data.data || data.items || data.results || []);
                     latestHerbs = herbs;
                     localStorage.setItem('herbData', JSON.stringify(herbs));
-                    renderHerbRows(tableBody, herbs, isAdmin);
+                    renderHerbRows(tableBody, herbs, true);
                 } catch (err) {
                     console.warn('Failed to fetch herbs, falling back to static data.', err);
                     // Fallback to static data

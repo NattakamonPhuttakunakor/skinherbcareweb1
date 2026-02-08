@@ -304,38 +304,58 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     });
 
-    // Admin sidebar: allow clicking avatar to change image (no drawer on admin pages)
+    // Admin sidebar: open drawer if present, otherwise allow quick pick
     if (hasAdminSidebar) {
-        const sidebarInput = document.createElement('input');
-        sidebarInput.type = 'file';
-        sidebarInput.accept = 'image/*';
-        sidebarInput.style.display = 'none';
-        document.body.appendChild(sidebarInput);
+        const adminDrawer = document.getElementById('profile-drawer');
+        const adminBackdrop = document.getElementById('profile-backdrop');
+        const adminClose = document.getElementById('profile-close');
+        const adminBtn = document.getElementById('profile-btn-admin');
+        const adminInput = document.getElementById('profile-image-input');
 
-        const onPickImage = () => {
+        const openAdminDrawer = () => {
             if (!token) {
                 window.location.href = '/login.html';
                 return;
             }
-            sidebarInput.click();
+            if (adminDrawer && adminBackdrop) {
+                adminDrawer.classList.add('open');
+                adminBackdrop.classList.add('show');
+                adminDrawer.setAttribute('aria-hidden', 'false');
+            } else if (adminInput) {
+                adminInput.click();
+            }
         };
+
+        const closeAdminDrawer = () => {
+            if (adminDrawer && adminBackdrop) {
+                adminDrawer.classList.remove('open');
+                adminBackdrop.classList.remove('show');
+                adminDrawer.setAttribute('aria-hidden', 'true');
+            }
+        };
+
+        if (adminBtn) adminBtn.addEventListener('click', openAdminDrawer);
+        if (adminClose) adminClose.addEventListener('click', closeAdminDrawer);
+        if (adminBackdrop) adminBackdrop.addEventListener('click', closeAdminDrawer);
 
         sidebarImgs.forEach((img) => {
             const wrapper = img.closest('div') || img;
             wrapper.style.cursor = 'pointer';
-            wrapper.addEventListener('click', onPickImage);
+            wrapper.addEventListener('click', openAdminDrawer);
         });
 
-        sidebarInput.addEventListener('change', () => {
-            const file = sidebarInput.files && sidebarInput.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const src = e.target.result;
-                localStorage.setItem(storageKey, src);
-                applyImage(src);
-            };
-            reader.readAsDataURL(file);
-        });
+        if (adminInput) {
+            adminInput.addEventListener('change', () => {
+                const file = adminInput.files && adminInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const src = e.target.result;
+                    localStorage.setItem(storageKey, src);
+                    applyImage(src);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     }
 });
