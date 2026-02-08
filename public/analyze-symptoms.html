@@ -468,14 +468,18 @@ function appendMessage(text, sender) {
       }
     }
 
+    
     function logout() {
-      if (confirm('&#x0E15;&#x0E49;&#x0E2D;&#x0E07;&#x0E01;&#x0E32;&#x0E23;&#x0E2D;&#x0E2D;&#x0E01;&#x0E08;&#x0E32;&#x0E01;&#x0E23;&#x0E30;&#x0E1A;&#x0E1A;&#x0E2B;&#x0E23;&#x0E37;&#x0E2D;&#x0E44;&#x0E21;&#x0E48;&#x003F;')) {
+      const msg = "\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E23\u0E30\u0E1A\u0E1A\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48?";
+      if (confirm(msg)) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
         location.reload();
       }
     }
+
+}
 
     document.addEventListener('DOMContentLoaded', () => {
       checkLoginStatus();
