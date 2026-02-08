@@ -356,6 +356,15 @@
                         fetch(`${API_BASE_URL}/api/diseases/admin`, { headers })
                     ]);
 
+                    if (herbRes.status === 401 || herbRes.status === 403 || diseaseRes.status === 401 || diseaseRes.status === 403) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userToken');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('userRole');
+                        window.location.href = '/login.html';
+                        return;
+                    }
+
                     const herbJson = herbRes.ok ? await herbRes.json() : null;
                     const diseaseJson = diseaseRes.ok ? await diseaseRes.json() : null;
 
