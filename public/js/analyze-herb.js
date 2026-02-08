@@ -30,6 +30,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const analyzeBtn = document.getElementById('analyze-herb-btn');
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
+    const apiUrl = (path) => `${API_BASE_URL}${path}`;
     const resultsContainer = document.getElementById('results-container');
     const fileInput = document.getElementById('herb-image-upload');
 
@@ -307,7 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const query = new URLSearchParams();
         if (fileMeta.baseName) query.set('q', fileMeta.baseName);
         if (fileMeta.fileName) query.set('imageName', fileMeta.fileName);
-        const res = await fetch(`/api/herbs${query.toString() ? `?${query.toString()}` : ''}`);
+        const res = await fetch(apiUrl(`/api/herbs${query.toString() ? `?${query.toString()}` : ''}`));
         if (!res.ok) return null;
         const json = await res.json().catch(() => null);
         const herbs = (json && (json.herbs || json.data)) || [];
@@ -319,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const candidates = buildNameCandidates(name);
         for (const candidate of candidates) {
             const query = new URLSearchParams({ q: candidate });
-            const res = await fetch(`/api/herbs?${query.toString()}`);
+            const res = await fetch(apiUrl(`/api/herbs?${query.toString()}`));
             if (!res.ok) continue;
             const json = await res.json().catch(() => null);
             const herbs = (json && (json.herbs || json.data)) || [];

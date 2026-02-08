@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
     if (!token || !userRaw) {
@@ -11,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const res = await fetch('/api/auth/profile', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

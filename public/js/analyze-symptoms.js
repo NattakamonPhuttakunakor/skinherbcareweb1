@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
     if (!token || !userRaw) {
@@ -89,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             const fetchHerbUsage = async (name) => {
                 try {
-                    const res = await fetch(`/api/herbs?q=${encodeURIComponent(name)}`);
+                    const res = await fetch(`${API_BASE_URL}/api/herbs?q=${encodeURIComponent(name)}`);
                     const json = await res.json();
                     const herb = (json.herbs && json.herbs[0]) || (json.data && json.data[0]);
                     return herb ? herb.usage : '';
