@@ -267,7 +267,9 @@
         
         // 1. ถ้า Backend อยู่คนละที่ ให้ใส่ URL เต็มๆ เช่น 'https://my-backend-api.onrender.com'
         // 2. ถ้า Backend อยู่ที่เดียวกัน (Host เดียวกัน) ให้ใส่เป็นค่าว่าง '' หรือ '/'
-        const API_BASE_URL = window.location.origin; 
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+          ? 'https://skinherbcareweb1.onrender.com'
+          : window.location.origin;
 
         // 3. ตรวจสอบชื่อ Route ใน Backend ของคุณว่าใช้ชื่ออะไร?
         //    (ถ้าใน Python/Node คุณใช้ @app.route('/predict') ก็ต้องแก้ตรงนี้เป็น '/predict')
