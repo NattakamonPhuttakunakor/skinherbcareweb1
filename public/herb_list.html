@@ -125,6 +125,17 @@
             { name: 'เปลือกมังคุด', date: '28/04/2022' }
         ];
 
+        function fixMojibake(text) {
+            if (typeof text !== 'string') return text;
+            if (!/[ÃÂà¸�]/.test(text)) return text;
+            try {
+                const bytes = Uint8Array.from(text, ch => ch.charCodeAt(0));
+                return new TextDecoder('utf-8').decode(bytes);
+            } catch (err) {
+                return text;
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('herb-table-body');
             const searchInput = document.getElementById('search-input');
@@ -134,7 +145,7 @@
             if (storedData) {
                 const data = JSON.parse(storedData);
                 const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                addTableRow(tableBody, data.name, today, true, 'new-item-row');
+                addTableRow(tableBody, fixMojibake(data.name), today, true, 'new-item-row');
             }
 
             // Debounce utility
@@ -182,7 +193,8 @@
                 }
 
                 herbs.forEach((h, idx) => {
-                    const name = h.name || h.commonName || h.thaiName || 'Unnamed';
+                    const nameRaw = h.name || h.commonName || h.thaiName || 'Unnamed';
+                    const name = fixMojibake(nameRaw);
                     const updated = h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (h.date || '—');
                     const published = h.published === true;
                     const statusLabel = published ? 'เผยแพร่' : 'ยังไม่เผยแพร่';
