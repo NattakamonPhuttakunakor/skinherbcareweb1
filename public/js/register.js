@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
     // --- 1. ค้นหา Element ที่ต้องใช้ ---
     const registerForm = document.getElementById('registerForm');
     const passwordInput = document.getElementById('password');
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // --- 4. ส่งข้อมูลไปยัง Backend API ---
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ firstName, lastName, email, password }),

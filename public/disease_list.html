@@ -128,6 +128,9 @@
     </main>
 
     <script>
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
         // ข้อมูลโรคจำลอง (Mockup Data)
         const staticDiseaseData = [
             { name: 'โรคกลาก (Ringworm)', symptoms: 'คันบริเวณผิวหนังที่ติดเชื้อ', date: '17 ม.ค. 2026' },
@@ -174,8 +177,8 @@
                 const token = localStorage.getItem('token') || localStorage.getItem('userToken');
                 const isAdmin = !!token;
                 const url = isAdmin
-                    ? `/api/diseases/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
-                    : `/api/diseases${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+                    ? `${API_BASE_URL}/api/diseases/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
+                    : `${API_BASE_URL}/api/diseases${query ? `?q=${encodeURIComponent(query)}` : ''}`;
                 const res = await fetch(url, {
                     headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
                 });
@@ -315,7 +318,7 @@
                 if (result.isConfirmed) {
                     isProcessing = true;
                     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-                    fetch(`/api/diseases/${diseaseId}`, {
+                    fetch(`${API_BASE_URL}/api/diseases/${diseaseId}`, {
                         method: 'DELETE',
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                     })
@@ -377,7 +380,7 @@
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             if (!token) return;
             try {
-                const res = await fetch(`/api/diseases/${id}/publish`, {
+                const res = await fetch(`${API_BASE_URL}/api/diseases/${id}/publish`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
+    const apiUrl = (path) => `${API_BASE_URL}${path}`;
     if (!token || !userRaw) {
         localStorage.removeItem('token');
         localStorage.removeItem('userToken');
@@ -11,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const res = await fetch('/api/auth/profile', {
+        const res = await fetch(apiUrl('/api/auth/profile'), {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -30,10 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const analyzeBtn = document.getElementById('analyze-herb-btn');
-    const API_BASE_URL = window.location.hostname.includes('netlify.app')
-        ? 'https://skinherbcareweb1.onrender.com'
-        : window.location.origin;
-    const apiUrl = (path) => `${API_BASE_URL}${path}`;
     const resultsContainer = document.getElementById('results-container');
     const fileInput = document.getElementById('herb-image-upload');
 
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const analyzeWithGemini = async (formData) => {
-        const res = await fetch('/api/python/predict', {
+        const res = await fetch(apiUrl('/api/python/predict'), {
             method: 'POST',
             body: formData
         });
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const debugUpload = async (formData) => {
-        const res = await fetch('/api/python/debug', {
+        const res = await fetch(apiUrl('/api/python/debug'), {
             method: 'POST',
             body: formData
         });

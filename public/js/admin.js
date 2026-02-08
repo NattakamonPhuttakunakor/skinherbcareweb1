@@ -2,12 +2,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin.js loaded!');
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken');
 
     // --- Fetch and Display Summary Data ---
     const fetchDashboardStats = async () => {
         try {
             // We created this API endpoint in server.js earlier
-            const response = await fetch('/api/admin/dashboard');
+            const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

@@ -278,6 +278,10 @@
         }
 
         // Admin quick search - navigate to herb list with optional query
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
+
         document.addEventListener('DOMContentLoaded', () => {
             const adminSearchBtn = document.getElementById('admin-search-btn');
             if (adminSearchBtn) {
@@ -300,8 +304,8 @@
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
                 try {
                     const [herbRes, diseaseRes] = await Promise.all([
-                        fetch('/api/herbs/admin', { headers }),
-                        fetch('/api/diseases/admin', { headers })
+                        fetch(`${API_BASE_URL}/api/herbs/admin`, { headers }),
+                        fetch(`${API_BASE_URL}/api/diseases/admin`, { headers })
                     ]);
 
                     const herbJson = herbRes.ok ? await herbRes.json() : null;
@@ -360,7 +364,7 @@
             // เช็ค /status เพื่อเตือนถ้า env บนเซิร์ฟเวอร์ขาด
             (async function checkServerStatus() {
                 try {
-                    const res = await fetch('/status');
+                    const res = await fetch(`${API_BASE_URL}/status`);
                     const j = await res.json().catch(() => null);
                     if (j && Array.isArray(j.missing_envs) && j.missing_envs.length > 0) {
                         alert('⚠️ Server configuration missing: ' + j.missing_envs.join(', ') + '\nกรุณาตั้งค่า environment variables บน hosting (Render)');

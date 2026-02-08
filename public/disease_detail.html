@@ -127,6 +127,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
         let currentDisease = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -145,7 +148,7 @@
 
         async function loadDiseaseDetailsFromApi(id) {
             try {
-                const res = await fetch(`/api/diseases/${id}`);
+                const res = await fetch(`${API_BASE_URL}/api/diseases/${id}`);
                 if (!res.ok) throw new Error('not found');
                 const json = await res.json();
                 const disease = json.disease || json.data || json;

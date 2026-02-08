@@ -13,6 +13,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     console.log('🌿 SkinHerbCare main.js loaded successfully!');
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
 
     // สร้าง Object หลักสำหรับจัดการฟังก์ชันต่างๆ ของแอป
     const App = {
@@ -49,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // เรียก API ไปยัง /api/auth/profile พร้อมแนบ token ไปเพื่อยืนยันตัวตน
-                const response = await fetch('/api/auth/profile', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                     headers: {
                         'Authorization': `Bearer ${this.token}`
                     }

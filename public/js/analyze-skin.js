@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const baseUrl = window.API_BASE_URL || window.location.origin;
+    const baseUrl = window.API_BASE_URL
+        || (window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin);
     const directUrl = window.SKIN_API_URL || '';
     const apiKey = window.SKIN_API_KEY || '';
     const API_URL = directUrl || `${baseUrl}/api/skin/predict`;
@@ -101,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const queries = [labelTh, labelEn].filter(Boolean);
         for (const q of queries) {
             const url = isAdmin
-                ? `/api/diseases/admin?q=${encodeURIComponent(q)}`
-                : `/api/diseases?q=${encodeURIComponent(q)}`;
+                ? `${baseUrl}/api/diseases/admin?q=${encodeURIComponent(q)}`
+                : `${baseUrl}/api/diseases?q=${encodeURIComponent(q)}`;
             const res = await fetch(url, {
                 headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
             });

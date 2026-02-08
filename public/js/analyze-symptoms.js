@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const res = await fetch('/api/auth/profile', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const timeoutId = setTimeout(() => controller.abort(), 20000);
 
             // ✅ API ที่ถูกต้อง (ใช้ relative URL เพื่อให้ทำงานบน localhost และ Render)
-            const res = await fetch('/api/analysis/diagnose', {
+            const res = await fetch(`${API_BASE_URL}/api/analysis/diagnose`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
