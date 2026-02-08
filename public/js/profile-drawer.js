@@ -114,6 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 
+    const DEFAULT_FALLBACK = "\uD83D\uDC64";
+
     const hasAdminSidebar = document.querySelector('.admin-sidebar-img') || document.querySelector('.admin-sidebar-name');
 
     const hasProfileIcon = document.querySelector('.profile-icon');
@@ -122,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fab = document.createElement('button');
         fab.className = 'profile-fab';
         fab.setAttribute('aria-label', 'Profile');
-        fab.innerHTML = '<img id="profile-fab-img" alt="Profile"><span id="profile-fab-fallback">👤</span>';
+        fab.innerHTML = `<img id="profile-fab-img" alt=""><span id="profile-fab-fallback">${DEFAULT_FALLBACK}</span>`;
         document.body.appendChild(fab);
     }
 
@@ -141,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
-            <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
-            <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">👤</div>
+            <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="" style="display:none;">
+            <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">${DEFAULT_FALLBACK}</div>
             <div id="profile-drawer-name" style="font-weight:700;color:#0f3d2e;">ผู้ใช้งาน</div>
             <div id="profile-drawer-email" style="font-size:0.9rem;color:#6b7280;">-</div>
         </div>
@@ -161,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgDrawer = drawer.querySelector('#profile-drawer-img');
     const fallbackDrawer = drawer.querySelector('#profile-drawer-fallback');
     const imgFab = fab ? fab.querySelector('#profile-fab-img') : null;
-    const fallbackFab = fab ? fab.querySelector('#profile-fab-fallback') : null;
+        fab.innerHTML = `<img id="profile-fab-img" alt=""><span id="profile-fab-fallback">${DEFAULT_FALLBACK}</span>`;
     const imageInput = drawer.querySelector('#profile-image-input');
 
     const fullName = user
@@ -178,40 +180,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const profileIconEls = Array.from(document.querySelectorAll('.profile-icon'));
     const ensureProfileIcon = (el) => {
-        let img = el.querySelector('img.profile-icon-img');
+        let img = el.querySelector('img.profile-icon-img') || el.querySelector('img');
         if (!img) {
             img = document.createElement('img');
-            img.className = 'profile-icon-img';
-            img.alt = 'Profile';
             el.appendChild(img);
         }
+        img.className = 'profile-icon-img';
+        img.alt = '';
+        img.loading = 'lazy';
+
         let fb = el.querySelector('.profile-icon-fallback');
         if (!fb) {
-            fb = document.createElement('span');
+            fb = el.querySelector('span') || document.createElement('span');
             fb.className = 'profile-icon-fallback';
-            fb.textContent = el.textContent.trim() || '👤';
-            el.appendChild(fb);
+            if (!fb.parentElement) el.appendChild(fb);
         }
+        fb.textContent = DEFAULT_FALLBACK;
+
         const svg = el.querySelector('svg');
         return { img, fb, svg };
     };
 
     const applyImage = (src) => {
         if (src) {
+            imgDrawer.onerror = () => {
+                imgDrawer.style.display = 'none';
+                fallbackDrawer.style.display = 'flex';
+            };
             imgDrawer.src = src;
             imgDrawer.style.display = 'block';
             fallbackDrawer.style.display = 'none';
             if (imgFab && fallbackFab) {
+                imgFab.onerror = () => {
+                    imgFab.style.display = 'none';
+                    fallbackFab.style.display = 'inline';
+                };
                 imgFab.src = src;
                 imgFab.style.display = 'block';
                 fallbackFab.style.display = 'none';
             }
             profileIconEls.forEach((el) => {
                 const { img, fb, svg } = ensureProfileIcon(el);
+                img.onerror = () => {
+                    img.style.display = 'none';
+                    fb.style.display = 'flex';
+                    el.classList.remove('has-image');
+                    if (svg) svg.style.display = '';
+                };
                 img.src = src;
                 img.style.display = 'block';
                 fb.style.display = 'none';
                 if (svg) svg.style.display = 'none';
+                el.classList.add('has-image');
             });
             sidebarImgs.forEach((img) => {
                 img.src = src;
@@ -228,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.style.display = 'none';
                 fb.style.display = 'flex';
                 if (svg) svg.style.display = '';
+                el.classList.remove('has-image');
             });
         }
     };
