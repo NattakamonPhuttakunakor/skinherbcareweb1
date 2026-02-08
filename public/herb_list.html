@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinHerb Care - รายชื่อสมุนไพร</title>
+    <title>SkinHerb Care - เธฃเธฒเธขเธเธทเนเธญเธชเธกเธธเธเนเธเธฃ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -43,12 +43,12 @@
 
             <a href="herb_list.html" class="flex items-center gap-3 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold transition-all">
                 <i class="fa-solid fa-leaf w-5 text-center"></i>
-                <span>สมุนไพร</span>
+                <span>เธชเธกเธธเธเนเธเธฃ</span>
             </a>
 
             <a href="disease_list.html" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all hover:pl-6">
                 <i class="fa-solid fa-virus w-5 text-center text-cyan-400"></i>
-                <span>โรคผิวหนัง</span>
+                <span>เนเธฃเธเธเธดเธงเธซเธเธฑเธ</span>
             </a>
         </nav>
 
@@ -56,7 +56,7 @@
             
             <a href="index.html" class="w-full bg-[#1A2B5F] hover:bg-[#233a7d] text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-gray-600/50 shadow-sm">
                 <i class="fa-solid fa-globe"></i>
-                <span>ไปหน้าเว็บไซต์</span>
+                <span>เนเธเธซเธเนเธฒเน€เธงเนเธเนเธเธ•เน</span>
             </a>
 
             <button id="logout-btn" onclick="logout()" class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg">
@@ -72,7 +72,7 @@
 
         <div class="relative z-10 px-8 py-5 flex items-center justify-between bg-white/50 backdrop-blur-sm border-b border-white/60">
             <h1 class="text-2xl font-bold text-[#111C44] flex items-center gap-3">
-                <i class="fa-solid fa-book-open"></i> รายชื่อสมุนไพร
+                <i class="fa-solid fa-book-open"></i> เธฃเธฒเธขเธเธทเนเธญเธชเธกเธธเธเนเธเธฃ
             </h1>
             <div class="flex gap-3 items-center">
                  <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
@@ -80,10 +80,10 @@
                     <span class="text-[#111C44] font-medium text-sm">Online</span>
                 </div>
                 <div class="ml-4">
-                    <input id="search-input" type="search" placeholder="ค้นหาสมุนไพร..." class="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-300">
+                    <input id="search-input" type="search" placeholder="เธเนเธเธซเธฒเธชเธกเธธเธเนเธเธฃ..." class="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-300">
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="search-btn" class="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">ค้นหา</button>
+                    <button id="search-btn" class="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">เธเนเธเธซเธฒ</button>
                 </div>     
             </div>
         </div>
@@ -91,20 +91,20 @@
         <div class="relative z-10 p-8 flex-1 overflow-y-auto">
             
             <a href="add_herb.html" class="block w-full bg-[#2B3674] hover:bg-[#1f2858] text-white text-lg font-bold py-4 rounded-2xl shadow-lg text-center transition-transform hover:scale-[1.01] mb-6 flex items-center justify-center gap-3">
-                <i class="fa-solid fa-plus text-2xl"></i> เพิ่มสมุนไพร
+                <i class="fa-solid fa-plus text-2xl"></i> เน€เธเธดเนเธกเธชเธกเธธเธเนเธเธฃ
             </a>
 
             <div class="bg-white rounded-3xl shadow-sm p-6 min-h-[500px]">
-                <h2 class="text-xl font-bold text-[#111C44] mb-6">สมุนไพรทั้งหมด</h2>
+                <h2 class="text-xl font-bold text-[#111C44] mb-6">เธชเธกเธธเธเนเธเธฃเธ—เธฑเนเธเธซเธกเธ”</h2>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr class="text-gray-400 text-sm border-b border-gray-100">
-                                <th class="pb-4 text-left font-medium pl-4">ชื่อสมุนไพร</th>
-                                <th class="pb-4 text-center font-medium">สถานะ</th>
-                                <th class="pb-4 text-center font-medium">อัปเดตล่าสุด</th>
-                                <th class="pb-4 text-center font-medium">การจัดการ</th>
+                                <th class="pb-4 text-left font-medium pl-4">เธเธทเนเธญเธชเธกเธธเธเนเธเธฃ</th>
+                                <th class="pb-4 text-center font-medium">เธชเธ–เธฒเธเธฐ</th>
+                                <th class="pb-4 text-center font-medium">เธญเธฑเธเน€เธ”เธ•เธฅเนเธฒเธชเธธเธ”</th>
+                                <th class="pb-4 text-center font-medium">เธเธฒเธฃเธเธฑเธ”เธเธฒเธฃ</th>
                             </tr>
                         </thead>
                         <tbody id="herb-table-body" class="text-[#2B3674]">
@@ -211,14 +211,14 @@
                 };
             }
         }
-        // ข้อมูลจำลอง (Mockup Data)
+        // เธเนเธญเธกเธนเธฅเธเธณเธฅเธญเธ (Mockup Data)
         const staticData = [
-            { name: 'กระเทียม', date: '28/04/2022' },
-            { name: 'โหระพา', date: '30/04/2022' },
-            { name: 'ว่านหางจระเข้', date: '28/06/2022' },
-            { name: 'พลูคาว', date: '28/04/2022' },
-            { name: 'แตงกวา', date: '28/04/2022' },
-            { name: 'เปลือกมังคุด', date: '28/04/2022' }
+            { name: 'เธเธฃเธฐเน€เธ—เธตเธขเธก', date: '28/04/2022' },
+            { name: 'เนเธซเธฃเธฐเธเธฒ', date: '30/04/2022' },
+            { name: 'เธงเนเธฒเธเธซเธฒเธเธเธฃเธฐเน€เธเน', date: '28/06/2022' },
+            { name: 'เธเธฅเธนเธเธฒเธง', date: '28/04/2022' },
+            { name: 'เนเธ•เธเธเธงเธฒ', date: '28/04/2022' },
+            { name: 'เน€เธเธฅเธทเธญเธเธกเธฑเธเธเธธเธ”', date: '28/04/2022' }
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -231,7 +231,7 @@
             const tableBody = document.getElementById('herb-table-body');
             const searchInput = document.getElementById('search-input');
 
-            // หากมีข้อมูลจากหน้า Add ให้แสดงเป็นแถวแรก (preview)
+            // เธซเธฒเธเธกเธตเธเนเธญเธกเธนเธฅเธเธฒเธเธซเธเนเธฒ Add เนเธซเนเนเธชเธ”เธเน€เธเนเธเนเธ–เธงเนเธฃเธ (preview)
             const storedData = localStorage.getItem('previewHerbData');
             if (storedData) {
                 const data = JSON.parse(storedData);
@@ -282,18 +282,18 @@
                 container.innerHTML = '';
                 if (!Array.isArray(herbs) || herbs.length === 0) {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td colspan="4" class="py-8 text-center text-gray-400">ไม่มีสมุนไพรที่ตรงกับผลการค้นหา</td>`;
+                    tr.innerHTML = `<td colspan="4" class="py-8 text-center text-gray-400">เนเธกเนเธกเธตเธชเธกเธธเธเนเธเธฃเธ—เธตเนเธ•เธฃเธเธเธฑเธเธเธฅเธเธฒเธฃเธเนเธเธซเธฒ</td>`;
                     container.appendChild(tr);
                     return;
                 }
 
                 herbs.forEach((h, idx) => {
                     const name = h.name || h.commonName || h.thaiName || 'Unnamed';
-                    const updated = h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (h.date || '—');
+                    const updated = h.updatedAt ? new Date(h.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (h.date || 'โ€”');
                     const published = h.published === true;
-                    const statusLabel = published ? 'เผยแพร่' : 'ยังไม่เผยแพร่';
+                    const statusLabel = published ? 'เน€เธเธขเนเธเธฃเน' : 'เธขเธฑเธเนเธกเนเน€เธเธขเนเธเธฃเน';
                     const statusClass = published ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600';
-                    const publishBtnText = published ? 'ซ่อน' : 'เผยแพร่';
+                    const publishBtnText = published ? 'เธเนเธญเธ' : 'เน€เธเธขเนเธเธฃเน';
                     const publishBtnClass = published ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-[#05CD99] text-white hover:bg-green-600';
                     addTableRow(container, name, updated, false, `herb-${idx}`);
                     const row = container.lastElementChild;
@@ -306,10 +306,10 @@
                         if (actionCell) {
                             actionCell.innerHTML = `
                                 <button onclick='viewHerb(${JSON.stringify(h._id || idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
-                                    <i class="fa-solid fa-eye"></i> ดู
+                                    <i class="fa-solid fa-eye"></i> เธ”เธน
                                 </button>
-                                <button onclick="editHerb('${h._id || ''}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                                <button onclick="deleteHerb('${h._id || ''}', '${name}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">ลบ</button>
+                                <button onclick="editHerb('${h._id || ''}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">เนเธเนเนเธ</button>
+                                <button onclick="deleteHerb('${h._id || ''}', '${name}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">เธฅเธ</button>
                                 ${isAdmin ? `
                                     <button onclick='togglePublish(${JSON.stringify(idx)})' class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">
                                         ${publishBtnText}
@@ -358,7 +358,7 @@
                     await fetchHerbs(document.getElementById('search-input').value.trim());
                 } catch (err) {
                     console.error(err);
-                    alert('อัปเดตสถานะไม่สำเร็จ');
+                    alert('เธญเธฑเธเน€เธ”เธ•เธชเธ–เธฒเธเธฐเนเธกเนเธชเธณเน€เธฃเนเธ');
                 }
             };
 
@@ -394,12 +394,12 @@
                 <td class="py-4 pl-4 font-bold flex items-center">
                     ${name} ${newBadge}
                 </td>
-                <td class="py-4 text-center"><span class="bg-[#E6F9F0] text-[#05CD99] px-3 py-1 rounded-full text-xs font-bold">เผยแพร่</span></td>
+                <td class="py-4 text-center"><span class="bg-[#E6F9F0] text-[#05CD99] px-3 py-1 rounded-full text-xs font-bold">เน€เธเธขเนเธเธฃเน</span></td>
                 <td class="py-4 text-center text-sm">${date}</td>
                 <td class="py-4 text-center">
-                    <button onclick="viewDetail(this, '${rowId}', '${name}', ${isNew})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                    <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                    <button onclick="deleteItem(this, '${rowId}', ${isNew})" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
+                    <button onclick="viewDetail(this, '${rowId}', '${name}', ${isNew})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> เธ”เธน</button>
+                    <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">เนเธเนเนเธ</button>
+                    <button onclick="deleteItem(this, '${rowId}', ${isNew})" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">เธฅเธ</button>
                 </td>
             `;
             container.appendChild(tr);
@@ -408,29 +408,29 @@
         // --- Action Functions ---
         function deleteItem(btn, rowId, isNew) {
             Swal.fire({
-                title: 'ยืนยันการลบ?',
-                text: "ต้องการลบข้อมูลนี้ใช่หรือไม่",
+                title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธ?',
+                text: "เธ•เนเธญเธเธเธฒเธฃเธฅเธเธเนเธญเธกเธนเธฅเธเธตเนเนเธเนเธซเธฃเธทเธญเนเธกเน",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'ใช่, ลบเลย'
+                confirmButtonText: 'เนเธเน, เธฅเธเน€เธฅเธข'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const row = document.getElementById(rowId);
-                    row.style.display = 'none'; // ซ่อนแถว
+                    row.style.display = 'none'; // เธเนเธญเธเนเธ–เธง
                     if (isNew) localStorage.removeItem('previewHerbData');
-                    Swal.fire('ลบสำเร็จ!', '', 'success');
+                    Swal.fire('เธฅเธเธชเธณเน€เธฃเนเธ!', '', 'success');
                 }
             })
         }
 
         function editItem(name) {
             Swal.fire({
-                title: 'แก้ไขข้อมูล',
-                text: `ต้องการแก้ไข ${name} ใช่หรือไม่?`,
+                title: 'เนเธเนเนเธเธเนเธญเธกเธนเธฅ',
+                text: `เธ•เนเธญเธเธเธฒเธฃเนเธเนเนเธ ${name} เนเธเนเธซเธฃเธทเธญเนเธกเน?`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'ไปหน้าแก้ไข'
+                confirmButtonText: 'เนเธเธซเธเนเธฒเนเธเนเนเธ'
             }).then((result) => {
                 if (result.isConfirmed) window.location.href = 'add_herb.html';
             });
@@ -439,11 +439,11 @@
         function editHerb(herbId) {
             if (!herbId) return;
             Swal.fire({
-                title: 'แก้ไขข้อมูลสมุนไพร',
-                text: 'ต้องการไปหน้าแก้ไขข้อมูลหรือไม่?',
+                title: 'เนเธเนเนเธเธเนเธญเธกเธนเธฅเธชเธกเธธเธเนเธเธฃ',
+                text: 'เธ•เนเธญเธเธเธฒเธฃเนเธเธซเธเนเธฒเนเธเนเนเธเธเนเธญเธกเธนเธฅเธซเธฃเธทเธญเนเธกเน?',
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonText: 'ไปแก้ไข'
+                confirmButtonText: 'เนเธเนเธเนเนเธ'
             }).then((result) => {
                 if (result.isConfirmed) {
                     sessionStorage.setItem('editingHerbId', herbId);
@@ -455,12 +455,12 @@
         function deleteHerb(herbId, herbName) {
             if (!herbId) return;
             Swal.fire({
-                title: 'ยืนยันการลบ?',
-                text: `ต้องการลบ "${herbName}" ใช่หรือไม่`,
+                title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธ?',
+                text: `เธ•เนเธญเธเธเธฒเธฃเธฅเธ "${herbName}" เนเธเนเธซเธฃเธทเธญเนเธกเน`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'ใช่, ลบเลย'
+                confirmButtonText: 'เนเธเน, เธฅเธเน€เธฅเธข'
             }).then(async (result) => {
                 if (!result.isConfirmed) return;
                 const token = localStorage.getItem('token') || localStorage.getItem('userToken');
@@ -470,11 +470,11 @@
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                     });
                     if (!res.ok) throw new Error('Delete failed');
-                    Swal.fire('ลบสำเร็จ!', '', 'success');
+                    Swal.fire('เธฅเธเธชเธณเน€เธฃเนเธ!', '', 'success');
                     const q = document.getElementById('search-input').value.trim();
                     if (window.fetchHerbs) await window.fetchHerbs(q);
                 } catch (e) {
-                    Swal.fire('ลบไม่สำเร็จ', 'เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                    Swal.fire('เธฅเธเนเธกเนเธชเธณเน€เธฃเนเธ', 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเธฅเธเธเนเธญเธกเธนเธฅ', 'error');
                 }
             });
         }
@@ -483,16 +483,16 @@
             if(isNew) {
                 window.location.href = 'herb_detail.html';
             } else {
-                Swal.fire('ข้อมูลตัวอย่าง', 'นี่เป็นข้อมูล Mockup ยังไม่มีหน้ารายละเอียดจริง', 'info');
+                Swal.fire('เธเนเธญเธกเธนเธฅเธ•เธฑเธงเธญเธขเนเธฒเธ', 'เธเธตเนเน€เธเนเธเธเนเธญเธกเธนเธฅ Mockup เธขเธฑเธเนเธกเนเธกเธตเธซเธเนเธฒเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธฃเธดเธ', 'info');
             }
         }
         
         function logout() {
             Swal.fire({
-                title: 'ออกจากระบบ',
+                title: 'เธญเธญเธเธเธฒเธเธฃเธฐเธเธ',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'ใช่'
+                confirmButtonText: 'เนเธเน'
             }).then((result) => {
                 if(result.isConfirmed) {
                     localStorage.removeItem('token');
@@ -506,3 +506,4 @@
     <script src="/js/profile-drawer.js?v=20260208"></script>
 </body>
 </html>
+
