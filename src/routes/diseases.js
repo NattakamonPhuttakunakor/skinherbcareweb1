@@ -200,6 +200,13 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
       return res.status(400).json({ success: false, error: 'ไม่มีข้อมูลใหม่สำหรับอัปเดต' });
     }
 
+    if (update.name) {
+      const conflict = await Disease.findOne({ name: update.name, _id: { $ne: req.params.id } });
+      if (conflict) {
+        return res.status(400).json({ success: false, error: 'ชื่อโรคนี้มีอยู่แล้ว' });
+      }
+    }
+
     const disease = await Disease.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true
@@ -211,6 +218,9 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
     
     res.json({ success: true, message: 'อัปเดตสำเร็จ ✅', disease });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, error: 'ชื่อโรคนี้มีอยู่แล้ว' });
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
