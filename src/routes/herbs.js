@@ -161,31 +161,49 @@ router.get('/:id', async (req, res) => {
 // ✏️ Update herb (Admin only) — support multipart/form-data with optional image
 router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const name = req.body.name;
-    const scientificName = req.body.engName || req.body.scientificName || '';
-    const description = req.body.description;
-    let properties = [];
-    if (req.body.properties) {
-      try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
-    }
-    const usage = req.body.usage || '';
-    const published = String(req.body.published) === 'true';
+    const hasBody = (key) => Object.prototype.hasOwnProperty.call(req.body, key);
 
-    const update = {
-      name,
-      scientificName,
-      description,
-      properties,
-      usage,
-      published
-    };
+    const update = {};
+
+    if (hasBody('name') && String(req.body.name).trim() !== '') {
+      update.name = String(req.body.name).trim();
+    }
+
+    const scientificNameRaw = req.body.engName ?? req.body.scientificName;
+    if (scientificNameRaw !== undefined && String(scientificNameRaw).trim() !== '') {
+      update.scientificName = String(scientificNameRaw).trim();
+    }
+
+    if (hasBody('description') && String(req.body.description).trim() !== '') {
+      update.description = String(req.body.description).trim();
+    }
+
+    if (hasBody('properties') && String(req.body.properties).trim() !== '') {
+      let properties = [];
+      try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
+      update.properties = properties;
+    }
+
+    if (hasBody('usage') && String(req.body.usage).trim() !== '') {
+      update.usage = String(req.body.usage).trim();
+    }
+
+    if (hasBody('published')) {
+      update.published = String(req.body.published) === 'true';
+    }
 
     if (req.file) {
       update.image = req.file.path || `/uploads/${req.file.filename}`;
       update.imageOriginalName = req.file.originalname || '';
-    } else if (req.body.image) {
+    } else if (hasBody('image') && String(req.body.image).trim() !== '') {
       update.image = req.body.image;
-      if (req.body.imageOriginalName) update.imageOriginalName = req.body.imageOriginalName;
+      if (hasBody('imageOriginalName') && String(req.body.imageOriginalName).trim() !== '') {
+        update.imageOriginalName = req.body.imageOriginalName;
+      }
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ success: false, error: 'ไม่มีข้อมูลใหม่สำหรับอัปเดต' });
     }
 
     const herb = await Herb.findByIdAndUpdate(req.params.id, update, {

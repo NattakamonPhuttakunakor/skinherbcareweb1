@@ -154,36 +154,50 @@ router.get('/:id', async (req, res) => {
 // ✏️ Update disease (Admin only) — support multipart/form-data with optional image
 router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
   try {
-    const name = req.body.name;
-    const description = req.body.description;
-    const engName = req.body.engName || '';
-    const usage = req.body.usage || '';
-    const published = String(req.body.published) === 'true';
+    const hasBody = (key) => Object.prototype.hasOwnProperty.call(req.body, key);
 
-    let symptoms = [];
-    if (req.body.symptoms) {
+    const update = {};
+
+    if (hasBody('name') && String(req.body.name).trim() !== '') {
+      update.name = String(req.body.name).trim();
+    }
+
+    if (hasBody('description') && String(req.body.description).trim() !== '') {
+      update.description = String(req.body.description).trim();
+    }
+
+    if (hasBody('engName') && String(req.body.engName).trim() !== '') {
+      update.engName = String(req.body.engName).trim();
+    }
+
+    if (hasBody('usage') && String(req.body.usage).trim() !== '') {
+      update.usage = String(req.body.usage).trim();
+    }
+
+    if (hasBody('published')) {
+      update.published = String(req.body.published) === 'true';
+    }
+
+    if (hasBody('symptoms') && String(req.body.symptoms).trim() !== '') {
+      let symptoms = [];
       try { symptoms = JSON.parse(req.body.symptoms); if (!Array.isArray(symptoms)) throw new Error('not array'); } catch (e) { symptoms = String(req.body.symptoms).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+      update.symptoms = symptoms;
     }
 
-    let medicines = [];
-    if (req.body.medicines) {
+    if (hasBody('medicines') && String(req.body.medicines).trim() !== '') {
+      let medicines = [];
       try { medicines = JSON.parse(req.body.medicines); if (!Array.isArray(medicines)) throw new Error('not array'); } catch (e) { medicines = String(req.body.medicines).split(/[\n,]+/).map(s => s.trim()).filter(Boolean); }
+      update.medicines = medicines;
     }
-
-    const update = {
-      name,
-      engName,
-      description,
-      symptoms,
-      medicines,
-      usage,
-      published
-    };
 
     if (req.file) {
       update.image = req.file.path || `/uploads/${req.file.filename}`;
-    } else if (req.body.image) {
+    } else if (hasBody('image') && String(req.body.image).trim() !== '') {
       update.image = req.body.image;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ success: false, error: 'ไม่มีข้อมูลใหม่สำหรับอัปเดต' });
     }
 
     const disease = await Disease.findByIdAndUpdate(req.params.id, update, {
