@@ -156,10 +156,7 @@
             const imgEl = document.getElementById('display-image');
             const placeholder = document.getElementById('img-placeholder');
             if (data.image) {
-                const imgSrc = data.image.startsWith('/uploads')
-                    ? `${window.location.origin}${data.image}`
-                    : data.image;
-                imgEl.src = imgSrc;
+                imgEl.src = resolveImageSrc(data.image);
                 imgEl.classList.remove('hidden');
                 placeholder.classList.add('hidden');
             } else {
@@ -211,6 +208,19 @@
                 document.getElementById('display-desc').textContent = "กรุณากรอกข้อมูลในหน้าเพิ่มสมุนไพรก่อนครับ";
             }
         });
+
+        function resolveImageSrc(raw) {
+            if (!raw) return '';
+            const val = String(raw).trim();
+            if (!val) return '';
+            if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+            const normalized = val.replace(/\\/g, '/');
+            const idx = normalized.lastIndexOf('/uploads/');
+            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+            return val;
+        }
     </script>
     <script src="/js/profile-drawer.js"></script>
 

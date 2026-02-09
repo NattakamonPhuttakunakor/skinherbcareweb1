@@ -200,11 +200,11 @@
                 medicineContainer.innerHTML = '<span class="text-gray-400 text-sm">- ไม่มีข้อมูลสมุนไพร -</span>';
             }
 
-            // แสดงรูปถ้ามี (เก็บเป็น base64 ใน field image)
+            // แสดงรูปถ้ามี
             const imgEl = document.getElementById('display-image');
             const placeholder = document.getElementById('img-placeholder');
             if (disease.image) {
-                imgEl.src = disease.image;
+                imgEl.src = resolveImageSrc(disease.image);
                 imgEl.classList.remove('hidden');
                 placeholder.classList.add('hidden');
             } else {
@@ -212,6 +212,19 @@
                 imgEl.classList.add('hidden');
                 placeholder.classList.remove('hidden');
             }
+        }
+
+        function resolveImageSrc(raw) {
+            if (!raw) return '';
+            const val = String(raw).trim();
+            if (!val) return '';
+            if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+            const normalized = val.replace(/\\/g, '/');
+            const idx = normalized.lastIndexOf('/uploads/');
+            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+            return val;
         }
 
         function showNotFound() {
