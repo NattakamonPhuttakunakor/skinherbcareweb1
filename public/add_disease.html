@@ -124,19 +124,18 @@
 
             <div class="max-w-5xl mx-auto mt-8 bg-white/90 backdrop-blur-md rounded-3xl shadow-lg p-6">
                 <h2 class="text-xl font-bold text-[#111C44] mb-4 flex items-center justify-between">
-                    รายการโรคผิวหนังในระบบ
+                    จัดการข้อมูลโรค (Disease Management)
                     <span id="dashboard-disease-count" class="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">ทั้งหมด 0 รายการ</span>
                 </h2>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-gray-400 text-sm border-b border-gray-100">
-                                <th class="pb-4 text-left font-medium pl-4 w-1/4">ชื่อโรค</th>
-                                <th class="pb-4 text-left font-medium w-1/3">อาการเบื้องต้น</th>
-                                <th class="pb-4 text-center font-medium">สถานะ</th>
-                                <th class="pb-4 text-center font-medium">อัปเดตล่าสุด</th>
-                                <th class="pb-4 text-center font-medium">การจัดการ</th>
+                                <th class="pb-4 pl-4 font-medium">รูปภาพ</th>
+                                <th class="pb-4 font-medium">ชื่อโรค</th>
+                                <th class="pb-4 font-medium">สมุนไพรที่เกี่ยวข้อง</th>
+                                <th class="pb-4 text-center font-medium">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-disease-table-body" class="text-[#2B3674]"></tbody>
@@ -429,22 +428,25 @@
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100/50';
 
+                    const relatedHerbs = Array.isArray(disease.medicines) ? disease.medicines : [];
+                    const relatedLabel = relatedHerbs.length > 0 ? relatedHerbs.slice(0, 2).join(', ') : '—';
                     const published = disease.published === true;
                     const statusLabel = published ? 'เผยแพร่' : 'ยังไม่เผยแพร่';
-                    const statusClass = published ? 'bg-[#E6F9F0] text-[#05CD99]' : 'bg-gray-200 text-gray-600';
-                    const publishBtnText = published ? 'ซ่อน' : 'เผยแพร่';
-                    const publishBtnClass = published ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-[#05CD99] text-white hover:bg-green-600';
+                    const statusClass = published ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600';
 
                     tr.innerHTML = `
-                        <td class="py-4 pl-4 font-bold">${disease.name || '-'}</td>
-                        <td class="py-4 text-sm text-gray-600">${Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '')}</td>
-                        <td class="py-4 text-center"><span class="${statusClass} px-3 py-1 rounded-full text-xs font-bold">${statusLabel}</span></td>
-                        <td class="py-4 text-center text-sm">${disease.updatedAt ? new Date(disease.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}</td>
+                        <td class="py-4 pl-4">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-disease"></i>
+                            </div>
+                        </td>
+                        <td class="py-4 font-bold text-[#111C44]">${disease.name || '-'}</td>
+                        <td class="py-4">
+                            <span class="${statusClass} px-2 py-1 rounded text-xs font-bold mr-2">${statusLabel}</span>
+                            <span class="text-sm text-gray-600">${relatedLabel}</span>
+                        </td>
                         <td class="py-4 text-center">
-                            <button onclick="viewDisease('${disease._id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                            <button onclick="editDisease('${disease._id}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                            <button onclick="deleteDisease('${disease._id}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
-                            ${isAdmin ? `<button onclick="toggleDiseasePublish('${disease._id}', ${published})" class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">${publishBtnText}</button>` : ''}
+                            <button onclick="editDisease('${disease._id}')" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">ไปจัดการ</button>
                         </td>
                     `;
                     dashboardTableBody.appendChild(tr);
