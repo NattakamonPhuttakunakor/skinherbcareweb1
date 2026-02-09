@@ -15,11 +15,33 @@ const connectDB = async () => {
 };
 
 const readCsvFile = (fileName) => {
-  const buffer = fs.readFileSync(fileName);
-  const workbook = XLSX.read(buffer, { type: 'buffer', codepage: 65001 });
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
-  return XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+  let data = fs.readFileSync(fileName, 'utf-8');
+  if (data.charCodeAt(0) === 0xfeff) {
+    data = data.slice(1);
+  }
+
+  const lines = data.split(/\r?\n/).filter((line) => line.trim() !== '');
+  if (lines.length === 0) return { delimiter: ',', rows: [] };
+
+  const sample = lines[0];
+  const commaCount = (sample.match(/,/g) || []).length;
+  const semicolonCount = (sample.match(/;/g) || []).length;
+  const delimiter = semicolonCount > commaCount ? ';' : ',';
+
+  const pattern = new RegExp(`("([^"]|"")*"|[^${delimiter}\\r\\n]*)(?=${delimiter}|\\r?\\n|$)`, 'g');
+  const parseLine = (line) => {
+    const parts = line.match(pattern) || [];
+    return parts.map((part) => {
+      const trimmed = part.trim();
+      if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+        return trimmed.slice(1, -1).replace(/""/g, '"').trim();
+      }
+      return trimmed;
+    });
+  };
+
+  const rows = lines.map(parseLine);
+  return { delimiter, rows };
 };
 
 const normalizeText = (value) => {
@@ -36,49 +58,52 @@ const seed = async () => {
   await connectDB();
   console.log('Connected to MongoDB');
 
-  const rows = readCsvFile(csvPath);
-  console.log(`Found ${rows.length} diseases in data.csv`);
+  const { delimiter, rows } = readCsvFile(csvPath);
+  console.log(`Found ${rows.length} lines in data.csv (delimiter="${delimiter}")`);
 
   const collection = mongoose.connection.collection('datadiseases');
-  let upserted = 0;
-  let updated = 0;
+  const docs = [];
 
-  for (const row of rows) {
-    const name = normalizeText(row['รายชื่อโรค'] || row['name'] || row['Disease'] || row['Diseases']);
+  const dataRows = rows.slice(1);
+  for (const row of dataRows) {
+    const name = normalizeText(row[0]);
     if (!name) continue;
 
-    const mainSymptoms = row['อาการหลัก'] || row['symptoms'] || row['Main Symptoms'] || '';
-    const secondary = row['อาการรอง'] || row['subSymptoms'] || row['Secondary symptoms'] || '';
-    const locations = row['ตำแหน่งที่พบบ่อย'] || row['locations'] || '';
-    const cause = row['สาเหตุ'] || row['cause'] || '';
-    const treatment = row['วิธีรักษาเบื้อต้น'] || row['วิธีรักษาเบื้องต้น'] || row['treatment'] || '';
+    const mainSymptoms = row[1] || '';
+    const secondary = row[2] || '';
+    const locations = row[3] || '';
+    const cause = row[4] || '';
+    const treatment = row[5] || '';
 
-    const update = {};
     const mainText = normalizeText(mainSymptoms);
     const subText = normalizeText(secondary);
     const locText = normalizeText(locations);
     const causeText = normalizeText(cause);
     const treatText = normalizeText(treatment);
 
-    if (mainText) update.symptoms = mainText;
-    if (subText) update.subSymptoms = subText;
-    if (locText) update.locations = locText;
-    if (causeText) update.cause = causeText;
-    if (treatText) update.treatment = treatText;
-
-    update.updatedAt = new Date();
-
-    const result = await collection.updateOne(
-      { name },
-      { $set: update, $setOnInsert: { name, createdAt: new Date() } },
-      { upsert: true }
-    );
-
-    if (result.upsertedCount > 0) upserted += 1;
-    else if (result.modifiedCount > 0) updated += 1;
+    docs.push({
+      name,
+      symptoms: mainText,
+      subSymptoms: subText,
+      locations: locText,
+      cause: causeText,
+      treatment: treatText,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
   }
 
-  console.log(`Done. Inserted: ${upserted}, Updated: ${updated}`);
+  console.log(`Prepared ${docs.length} docs`);
+
+  await collection.deleteMany({});
+  console.log('Cleared old data in datadiseases');
+
+  if (docs.length > 0) {
+    const result = await collection.insertMany(docs);
+    console.log(`Inserted ${result.insertedCount} docs into datadiseases`);
+  } else {
+    console.log('No docs to insert.');
+  }
   await mongoose.disconnect();
 };
 
