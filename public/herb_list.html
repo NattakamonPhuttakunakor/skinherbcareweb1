@@ -304,7 +304,7 @@
                 <td class="py-4 text-center text-sm">${date}</td>
                 <td class="py-4 text-center">
                     <button onclick="viewDetail(this, '${rowId}', '${name}', ${isNew})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                    <button onclick='editItem(${JSON.stringify(h._id || idx)})' class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                    <button onclick="editItem('${rowId}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
                     <button onclick="deleteItem(this, '${rowId}', ${isNew})" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
                 </td>
             `;

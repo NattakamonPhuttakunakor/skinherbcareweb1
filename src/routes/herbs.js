@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import mongoose from 'mongoose';
 import Herb from '../models/Herb.js';
 import { protect, admin } from '../middleware/auth.js';
@@ -71,7 +72,12 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     }
     const usage = req.body.usage || '';
     const published = String(req.body.published) === 'true';
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '/uploads/default-herb.png');
+    let imagePath = req.body.image || '/uploads/default-herb.png';
+    if (req.file) {
+      const buffer = fs.readFileSync(req.file.path);
+      imagePath = `data:${req.file.mimetype};base64,${buffer.toString('base64')}`;
+      fs.unlink(req.file.path, () => {});
+    }
     const imageOriginalName = req.file ? req.file.originalname : (req.body.imageOriginalName || '');
 
     // Validate required fields
@@ -193,7 +199,9 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
     }
 
     if (req.file) {
-      update.image = `/uploads/${req.file.filename}`;
+      const buffer = fs.readFileSync(req.file.path);
+      update.image = `data:${req.file.mimetype};base64,${buffer.toString('base64')}`;
+      fs.unlink(req.file.path, () => {});
       update.imageOriginalName = req.file.originalname || '';
     } else if (hasBody('image') && String(req.body.image).trim() !== '') {
       update.image = req.body.image;

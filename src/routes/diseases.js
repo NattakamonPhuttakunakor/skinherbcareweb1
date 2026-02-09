@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import mongoose from 'mongoose';
 import Disease from '../models/Disease.js';
 import { protect, admin } from '../middleware/auth.js';
@@ -65,7 +66,12 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     }
     const usage = req.body.usage || '';
     const published = String(req.body.published) === 'true';
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '');
+    let imagePath = req.body.image || '';
+    if (req.file) {
+      const buffer = fs.readFileSync(req.file.path);
+      imagePath = `data:${req.file.mimetype};base64,${buffer.toString('base64')}`;
+      fs.unlink(req.file.path, () => {});
+    }
 
     // Validate required fields
     if (!name || !description) {
@@ -191,7 +197,9 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
     }
 
     if (req.file) {
-      update.image = `/uploads/${req.file.filename}`;
+      const buffer = fs.readFileSync(req.file.path);
+      update.image = `data:${req.file.mimetype};base64,${buffer.toString('base64')}`;
+      fs.unlink(req.file.path, () => {});
     } else if (hasBody('image') && String(req.body.image).trim() !== '') {
       update.image = req.body.image;
     }
