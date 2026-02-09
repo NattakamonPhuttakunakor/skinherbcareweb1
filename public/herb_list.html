@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -179,7 +179,7 @@
                     console.warn('Failed to fetch herbs, falling back to static data.', err);
                     // Fallback to static data
                     tableBody.innerHTML = '';
-                    staticData.forEach((item, index) => addTableRow(tableBody, item.name, item.date, false, `static-row-${index}`));
+                    staticData.forEach((item, index) => addTableRow(tableBody, fixMojibake(item.name), item.date, false, `static-row-${index}`));
                 }
             }
 
