@@ -204,6 +204,12 @@
             }
 
             fetchDashboardDiseases();
+
+            const editingId = sessionStorage.getItem('editingDiseaseId');
+            if (editingId) {
+                sessionStorage.removeItem('editingDiseaseId');
+                loadDiseaseForEdit(editingId);
+            }
         });
 
         function debounce(fn, delay = 300) {

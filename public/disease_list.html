@@ -212,13 +212,13 @@
                         <td class="py-4 pl-4 font-bold flex items-center">
                             ${disease.name}
                         </td>
-                        <td class="py-4 text-sm text-gray-600">${disease.symptoms || ''}</td>
+                        <td class="py-4 text-sm text-gray-600">${Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '')}</td>
                         <td class="py-4 text-center"><span class="${statusClass} px-3 py-1 rounded-full text-xs font-bold">${statusLabel}</span></td>
                         <td class="py-4 text-center text-sm">${disease.updatedAt ? new Date(disease.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : (disease.date || '—')}</td>
                         <td class="py-4 text-center">
                             <button onclick="viewDisease('${disease._id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                            <button onclick="editDisease('${disease.name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
-                            <button onclick="deleteDisease('${disease.name}', this)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
+                            <button onclick="editDisease('${disease._id}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                            <button onclick="deleteDisease('${disease._id}')" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
                             ${isAdmin ? `<button onclick="toggleDiseasePublish('${disease._id}', ${published})" class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">${publishBtnText}</button>` : ''}
                         </td>
                     `;
@@ -263,52 +263,47 @@
         }
 
         // ฟังก์ชัน ลบ
-        function deleteDisease(diseaseName, btn) {
+        async function deleteDisease(diseaseId) {
             if (isProcessing) return;
-            
-            Swal.fire({
+
+            const result = await Swal.fire({
                 title: 'ยืนยันการลบ?',
-                text: `คุณต้องการลบโรค "${diseaseName}" ใช่หรือไม่`,
+                text: 'ข้อมูลจะถูกลบถาวร',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'ใช่, ลบเลย',
                 cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    isProcessing = true;
-                    const row = btn.closest('tr');
-                    row.style.transition = "all 0.5s";
-                    row.style.opacity = "0";
-                    row.style.transform = "translateX(50px)";
-                    
-                    setTimeout(() => {
-                        row.remove();
-                        // อัปเดตข้อมูลใน LocalStorage
-                        const storedData = localStorage.getItem('diseaseData');
-                        if (storedData) {
-                            const diseases = JSON.parse(storedData);
-                            const updated = diseases.filter(d => d.name !== diseaseName);
-                            localStorage.setItem('diseaseData', JSON.stringify(updated));
-                        }
-                        
-                        Swal.fire('ลบสำเร็จ!', 'ข้อมูลโรคถูกลบเรียบร้อยแล้ว', 'success').then(() => {
-                            isProcessing = false;
-                            loadDiseaseList();
-                        });
-                    }, 500);
-                }
-            })
+            });
+
+            if (!result.isConfirmed) return;
+            isProcessing = true;
+
+            try {
+                const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+                const res = await fetch(`/api/diseases/${diseaseId}`, {
+                    method: 'DELETE',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (!res.ok) throw new Error('Delete failed');
+                await fetchDiseases(document.getElementById('search-input').value.trim());
+                Swal.fire('ลบสำเร็จ!', 'ข้อมูลโรคถูกลบเรียบร้อยแล้ว', 'success');
+            } catch (err) {
+                console.error(err);
+                Swal.fire('ผิดพลาด', 'ลบข้อมูลไม่สำเร็จ', 'error');
+            } finally {
+                isProcessing = false;
+            }
         }
 
         // ฟังก์ชัน แก้ไข
-        function editDisease(diseaseName) {
+        function editDisease(diseaseId) {
             if (isProcessing) return;
-            
+
             Swal.fire({
                 title: 'แก้ไขข้อมูลโรค',
-                text: `คุณต้องการแก้ไข "${diseaseName}" ใช่ไหม?`,
+                text: 'ต้องการแก้ไขข้อมูลนี้ใช่ไหม?',
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'ไปแก้ไข',
@@ -317,11 +312,8 @@
                 allowEscapeKey: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    isProcessing = true;
-                    localStorage.setItem('editingDiseaseName', diseaseName);
+                    sessionStorage.setItem('editingDiseaseId', diseaseId);
                     window.location.href = 'add_disease.html';
-                } else {
-                    isProcessing = false;
                 }
             });
         }
