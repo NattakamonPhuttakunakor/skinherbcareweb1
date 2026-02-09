@@ -136,6 +136,63 @@ const migrateDiseasesFromCsv = async () => {
   }
 };
 
+// Function to migrate diseases from data.csv into a custom collection
+const migrateDiseasesFromCsvToCollection = async (collectionName) => {
+  const csvPath = path.join(process.cwd(), 'data.csv');
+  if (!fs.existsSync(csvPath)) {
+    console.log("No data.csv found, skipping CSV import.");
+    return;
+  }
+
+  try {
+    console.log(`\nReading diseases from data.csv -> ${collectionName}...`);
+    const rows = readCsvFile(csvPath);
+    console.log(`Found ${rows.length} diseases in data.csv`);
+
+    const collection = mongoose.connection.collection(collectionName);
+    for (const row of rows) {
+      try {
+        const name = normalizeText(row['รายชื่อโรค'] || row['name'] || row['Disease'] || row['Diseases']);
+        if (!name) {
+          console.warn('Skipping row with missing disease name');
+          continue;
+        }
+
+        const mainSymptoms = row['อาการหลัก'] || row['symptoms'] || row['Main Symptoms'] || '';
+        const secondary = row['อาการรอง'] || row['subSymptoms'] || row['Secondary symptoms'] || '';
+        const locations = row['ตำแหน่งที่พบบ่อย'] || row['locations'] || '';
+        const cause = row['สาเหตุ'] || row['cause'] || '';
+        const treatment = row['วิธีรักษาเบื้อต้น'] || row['วิธีรักษาเบื้องต้น'] || row['treatment'] || '';
+
+        const update = {};
+        const mainText = normalizeText(mainSymptoms);
+        const subText = normalizeText(secondary);
+        const locText = normalizeText(locations);
+        const causeText = normalizeText(cause);
+        const treatText = normalizeText(treatment);
+
+        if (mainText) update.symptoms = mainText;
+        if (subText) update.subSymptoms = subText;
+        if (locText) update.locations = locText;
+        if (causeText) update.cause = causeText;
+        if (treatText) update.treatment = treatText;
+
+        update.updatedAt = new Date();
+
+        await collection.updateOne(
+          { name },
+          { $set: update, $setOnInsert: { name, createdAt: new Date() } },
+          { upsert: true }
+        );
+      } catch (error) {
+        console.error(`Error migrating disease: ${error.message}`);
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading diseases from CSV: ${error.message}`);
+  }
+};
+
 // Function to migrate diseases from data.xlsx
 const migrateDiseasesFromData = async () => {
   try {
@@ -266,7 +323,10 @@ const migrate = async () => {
     
     await connectDB();
     
-    // Migrate diseases from CSV first (preferred)
+    // Migrate diseases from CSV into custom collection (datadiseases)
+    await migrateDiseasesFromCsvToCollection('datadiseases');
+
+    // Migrate diseases from CSV into main Disease collection
     await migrateDiseasesFromCsv();
 
     // Migrate diseases from XLSX (fallback)
