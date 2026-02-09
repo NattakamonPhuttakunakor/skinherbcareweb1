@@ -157,6 +157,7 @@
                     fetchDiseases(q);
                 });
             }
+            fetchDiseases();
         });
 
         let latestDiseases = [];
@@ -178,7 +179,7 @@
                 const data = await res.json();
                 const diseases = Array.isArray(data) ? data : (data.diseases || data.data || []);
                 latestDiseases = diseases;
-                localStorage.setItem('diseaseData', JSON.stringify(diseases.map(d => ({
+                const mapped = diseases.map((d) => ({
                     id: d._id,
                     name: d.name,
                     engName: d.engName || '',
@@ -188,7 +189,8 @@
                     usage: d.usage || '',
                     image: d.image || '',
                     date: d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''
-                })));
+                }));
+                localStorage.setItem('diseaseData', JSON.stringify(mapped));
 
                 if (!Array.isArray(diseases) || diseases.length === 0) {
                     tableBody.innerHTML = '';
