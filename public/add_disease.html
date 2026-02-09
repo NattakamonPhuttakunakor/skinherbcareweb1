@@ -178,6 +178,7 @@
         
         // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
         let uploadedImageFile = null; // เก็บออบเจ็กต์ File
+        let existingImageUrl = '';
         let editingDiseaseId = null;
         let latestDiseases = [];
 
@@ -227,6 +228,7 @@
             fileListContainer.innerHTML = '';
 
             uploadedImageFile = files[0];
+            existingImageUrl = '';
 
             const fileItem = document.createElement('div');
             fileItem.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-300';
@@ -295,7 +297,12 @@
             form.append('medicines', JSON.stringify(medicines));
             form.append('usage', usage);
             form.append('published', published);
-            if (uploadedImageFile) form.append('image', uploadedImageFile);
+            if (uploadedImageFile) {
+                form.append('image', uploadedImageFile);
+            } else if (editingDiseaseId && existingImageUrl) {
+                // keep existing image if no new upload
+                form.append('image', existingImageUrl);
+            }
 
             // UI Loading
             const finishBtn = document.getElementById('finish-btn');
@@ -490,6 +497,9 @@
                     cb.checked = Array.isArray(disease.medicines) ? disease.medicines.includes(cb.value) : false;
                 });
 
+                existingImageUrl = disease.image || '';
+                renderImagePreview(existingImageUrl);
+
                 step2.classList.add('hidden');
                 step1.classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -564,6 +574,33 @@
                 console.error(err);
                 Swal.fire('ผิดพลาด', 'อัปเดตสถานะไม่สำเร็จ', 'error');
             }
+        }
+
+        function resolveImageSrc(raw) {
+            if (!raw) return '';
+            const val = String(raw).trim();
+            if (!val) return '';
+            if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+            const normalized = val.replace(/\\/g, '/');
+            const idx = normalized.lastIndexOf('/uploads/');
+            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+            return val;
+        }
+
+        function renderImagePreview(imageUrl) {
+            if (!fileListContainer) return;
+            fileListContainer.innerHTML = '';
+            const src = resolveImageSrc(imageUrl);
+            if (!src) return;
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 bg-gray-100 p-3 rounded-lg border border-gray-300';
+            item.innerHTML = `
+                <img src="${src}" alt="current" class="w-14 h-14 rounded-lg object-cover border border-gray-200">
+                <span class="text-gray-600 text-sm">รูปเดิมจะถูกเก็บไว้จนกว่าจะมีการอัปโหลดใหม่</span>
+            `;
+            fileListContainer.appendChild(item);
         }
     </script>
 </body>

@@ -159,7 +159,9 @@
         }
 
         // เก็บไฟล์จริงจาก input (จะส่งเป็น FormData)
-        let uploadedImageFile = null; 
+        let uploadedImageFile = null;
+        let existingImageUrl = '';
+        let editingHerbId = null;
 
         // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
         window.addEventListener('load', () => {
@@ -178,6 +180,12 @@
                     window.location.href = `/herb_list.html${q ? '?q=' + encodeURIComponent(q) : ''}`;
                 });
             }
+
+            const editingId = sessionStorage.getItem('editingHerbId');
+            if (editingId) {
+                sessionStorage.removeItem('editingHerbId');
+                loadHerbForEdit(editingId);
+            }
         });
 
         // 2. จัดการรูปภาพ (File Handling)git
@@ -187,6 +195,7 @@
             
             const file = files[0]; // เอาแค่ไฟล์แรก
             uploadedImageFile = file; // เก็บไว้ส่งเป็น FormData
+            existingImageUrl = '';
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -255,10 +264,16 @@
                 form.append('usage', usage);
                 form.append('published', published);
                 form.append('diseases', JSON.stringify(diseases));
-                if (uploadedImageFile) form.append('image', uploadedImageFile);
+                if (uploadedImageFile) {
+                    form.append('image', uploadedImageFile);
+                } else if (editingHerbId && existingImageUrl) {
+                    form.append('image', existingImageUrl);
+                }
 
-                const response = await fetch(`${API_BASE_URL}/api/herbs`, {
-                    method: 'POST',
+                const endpoint = editingHerbId ? `${API_BASE_URL}/api/herbs/${editingHerbId}` : `${API_BASE_URL}/api/herbs`;
+                const method = editingHerbId ? 'PUT' : 'POST';
+                const response = await fetch(endpoint, {
+                    method,
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: form
                 });
@@ -271,6 +286,7 @@
                 if (response.ok && result) {
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
+                    editingHerbId = null;
                     
                     modal.classList.remove('hidden');
                     setTimeout(() => {
@@ -314,6 +330,72 @@
             step1.classList.remove('hidden');
             circle2.classList.add('bg-white/50', 'text-gray-500', 'border-gray-400');
             circle2.classList.remove('bg-[#A5F3BC]', 'text-[#111C44]', 'border-[#111C44]');
+        }
+
+        async function loadHerbForEdit(id) {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const res = await fetch(`/api/herbs/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Load failed');
+                const data = await res.json();
+                const herb = data.herb || data.data || data;
+                if (!herb) return;
+
+                editingHerbId = id;
+                document.getElementById('input-name').value = herb.name || '';
+                document.getElementById('input-eng').value = herb.scientificName || herb.engName || '';
+                document.getElementById('input-desc').value = herb.description || '';
+                document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
+                document.getElementById('input-usage').value = herb.usage || '';
+                if (document.getElementById('input-published')) {
+                    document.getElementById('input-published').checked = herb.published === true;
+                }
+
+                // set diseases checkboxes
+                const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
+                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                    cb.checked = diseases.includes(cb.value);
+                });
+
+                existingImageUrl = herb.image || '';
+                renderImagePreview(existingImageUrl);
+
+                step2.classList.add('hidden');
+                step1.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function resolveImageSrc(raw) {
+            if (!raw) return '';
+            const val = String(raw).trim();
+            if (!val) return '';
+            if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+            const normalized = val.replace(/\\/g, '/');
+            const idx = normalized.lastIndexOf('/uploads/');
+            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+            return val;
+        }
+
+        function renderImagePreview(imageUrl) {
+            if (!fileListContainer) return;
+            fileListContainer.innerHTML = '';
+            const src = resolveImageSrc(imageUrl);
+            if (!src) return;
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 bg-green-50 p-3 rounded-lg border border-green-200';
+            item.innerHTML = `
+                <img src="${src}" class="w-10 h-10 object-cover rounded-md border border-green-200">
+                <span class="text-gray-700 text-sm">รูปเดิมจะถูกเก็บไว้จนกว่าจะมีการอัปโหลดใหม่</span>
+            `;
+            fileListContainer.appendChild(item);
         }
     </script>
 </body>

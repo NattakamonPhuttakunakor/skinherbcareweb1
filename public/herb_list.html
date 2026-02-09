@@ -214,7 +214,7 @@
                                 <button onclick='viewHerb(${JSON.stringify(h._id || idx)})' class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">
                                     <i class="fa-solid fa-eye"></i> ดู
                                 </button>
-                                <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                            <button onclick='editItem(${JSON.stringify(h._id || idx)})' class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
                                 <button onclick="deleteItem(this, 'herb-${idx}', false)" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">ลบ</button>
                                 ${isAdmin ? `
                                     <button onclick='togglePublish(${JSON.stringify(idx)})' class="${publishBtnClass} px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">
@@ -304,7 +304,7 @@
                 <td class="py-4 text-center text-sm">${date}</td>
                 <td class="py-4 text-center">
                     <button onclick="viewDetail(this, '${rowId}', '${name}', ${isNew})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all"><i class="fa-solid fa-eye"></i> ดู</button>
-                    <button onclick="editItem('${name}')" class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
+                    <button onclick='editItem(${JSON.stringify(h._id || idx)})' class="bg-[#05CD99] hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold mr-1 shadow-sm transition-all">แก้ไข</button>
                     <button onclick="deleteItem(this, '${rowId}', ${isNew})" class="bg-[#EE5D50] hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all">ลบ</button>
                 </td>
             `;
@@ -330,15 +330,25 @@
             })
         }
 
-        function editItem(name) {
+        function editItem(idOrIdx) {
             Swal.fire({
                 title: 'แก้ไขข้อมูล',
-                text: `ต้องการแก้ไข ${name} ใช่หรือไม่?`,
+                text: 'ต้องการแก้ไขข้อมูลนี้ใช่หรือไม่?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'ไปหน้าแก้ไข'
             }).then((result) => {
-                if (result.isConfirmed) window.location.href = 'add_herb.html';
+                if (result.isConfirmed) {
+                    if (typeof idOrIdx === 'number') {
+                        const herb = latestHerbs[idOrIdx];
+                        if (herb && herb._id) {
+                            sessionStorage.setItem('editingHerbId', herb._id);
+                        }
+                    } else if (idOrIdx) {
+                        sessionStorage.setItem('editingHerbId', idOrIdx);
+                    }
+                    window.location.href = 'add_herb.html';
+                }
             });
         }
 
