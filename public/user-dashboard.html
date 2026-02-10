@@ -274,7 +274,6 @@
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             if (!token) {
                 event.preventDefault();
-                alert('กรุณาเข้าสู่ระบบก่อนใช้งานครับ');
                 window.location.href = '/login.html';
             }
         }
