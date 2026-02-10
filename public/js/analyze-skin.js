@@ -63,14 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return '<div class="text-sm text-gray-700">-</div>';
         }
         return `
-            <div class="flex gap-3 overflow-x-auto pb-2">
+            <div class="flex gap-2 flex-wrap pt-2">
                 ${herbs.map(h => `
-                    <div class="min-w-[130px] bg-white p-3 rounded-xl border border-yellow-200 shadow-sm text-center">
-                        <div class="w-16 h-16 mx-auto mb-2">
-                            <img src="${h.img}" class="w-full h-full rounded-full object-cover border-2 border-white shadow-sm" alt="${h.name}">
-                        </div>
-                        <h4 class="font-bold text-slate-700 text-sm">${h.name}</h4>
-                        <p class="text-[10px] text-slate-500 mt-1 line-clamp-2">${h.prop}</p>
+                    <div class="bg-yellow-50 px-4 py-2 rounded-lg border border-yellow-200 shadow-sm flex flex-col justify-center min-w-[100px]">
+                        <span class="font-bold text-slate-800 text-sm">🌿 ${h.name}</span>
+                        <span class="text-[10px] text-slate-500">${h.prop}</span>
                     </div>
                 `).join('')}
             </div>
