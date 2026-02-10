@@ -202,10 +202,20 @@
             uploadedImageFile = files[0];
             existingImageUrl = '';
 
-            const fileItem = document.createElement('div');
-            fileItem.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-300';
-            fileItem.innerHTML = `<span class="text-gray-600 text-sm truncate pr-2"><i class="fa-regular fa-image mr-2 text-blue-500"></i>${files[0].name}</span>`;
-            fileListContainer.appendChild(fileItem);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex items-center justify-between bg-gray-100 p-3 rounded-lg border border-gray-300';
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${e.target.result}" alt="preview" class="w-14 h-14 rounded-lg object-cover border border-gray-200">
+                        <span class="text-gray-600 text-sm truncate pr-2"><i class="fa-regular fa-image mr-2 text-blue-500"></i>${files[0].name}</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500"></i>
+                `;
+                fileListContainer.appendChild(fileItem);
+            };
+            reader.readAsDataURL(files[0]);
         }
 
         function goToStep2() {
