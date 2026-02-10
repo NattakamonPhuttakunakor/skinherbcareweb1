@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รายละเอียดสมุนไพร - SkinHerbCare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Sarabun", sans-serif;
+      background: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+  <nav class="sticky top-0 z-20 bg-white/40 backdrop-blur-md border-b border-white/50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/index.html" class="text-lg font-bold text-green-900">🌿 SkinHerbCare</a>
+      <a href="/herb_library.html" class="text-sm font-semibold text-green-700 hover:text-green-900">กลับไปหน้ารายการ</a>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-10">
+    <div class="glass-card rounded-3xl overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div class="bg-gray-100 min-h-[260px]">
+          <img id="detail-image" alt="Herb" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 md:p-10 flex flex-col gap-6">
+          <div>
+            <p class="text-xs uppercase tracking-widest text-green-700 font-bold mb-2">Herb Detail</p>
+            <h1 id="detail-name" class="text-2xl md:text-3xl font-extrabold text-green-900">กำลังโหลด...</h1>
+            <p id="detail-sci" class="text-sm text-gray-500 mt-1">...</p>
+          </div>
+
+          <div>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">สรรพคุณ</h2>
+            <p id="detail-properties" class="text-gray-700 leading-relaxed">...</p>
+          </div>
+
+          <div>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">คำอธิบาย</h2>
+            <p id="detail-description" class="text-gray-700 leading-relaxed">...</p>
+          </div>
+
+          <div>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">วิธีการใช้</h2>
+            <p id="detail-usage" class="text-gray-700 leading-relaxed">...</p>
+          </div>
+
+          <div>
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">โรคที่ใช้รักษาได้</h2>
+            <div id="detail-diseases" class="flex flex-wrap gap-2 text-sm text-gray-700">
+              <span class="text-gray-400">- ไม่มีข้อมูล -</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+      ? 'https://skinherbcareweb1.onrender.com'
+      : window.location.origin;
+
+    function resolveImageSrc(raw) {
+      if (!raw) return '';
+      const val = String(raw).trim();
+      if (!val) return '';
+      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+      if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+      const normalized = val.replace(/\\/g, '/');
+      const idx = normalized.lastIndexOf('/uploads/');
+      if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+      return val;
+    }
+
+    function applyHerbData(herb) {
+      document.getElementById('detail-name').textContent = herb.name || 'ไม่ระบุชื่อ';
+      document.getElementById('detail-sci').textContent = herb.scientificName || herb.engName || '';
+      document.getElementById('detail-description').textContent = herb.description || '-';
+      const props = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '-');
+      document.getElementById('detail-properties').textContent = props;
+      document.getElementById('detail-usage').textContent = herb.usage || '-';
+
+      const img = document.getElementById('detail-image');
+      const imgSrc = resolveImageSrc(herb.image || '');
+      img.src = imgSrc || 'https://via.placeholder.com/600?text=No+Image';
+
+      const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
+      const container = document.getElementById('detail-diseases');
+      if (diseases.length === 0) {
+        container.innerHTML = '<span class="text-gray-400">- ไม่มีข้อมูล -</span>';
+        return;
+      }
+      container.innerHTML = '';
+      diseases.forEach((d) => {
+        const badge = document.createElement('span');
+        badge.className = 'px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-200 text-xs';
+        badge.textContent = d;
+        container.appendChild(badge);
+      });
+    }
+
+    async function loadHerb() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('detail-name').textContent = 'ไม่พบข้อมูล';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`);
+        if (!res.ok) throw new Error('not found');
+        const json = await res.json();
+        const herb = json.herb || json.data || json;
+        applyHerbData(herb);
+      } catch (e) {
+        document.getElementById('detail-name').textContent = 'ไม่พบข้อมูล';
+        document.getElementById('detail-description').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล หรือสมุนไพรนี้อาจถูกลบไปแล้ว';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHerb);
+  </script>
+</body>
+</html>
