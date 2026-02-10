@@ -70,6 +70,10 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     if (req.body.properties) {
       try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
     }
+    let diseases = [];
+    if (req.body.diseases) {
+      try { diseases = JSON.parse(req.body.diseases); if (!Array.isArray(diseases)) throw new Error('not array'); } catch (e) { diseases = String(req.body.diseases).split(/[\n,]+/).map(d => d.trim()).filter(Boolean); }
+    }
     const usage = req.body.usage || '';
     const published = String(req.body.published) === 'true';
     let imagePath = req.body.image || '/uploads/default-herb.png';
@@ -97,6 +101,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
         scientificName: scientificName || '',
         description,
         properties: properties || [],
+        diseases: diseases || [],
         usage: usage || '',
         image: imagePath,
         imageOriginalName,
@@ -111,11 +116,12 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
       scientificName: scientificName || '',
       description,
       properties: properties || [],
-        usage: usage || '',
-        published,
-        image: imagePath,
-        imageOriginalName,
-        addedBy: req.user._id
+      diseases: diseases || [],
+      usage: usage || '',
+      published,
+      image: imagePath,
+      imageOriginalName,
+      addedBy: req.user._id
     });
 
     const savedHerb = await newHerb.save();
@@ -188,6 +194,12 @@ router.put('/:id', protect, admin, upload.single('image'), async (req, res) => {
       let properties = [];
       try { properties = JSON.parse(req.body.properties); if (!Array.isArray(properties)) throw new Error('not array'); } catch (e) { properties = String(req.body.properties).split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
       update.properties = properties;
+    }
+
+    if (hasBody('diseases') && String(req.body.diseases).trim() !== '') {
+      let diseases = [];
+      try { diseases = JSON.parse(req.body.diseases); if (!Array.isArray(diseases)) throw new Error('not array'); } catch (e) { diseases = String(req.body.diseases).split(/[\n,]+/).map(d => d.trim()).filter(Boolean); }
+      update.diseases = diseases;
     }
 
     if (hasBody('usage') && String(req.body.usage).trim() !== '') {
