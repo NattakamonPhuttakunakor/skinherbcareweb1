@@ -36,6 +36,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return payload;
     };
 
+    const herbDatabase = {
+        acne: [
+            { name: 'แตงกวา', prop: 'ลดความมัน กระชับรูขุมขน', img: 'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=200' },
+            { name: 'ขมิ้นชัน', prop: 'ยับยั้งแบคทีเรีย ลดการอักเสบ', img: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200' },
+            { name: 'ว่านหางจระเข้', prop: 'ลดรอยแดง สมานแผล', img: 'https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?w=200' }
+        ],
+        psoriasis: [
+            { name: 'น้ำมันมะพร้าว', prop: 'ลดอาการผิวแห้ง แตก', img: 'https://images.unsplash.com/photo-1620886568558-763435161427?w=200' },
+            { name: 'ว่านหางจระเข้', prop: 'ให้ความชุ่มชื้น ลดอาการลอก', img: 'https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?w=200' }
+        ],
+        eczema: [
+            { name: 'ใบบัวบก', prop: 'ลดอาการฟกช้ำ แก้แพ้', img: 'https://images.unsplash.com/photo-1632808447598-e32501602492?w=200' },
+            { name: 'เสลดพังพอน', prop: 'แก้แมลงกัดต่อย ผื่นคัน', img: 'https://medthai.com/wp-content/uploads/2013/08/เสลดพังพอนตัวเมีย.jpg' }
+        ],
+        melanoma: [
+            { name: '⚠️ พบแพทย์', prop: 'ควรปรึกษาแพทย์ผู้เชี่ยวชาญ', img: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png' }
+        ],
+        default: [
+            { name: 'สมุนไพรบำรุงผิว', prop: 'เพื่อสุขภาพผิวที่ดี', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=200' }
+        ]
+    };
+
+    const renderHerbCards = (herbs) => {
+        if (!herbs || herbs.length === 0) {
+            return '<div class="text-sm text-gray-700">-</div>';
+        }
+        return `
+            <div class="flex gap-3 overflow-x-auto pb-2">
+                ${herbs.map(h => `
+                    <div class="min-w-[130px] bg-white p-3 rounded-xl border border-yellow-200 shadow-sm text-center">
+                        <div class="w-16 h-16 mx-auto mb-2">
+                            <img src="${h.img}" class="w-full h-full rounded-full object-cover border-2 border-white shadow-sm" alt="${h.name}">
+                        </div>
+                        <h4 class="font-bold text-slate-700 text-sm">${h.name}</h4>
+                        <p class="text-[10px] text-slate-500 mt-1 line-clamp-2">${h.prop}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    };
+
     const renderResult = (rawData, diseaseInfo) => {
         const data = normalizeSkinResponse(rawData);
         const labelCandidate = data.label_th || data.label_en || data.label || data.prediction || data.class || data.disease || '';
@@ -59,9 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ? info.symptoms.join(', ')
             : (info.symptoms || '-');
         const adviceText = info.advice || info.description || '-';
+        const diseaseKey = (labelEn || labelCandidate || '').toLowerCase().trim();
+        const selectedHerbs = herbDatabase[diseaseKey] || herbDatabase.default;
         const medicinesList = Array.isArray(info.medicines) && info.medicines.length
             ? `<ul class="list-disc list-inside text-sm text-gray-700 mt-2">${info.medicines.map((m) => `<li>${m}</li>`).join('')}</ul>`
-            : '<p class="text-sm text-gray-700 mt-2">-</p>';
+            : '';
+        const herbsBlock = renderHerbCards(selectedHerbs);
 
         resultsContainer.innerHTML = `
             <div class="p-4 bg-white rounded-lg shadow text-left">
@@ -90,7 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div class="mt-3 bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
                     <h4 class="font-semibold text-yellow-700 mb-2">สมุนไพรที่แนะนำ</h4>
-                    ${medicinesList}
+                    <div id="recommended-herbs-container">
+                        ${herbsBlock}
+                        ${medicinesList}
+                    </div>
                 </div>
 
                 <p class="text-xs text-red-500 mt-3">*คำเตือน: ผลลัพธ์เป็นการประเมินจาก AI เท่านั้น ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
