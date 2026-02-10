@@ -76,7 +76,9 @@
     
     <script>
         // ✅ ลิงก์ Backend ถูกต้องแล้ว
-        const API_BASE_URL = 'https://skinherbcareweb1.onrender.com'; 
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('login-form');
@@ -108,9 +110,12 @@
                         body: JSON.stringify({ email, password }),
                     });
 
-                    const data = await response.json();
+                    const contentType = response.headers.get('content-type') || '';
+                    const isJson = contentType.includes('application/json');
+                    const data = isJson ? await response.json() : null;
+                    const rawText = !isJson ? await response.text() : '';
 
-                    if (response.ok && data.success) {
+                    if (response.ok && data && data.success) {
                         // --- Login สำเร็จ ---
                         // เก็บ Token ไว้ใช้งาน
                         localStorage.setItem('token', data.token);
@@ -124,7 +129,10 @@
                         window.location.href = '/index.html';
                     } else {
                         // --- Login ไม่สำเร็จ ---
-                        throw new Error(data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+                        const msg = (data && data.message)
+                            ? data.message
+                            : (rawText ? 'การตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง' : 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+                        throw new Error(msg);
                     }
 
                 } catch (error) {
