@@ -301,14 +301,19 @@
                 const API_BASE_URL = window.location.hostname.includes('netlify.app')
                     ? 'https://skinherbcareweb1.onrender.com'
                     : window.location.origin;
-                try {
-                    const [herbRes, diseaseRes] = await Promise.all([
-                        fetch(`${API_BASE_URL}/api/herbs/admin`, { headers }),
-                        fetch(`${API_BASE_URL}/api/diseases/admin`, { headers })
-                    ]);
 
-                    const herbJson = herbRes.ok ? await herbRes.json() : null;
-                    const diseaseJson = diseaseRes.ok ? await diseaseRes.json() : null;
+                const fetchJson = async (url, opts) => {
+                    const res = await fetch(url, opts);
+                    const ct = res.headers.get('content-type') || '';
+                    if (!res.ok || !ct.includes('application/json')) return null;
+                    return res.json().catch(() => null);
+                };
+
+                try {
+                    const herbJson = await fetchJson(`${API_BASE_URL}/api/herbs/admin`, { headers })
+                        || await fetchJson(`${API_BASE_URL}/api/herbs`, {});
+                    const diseaseJson = await fetchJson(`${API_BASE_URL}/api/diseases/admin`, { headers })
+                        || await fetchJson(`${API_BASE_URL}/api/diseases`, {});
 
                     const herbs = herbJson ? (herbJson.herbs || herbJson.data || []) : [];
                     const diseases = diseaseJson ? (diseaseJson.diseases || diseaseJson.data || []) : [];
