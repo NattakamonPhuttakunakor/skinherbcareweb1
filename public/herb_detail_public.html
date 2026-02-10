@@ -1,70 +1,111 @@
 <!DOCTYPE html>
-<html lang="th">
+<html class="light" lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>รายละเอียดสมุนไพร - SkinHerbCare</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Herb Detail | SkinHerbCare</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#30e89c",
+            "primary-dark": "#1a8a5b",
+            "primary-light": "#e9f7f0",
+            "background-light": "#f8fdfb"
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+            serif: ["Playfair Display", "serif"]
+          }
+        }
+      }
+    };
+  </script>
   <style>
-    body {
-      font-family: "Sarabun", sans-serif;
-      background: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #30e89c; border-radius: 10px; }
+    .leaf-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0c15 0 30 15 30 30S45 60 30 60 0 45 0 30 15 0 30 0z' fill='%2330e89c' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
     }
   </style>
 </head>
-<body class="text-gray-800">
-  <nav class="sticky top-0 z-20 bg-white/40 backdrop-blur-md border-b border-white/50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/index.html" class="text-lg font-bold text-green-900">🌿 SkinHerbCare</a>
-      <a href="/herb_library.html" class="text-sm font-semibold text-green-700 hover:text-green-900">กลับไปหน้ารายการ</a>
-    </div>
-  </nav>
+<body class="font-display bg-background-light text-slate-800 antialiased h-screen overflow-hidden relative">
 
-  <main class="max-w-5xl mx-auto px-4 py-10">
-    <div class="glass-card rounded-3xl overflow-hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <div class="bg-gray-100 min-h-[260px]">
-          <img id="detail-image" alt="Herb" class="w-full h-full object-cover">
+  <div class="absolute inset-0 leaf-bg -z-10"></div>
+
+  <a href="index.html" class="absolute top-6 left-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
+    <span class="material-symbols-outlined text-lg">arrow_back</span>
+    กลับหน้าหลัก
+  </a>
+
+  <a href="herb_library.html" class="absolute top-6 right-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
+    <span class="material-symbols-outlined text-lg">menu_book</span>
+    คลังสมุนไพร
+  </a>
+
+  <div class="h-full w-full flex items-center justify-center p-4 md:p-8">
+    <div class="relative w-full max-w-7xl h-full max-h-[900px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/50">
+      
+      <div class="w-full md:w-5/12 relative h-64 md:h-auto overflow-hidden bg-slate-100 group">
+        <img id="herb-image" alt="Herb Image" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://via.placeholder.com/600?text=Loading..."/>
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+        
+        <div class="absolute bottom-8 left-8 text-white">
+          <span class="px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2 inline-block">Natural Ingredient</span>
+          <h2 id="img-caption-name" class="text-3xl font-serif italic opacity-90">...</h2>
         </div>
-        <div class="p-6 md:p-10 flex flex-col gap-6">
-          <div>
-            <p class="text-xs uppercase tracking-widest text-green-700 font-bold mb-2">Herb Detail</p>
-            <h1 id="detail-name" class="text-2xl md:text-3xl font-extrabold text-green-900">กำลังโหลด...</h1>
-            <p id="detail-sci" class="text-sm text-gray-500 mt-1">...</p>
-          </div>
+      </div>
 
-          <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">สรรพคุณ</h2>
-            <p id="detail-properties" class="text-gray-700 leading-relaxed">...</p>
-          </div>
-
-          <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">คำอธิบาย</h2>
-            <p id="detail-description" class="text-gray-700 leading-relaxed">...</p>
-          </div>
-
-          <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">วิธีการใช้</h2>
-            <p id="detail-usage" class="text-gray-700 leading-relaxed">...</p>
-          </div>
-
-          <div>
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">โรคที่ใช้รักษาได้</h2>
-            <div id="detail-diseases" class="flex flex-wrap gap-2 text-sm text-gray-700">
-              <span class="text-gray-400">- ไม่มีข้อมูล -</span>
+      <div class="w-full md:w-7/12 flex flex-col h-full bg-white relative">
+        <div class="flex-grow overflow-y-auto custom-scrollbar p-8 md:p-12">
+          
+          <header class="mb-10 border-b border-slate-100 pb-8">
+            <div class="flex items-baseline gap-3 mb-2">
+              <h1 id="herb-name" class="text-4xl md:text-5xl font-extrabold text-slate-900">กำลังโหลด...</h1>
             </div>
+            <p id="herb-sci" class="font-serif italic text-xl text-primary-dark/70 mb-6">Scientific Name Loading...</p>
+            
+            <div class="bg-primary-light/50 p-6 rounded-2xl border border-primary/10">
+              <h3 class="text-xs font-bold text-primary-dark uppercase tracking-widest mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">verified</span> สรรพคุณหลัก
+              </h3>
+              <p id="herb-properties" class="text-slate-700 text-lg font-medium leading-relaxed">...</p>
+            </div>
+          </header>
+
+          <div class="space-y-8">
+            
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">คำอธิบายลักษณะ</h3>
+              <p id="herb-description" class="text-slate-600 leading-relaxed">...</p>
+            </section>
+
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">วิธีการนำไปใช้</h3>
+              <div class="bg-slate-50 p-6 rounded-2xl border-l-4 border-primary">
+                <p id="herb-usage" class="text-slate-600 leading-relaxed">...</p>
+              </div>
+            </section>
+
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">รักษาโรค/อาการ</h3>
+              <div id="herb-diseases-container" class="flex flex-wrap gap-2">
+                <span class="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-sm">ไม่มีข้อมูล</span>
+              </div>
+            </section>
+
           </div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
   <script>
     const API_BASE_URL = window.location.hostname.includes('netlify.app')
@@ -84,54 +125,58 @@
       return val;
     }
 
-    function applyHerbData(herb) {
-      document.getElementById('detail-name').textContent = herb.name || 'ไม่ระบุชื่อ';
-      document.getElementById('detail-sci').textContent = herb.scientificName || herb.engName || '';
-      document.getElementById('detail-description').textContent = herb.description || '-';
-      const props = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '-');
-      document.getElementById('detail-properties').textContent = props;
-      document.getElementById('detail-usage').textContent = herb.usage || '-';
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const herbId = urlParams.get('id');
 
-      const img = document.getElementById('detail-image');
-      const imgSrc = resolveImageSrc(herb.image || '');
-      img.src = imgSrc || 'https://via.placeholder.com/600?text=No+Image';
-
-      const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
-      const container = document.getElementById('detail-diseases');
-      if (diseases.length === 0) {
-        container.innerHTML = '<span class="text-gray-400">- ไม่มีข้อมูล -</span>';
-        return;
-      }
-      container.innerHTML = '';
-      diseases.forEach((d) => {
-        const badge = document.createElement('span');
-        badge.className = 'px-3 py-1 rounded-full bg-green-100 text-green-800 border border-green-200 text-xs';
-        badge.textContent = d;
-        container.appendChild(badge);
-      });
-    }
-
-    async function loadHerb() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      if (!id) {
-        document.getElementById('detail-name').textContent = 'ไม่พบข้อมูล';
+      if (!herbId) {
+        window.location.href = 'index.html';
         return;
       }
 
       try {
-        const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`);
-        if (!res.ok) throw new Error('not found');
-        const json = await res.json();
-        const herb = json.herb || json.data || json;
-        applyHerbData(herb);
-      } catch (e) {
-        document.getElementById('detail-name').textContent = 'ไม่พบข้อมูล';
-        document.getElementById('detail-description').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล หรือสมุนไพรนี้อาจถูกลบไปแล้ว';
-      }
-    }
+        const response = await fetch(`${API_BASE_URL}/api/herbs/${herbId}`);
+        if (!response.ok) throw new Error('Network response was not ok');
 
-    document.addEventListener('DOMContentLoaded', loadHerb);
+        const json = await response.json();
+        const herb = json.herb || json.data || json;
+
+        const imgEl = document.getElementById('herb-image');
+        const imageSrc = resolveImageSrc(herb.image || '');
+        imgEl.src = imageSrc || 'https://via.placeholder.com/600?text=No+Image';
+        document.getElementById('img-caption-name').innerText = herb.name || '-';
+
+        document.getElementById('herb-name').innerText = herb.name || '-';
+        document.getElementById('herb-sci').innerText = herb.scientificName || herb.engName || '-';
+
+        const props = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '-');
+        document.getElementById('herb-properties').innerText = props;
+
+        const descEl = document.getElementById('herb-description');
+        descEl.innerText = herb.description || 'ไม่มีข้อมูลคำอธิบายเพิ่มเติม';
+
+        document.getElementById('herb-usage').innerText = herb.usage || 'ไม่มีข้อมูลวิธีการใช้';
+
+        const diseasesContainer = document.getElementById('herb-diseases-container');
+        const diseasesData = herb.diseases || herb.treatment || [];
+        const diseaseList = Array.isArray(diseasesData) ? diseasesData : String(diseasesData).split(',');
+        const cleaned = diseaseList.map(d => d.trim()).filter(Boolean);
+
+        if (cleaned.length > 0) {
+          diseasesContainer.innerHTML = '';
+          cleaned.forEach((d) => {
+            const tag = document.createElement('span');
+            tag.className = "px-4 py-2 bg-primary/10 text-primary-dark font-bold rounded-lg text-sm shadow-sm";
+            tag.innerText = d;
+            diseasesContainer.appendChild(tag);
+          });
+        }
+
+      } catch (error) {
+        document.getElementById('herb-name').innerText = "ไม่พบข้อมูล";
+        document.getElementById('herb-description').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล หรือสมุนไพรนี้อาจถูกลบไปแล้ว";
+      }
+    });
   </script>
 </body>
 </html>
