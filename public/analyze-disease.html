@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script>
     (function () {
       const token = localStorage.getItem('token') || localStorage.getItem('userToken');
@@ -466,6 +469,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('analyze-disease.html build: 2026-02-10a');
       checkLoginStatus();
     });
   </script>
