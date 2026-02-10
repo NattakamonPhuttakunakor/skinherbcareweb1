@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คลังสมุนไพรทั้งหมด - SkinHerbCare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Sarabun", sans-serif;
+      background: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
+    }
+    .card-glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+  <nav class="sticky top-0 z-20 bg-white/40 backdrop-blur-md border-b border-white/50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <a href="/index.html" class="text-lg font-bold text-green-900">🌿 SkinHerbCare</a>
+      <div class="flex items-center gap-2 text-sm">
+        <a href="/index.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Home</a>
+        <a href="/login.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Log In</a>
+        <a href="/register.html" class="px-3 py-1 rounded-lg hover:bg-white/70">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-green-900">คลังสมุนไพรทั้งหมด</h1>
+        <p class="text-sm text-gray-600">แสดงข้อมูลจากฐานข้อมูลล่าสุด</p>
+      </div>
+      <div class="w-full md:w-72">
+        <input id="herb-search" type="search" placeholder="ค้นหาชื่อสมุนไพรหรือสรรพคุณ..."
+          class="w-full bg-white/80 border border-green-100 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+      </div>
+    </div>
+
+    <div id="herb-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="col-span-full text-center text-gray-500 bg-white/60 rounded-2xl py-10 border border-dashed border-green-200">
+        กำลังโหลดข้อมูลสมุนไพร...
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+      ? 'https://skinherbcareweb1.onrender.com'
+      : window.location.origin;
+
+    function resolveImageSrc(raw) {
+      if (!raw) return '';
+      const val = String(raw).trim();
+      if (!val) return '';
+      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+      if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+      const normalized = val.replace(/\\/g, '/');
+      const idx = normalized.lastIndexOf('/uploads/');
+      if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
+      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+      return val;
+    }
+
+    let allHerbs = [];
+
+    function renderHerbs(list) {
+      const grid = document.getElementById('herb-grid');
+      if (!list || list.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-gray-500 bg-white/60 rounded-2xl py-10 border border-dashed border-green-200">ยังไม่มีข้อมูลสมุนไพร</div>';
+        return;
+      }
+
+      const html = list.map((herb) => {
+        const propertiesText = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
+        const shortDesc = propertiesText.length > 90 ? `${propertiesText.substring(0, 90)}...` : (propertiesText || 'ไม่มีข้อมูลสรรพคุณ');
+        const imageSrc = resolveImageSrc(herb.image || '');
+        const herbId = herb._id || herb.id || '';
+
+        return `
+          <div class="card-glass rounded-2xl overflow-hidden flex flex-col">
+            <div class="h-44 bg-gray-100">
+              ${imageSrc ? `<img src="${imageSrc}" class="w-full h-full object-cover" alt="${herb.name || 'Herb'}">` : `<div class="h-full flex items-center justify-center text-gray-400">No Image</div>`}
+            </div>
+            <div class="p-5 flex flex-col gap-3">
+              <h3 class="text-lg font-bold text-slate-900">${herb.name || 'ไม่ระบุชื่อ'}</h3>
+              <p class="text-sm text-gray-600">${shortDesc}</p>
+              <a href="/herb_detail.html?id=${herbId}" class="mt-auto inline-flex items-center justify-center gap-2 text-sm font-bold text-green-800 bg-green-100 hover:bg-green-200 rounded-xl px-4 py-2">
+                อ่านเพิ่มเติม
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.innerHTML = html;
+    }
+
+    async function loadHerbs() {
+      const grid = document.getElementById('herb-grid');
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/herbs`);
+        if (!res.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+        const json = await res.json();
+        const herbs = Array.isArray(json) ? json : (json.herbs || json.data || []);
+        allHerbs = Array.isArray(herbs) ? herbs : [];
+        renderHerbs(allHerbs);
+      } catch (e) {
+        console.error(e);
+        grid.innerHTML = '<div class="col-span-full text-center text-red-500 bg-white/60 rounded-2xl py-10 border border-dashed border-red-200">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+      }
+    }
+
+    function setupSearch() {
+      const input = document.getElementById('herb-search');
+      if (!input) return;
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        if (!q) {
+          renderHerbs(allHerbs);
+          return;
+        }
+        const filtered = allHerbs.filter((herb) => {
+          const props = Array.isArray(herb.properties) ? herb.properties.join(' ') : (herb.properties || '');
+          const hay = `${herb.name || ''} ${props}`.toLowerCase();
+          return hay.includes(q);
+        });
+        renderHerbs(filtered);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHerbs();
+      setupSearch();
+    });
+  </script>
+</body>
+</html>

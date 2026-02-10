@@ -71,7 +71,7 @@
                 <h1 class="text-2xl font-bold text-[#111C44]">รายละเอียดสมุนไพร</h1>
                 <p class="text-sm text-gray-500">ตัวอย่างการแสดงผลข้อมูลในระบบ</p>
             </div>
-            <a href="add_herb.html" class="bg-white hover:bg-gray-50 text-[#111C44] px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium transition-all">
+            <a id="edit-link-top" href="add_herb.html" onclick="goToEdit(event)" class="bg-white hover:bg-gray-50 text-[#111C44] px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium transition-all">
                 <i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูล
             </a>
         </div>
@@ -132,10 +132,10 @@
             </div>
             
             <div class="flex gap-4 w-full max-w-4xl mx-auto mt-6">
-                <a href="add_herb.html" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
+                <a id="edit-link-bottom" href="add_herb.html" onclick="goToEdit(event)" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all">
                     <i class="fa-solid fa-pen"></i> แก้ไขข้อมูล
                 </a>
-                <a href="herb_list.html" class="flex-1 bg-[#111C44] hover:bg-[#0d1430] text-white py-3 rounded-xl font-bold shadow-lg text-center transition-all flex items-center justify-center gap-2">
+                <a id="back-to-list" href="herb_list.html" class="flex-1 bg-[#111C44] hover:bg-[#0d1430] text-white py-3 rounded-xl font-bold shadow-lg text-center transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-check-circle"></i> ยืนยันและกลับหน้ารายการ
                 </a>
             </div>
@@ -144,8 +144,11 @@
     </main>
 
     <script>
+        let currentHerbId = null;
+
         function applyHerbData(data) {
             if (!data) return;
+            currentHerbId = data._id || data.id || currentHerbId;
             document.getElementById('display-name').textContent = data.name || '-';
             document.getElementById('display-eng').textContent = data.engName || data.scientificName || '-';
             document.getElementById('display-desc').textContent = data.description || '-';
@@ -185,6 +188,7 @@
                 if (!res.ok) throw new Error('not found');
                 const json = await res.json();
                 const herb = json.herb || json.data || json;
+                currentHerbId = herb?._id || herb?.id || id;
                 applyHerbData(herb);
                 return true;
             } catch (e) {
@@ -193,6 +197,17 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
+            const userRole = localStorage.getItem('userRole');
+            const editTop = document.getElementById('edit-link-top');
+            const editBottom = document.getElementById('edit-link-bottom');
+            const backToList = document.getElementById('back-to-list');
+
+            if (userRole !== 'admin') {
+                if (editTop) editTop.style.display = 'none';
+                if (editBottom) editBottom.style.display = 'none';
+                if (backToList) backToList.href = 'herb_library.html';
+            }
+
             const herbId = sessionStorage.getItem('viewingHerbId');
             if (herbId) {
                 const ok = await loadHerbFromApi(herbId);
@@ -208,6 +223,14 @@
                 document.getElementById('display-desc').textContent = "กรุณากรอกข้อมูลในหน้าเพิ่มสมุนไพรก่อนครับ";
             }
         });
+
+        function goToEdit(event) {
+            if (event) event.preventDefault();
+            if (currentHerbId) {
+                sessionStorage.setItem('editingHerbId', currentHerbId);
+            }
+            window.location.href = 'add_herb.html';
+        }
 
         function resolveImageSrc(raw) {
             if (!raw) return '';
