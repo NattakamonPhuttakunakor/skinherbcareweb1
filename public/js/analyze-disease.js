@@ -121,13 +121,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${advice ? `<p style="margin-top: 0.5rem;">${advice}</p>` : ''}
                     <div style="margin-top: 0.75rem;">
                         <strong>สมุนไพรแนะนำ:</strong>
-                        <ul style="margin-top: 0.5rem; padding-left: 1rem; list-style: disc;">
+                        <ul id="recommended-herbs-container" style="margin-top: 0.5rem; padding-left: 0; list-style: none;">
                             ${herbHtml}
                         </ul>
                     </div>
                 </div>
             `;
             resultsContainer.innerHTML = resultHtml;
+
+            console.log('AI Disease (debug):', diseaseName);
+            const debugContainer = document.getElementById('recommended-herbs-container');
+            console.log('Herb container found:', Boolean(debugContainer));
 
             // 5. บันทึกผลลัพธ์ล่าสุดลงใน localStorage
             const analysisToStore = {
