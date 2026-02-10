@@ -448,7 +448,7 @@ header p {
         </div>
       </a>
 
-      <a href="/analyze-symptoms.html" class="feature-button">
+      <a href="/analyze-symptoms.html" class="feature-button" onclick="checkLogin(event)">
         <div class="feature-icon">📝</div>
         <div class="feature-content">
           <h3>วิเคราะห์จากอาการที่พิมพ์</h3>
@@ -572,6 +572,15 @@ header p {
                 };
                 reader.readAsDataURL(file);
             });
+        }
+    }
+
+    function checkLogin(event) {
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+        if (!token) {
+            event.preventDefault();
+            alert('กรุณาเข้าสู่ระบบก่อนใช้งานครับ');
+            window.location.href = '/login.html';
         }
     }
 

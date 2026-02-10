@@ -297,6 +297,51 @@
         const chatHistory = document.getElementById('chat-history');
         const userInput = document.getElementById('user-input');
 
+        const diseaseKeywords = {
+            acne: ['สิว', 'ลดการอักเสบ', 'หน้ามัน'],
+            eczema: ['ผื่น', 'คัน', 'ผิวหนังอักเสบ'],
+            psoriasis: ['สะเก็ดเงิน', 'ผิวแห้ง', 'ลอก'],
+            ringworm: ['กลาก', 'เกลื้อน', 'เชื้อรา'],
+            dermatitis: ['ผื่น', 'คัน', 'ผิวหนังอักเสบ'],
+            urticaria: ['ลมพิษ', 'ผื่น', 'คัน'],
+            impetigo: ['พุพอง', 'เชื้อแบคทีเรีย', 'ผิวหนังอักเสบ']
+        };
+
+        let knownHerbs = [];
+
+        async function loadHerbList() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/herbs`);
+                if (!res.ok) return;
+                const json = await res.json();
+                const herbs = json.herbs || json.data || [];
+                if (Array.isArray(herbs)) {
+                    knownHerbs = herbs;
+                }
+            } catch (e) {
+                // ignore fetch errors, fallback to backend-related herbs
+            }
+        }
+
+        function findHerbsForDisease(diseaseName) {
+            if (!diseaseName || !Array.isArray(knownHerbs) || knownHerbs.length === 0) return [];
+            const key = String(diseaseName).toLowerCase().trim();
+            const keywords = diseaseKeywords[key] || [];
+            if (keywords.length === 0) return [];
+
+            return knownHerbs.filter((herb) => {
+                const props = Array.isArray(herb.properties) ? herb.properties.join(' ') : (herb.properties || '');
+                const textToSearch = `${herb.name || ''} ${props}`.toLowerCase();
+                return keywords.some(kw => textToSearch.includes(kw));
+            }).map((herb) => ({
+                name: herb.name,
+                properties: Array.isArray(herb.properties) ? herb.properties.join(', ') : herb.properties,
+                image: herb.image || ''
+            }));
+        }
+
+        loadHerbList();
+
         async function handleChatSubmit(e) {
             e.preventDefault();
             const text = userInput.value.trim();
@@ -378,9 +423,13 @@ function renderResults(results, headerMessage) {
         const symptoms = item.main_symptoms || item.symptoms || '-';
         const treatment = item.recommendation || item.treatment || item.herbs || '-';
 
+        const relatedHerbs = (item.relatedHerbs && item.relatedHerbs.length > 0)
+            ? item.relatedHerbs
+            : findHerbsForDisease(name);
+
         let herbsHtml = '';
-        if (item.relatedHerbs && item.relatedHerbs.length > 0) {
-            const herbCards = item.relatedHerbs.map(herb => {
+        if (relatedHerbs && relatedHerbs.length > 0) {
+            const herbCards = relatedHerbs.map(herb => {
                 const properties = Array.isArray(herb.properties) ? herb.properties.join(', ') : herb.properties;
                 return `
                     <div class=\"flex items-start gap-3 bg-green-50/80 p-3 rounded-lg border border-green-200 mt-2\">
