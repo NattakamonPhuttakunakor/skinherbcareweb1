@@ -1,5 +1,6 @@
 // Node v20+ มี fetch ให้แล้ว ไม่ต้อง import
 import Disease from '../models/Disease.js';
+import Herb from '../models/Herb.js';
 import xlsx from 'xlsx';
 import path from 'path';
 import fs from 'fs';
@@ -56,6 +57,64 @@ const buildDiseaseText = (d) => {
         d.usage
     ].filter(Boolean);
     return parts.join(' ').toLowerCase();
+};
+
+const toText = (...fields) => fields
+    .filter(Boolean)
+    .map(v => (Array.isArray(v) ? v.join(' ') : String(v)))
+    .join(' ')
+    .toLowerCase();
+
+const normalizeHerb = (herb) => ({
+    name: herb.name,
+    properties: Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || ''),
+    image: herb.image || ''
+});
+
+const attachHerbsToResults = async (results) => {
+    try {
+        if (!Array.isArray(results) || results.length === 0) return results;
+
+        const allHerbs = await Herb.find({}, { name: 1, properties: 1, image: 1 }).lean();
+        if (!Array.isArray(allHerbs) || allHerbs.length === 0) return results;
+
+        const diseaseNames = results
+            .map(r => r.disease || r.name)
+            .filter(Boolean);
+
+        const diseaseDocs = diseaseNames.length > 0
+            ? await Disease.find({ name: { $in: diseaseNames } }, { name: 1, usage: 1, description: 1, medicines: 1 }).lean()
+            : [];
+        const diseaseMap = new Map((diseaseDocs || []).map(d => [d.name, d]));
+
+        return results.map((item) => {
+            const diseaseKey = item.disease || item.name;
+            const diseaseDoc = diseaseKey ? diseaseMap.get(diseaseKey) : null;
+            const haystack = toText(
+                item.treatment,
+                item.recommendation,
+                item.usage,
+                item.description,
+                item.herbs,
+                item.name,
+                item.disease,
+                diseaseDoc?.usage,
+                diseaseDoc?.description,
+                diseaseDoc?.medicines
+            );
+
+            const relatedHerbs = allHerbs
+                .filter((herb) => {
+                    const herbName = String(herb.name || '').trim().toLowerCase();
+                    return herbName && haystack.includes(herbName);
+                })
+                .map(normalizeHerb);
+
+            return { ...item, relatedHerbs };
+        });
+    } catch (e) {
+        return results;
+    }
 };
 
 const fallbackAnalyze = async (symptomsText) => {
@@ -145,10 +204,11 @@ export const diagnoseSymptoms = async (req, res) => {
         // 2. วิเคราะห์จาก Excel/ฐานข้อมูลภายในก่อน (ไม่เรียก Python)
         const localResults = await fallbackAnalyze(symptoms);
         if (localResults.length > 0) {
+            const enriched = await attachHerbsToResults(localResults);
             return res.json({
                 success: true,
                 found: true,
-                data: localResults,
+                data: enriched,
                 message: 'วิเคราะห์จากฐานข้อมูลภายใน'
             });
         }
@@ -193,10 +253,11 @@ export const diagnoseSymptoms = async (req, res) => {
             console.warn('⚠️ Unable to reach Python service:', err.message);
             const fallbackResults = await fallbackAnalyze(symptoms);
             if (fallbackResults.length > 0) {
+                const enriched = await attachHerbsToResults(fallbackResults);
                 return res.json({
                     success: true,
                     found: true,
-                    data: fallbackResults,
+                    data: enriched,
                     message: 'วิเคราะห์จากฐานข้อมูลภายใน'
                 });
             }
@@ -236,10 +297,11 @@ export const diagnoseSymptoms = async (req, res) => {
             console.error('❌ Python returned error:', response.status, text);
             const fallbackResults = await fallbackAnalyze(symptoms);
             if (fallbackResults.length > 0) {
+                const enriched = await attachHerbsToResults(fallbackResults);
                 return res.json({
                     success: true,
                     found: true,
-                    data: fallbackResults,
+                    data: enriched,
                     message: 'วิเคราะห์จากฐานข้อมูลภายใน'
                 });
             }
@@ -261,11 +323,13 @@ export const diagnoseSymptoms = async (req, res) => {
                     confidence: data.confidence ?? 0,
                     treatment: data.recommendation || data.treatment || data.message || ''
                 };
-                return res.json({ success: true, found: true, data: [out], message: data.message || 'วิเคราะห์สำเร็จ' });
+                const enriched = await attachHerbsToResults([out]);
+                return res.json({ success: true, found: true, data: enriched, message: data.message || 'วิเคราะห์สำเร็จ' });
             }
 
             // If Python returns structured data
-            return res.json({ success: true, found: data.found ?? false, data: data.data ?? [], message: data.message ?? 'วิเคราะห์สำเร็จ' });
+            const enriched = await attachHerbsToResults(data.data ?? []);
+            return res.json({ success: true, found: data.found ?? false, data: enriched, message: data.message ?? 'วิเคราะห์สำเร็จ' });
         }
 
         return res.status(500).json({

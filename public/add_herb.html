@@ -163,6 +163,26 @@
         let existingImageUrl = '';
         let editingHerbId = null;
 
+        const LAST_IMAGE_KEY = 'lastUploadedHerbImage';
+
+        function persistImageToLocalStorage(base64Image) {
+            try {
+                localStorage.setItem(LAST_IMAGE_KEY, base64Image);
+            } catch (err) {
+                console.warn('LocalStorage full. Unable to save image.', err);
+            }
+        }
+
+        function restoreLastImagePreview() {
+            const savedImage = localStorage.getItem(LAST_IMAGE_KEY);
+            if (!savedImage) return;
+            renderImagePreview(savedImage);
+        }
+
+        function clearDraft() {
+            localStorage.removeItem(LAST_IMAGE_KEY);
+        }
+
         // 1. ตรวจสอบการ Login (Auth Check) - ปิดชั่วคราวเพื่อเทสระบบ
         window.addEventListener('load', () => {
             //  ⚠️ ปิดการเช็ค Login ชั่วคราว เพื่อให้ทดสอบบันทึกข้อมูลได้
@@ -185,6 +205,8 @@
             if (editingId) {
                 sessionStorage.removeItem('editingHerbId');
                 loadHerbForEdit(editingId);
+            } else {
+                restoreLastImagePreview();
             }
         });
 
@@ -199,6 +221,7 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                persistImageToLocalStorage(e.target.result);
                 const fileItem = document.createElement('div');
                 fileItem.className = 'flex justify-between items-center bg-green-50 p-3 rounded-lg border border-green-200';
                 fileItem.innerHTML = `
@@ -287,6 +310,7 @@
                     // สำเร็จ: แสดง Modal
                     document.getElementById('modal-herb-name').textContent = name;
                     editingHerbId = null;
+                    clearDraft();
                     
                     modal.classList.remove('hidden');
                     setTimeout(() => {
