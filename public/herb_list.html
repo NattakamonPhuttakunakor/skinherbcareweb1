@@ -136,6 +136,10 @@
             }
         }
 
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
+
         window.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('herb-table-body');
             const searchInput = document.getElementById('search-input');
@@ -164,12 +168,15 @@
                     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
                     const isAdmin = !!token;
                     const url = isAdmin
-                        ? `/api/herbs/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
-                        : `/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+                        ? `${API_BASE_URL}/api/herbs/admin${query ? `?q=${encodeURIComponent(query)}` : ''}`
+                        : `${API_BASE_URL}/api/herbs${query ? `?q=${encodeURIComponent(query)}` : ''}`;
                     const res = await fetch(url, {
                         headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
                     });
-                    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+                    const contentType = res.headers.get('content-type') || '';
+                    if (!res.ok || !contentType.includes('application/json')) {
+                        throw new Error(`Server returned ${res.status}`);
+                    }
                     const data = await res.json();
                     const herbs = Array.isArray(data) ? data : (data.herbs || data.data || []);
                     latestHerbs = herbs;
@@ -252,7 +259,7 @@
                 const token = localStorage.getItem('token') || localStorage.getItem('userToken');
                 if (!token) return;
                 try {
-                    const res = await fetch(`/api/herbs/${herb._id}/publish`, {
+                    const res = await fetch(`${API_BASE_URL}/api/herbs/${herb._id}/publish`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',

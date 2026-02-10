@@ -160,6 +160,10 @@
             fetchDiseases();
         });
 
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
+
         let latestDiseases = [];
         async function fetchDiseases(query = '') {
             const tableBody = document.getElementById('disease-table-body');
@@ -170,12 +174,15 @@
                 const isAdmin = !!token;
                 const qs = query ? `?q=${encodeURIComponent(query)}` : '';
                 const url = isAdmin
-                    ? `/api/diseases/admin${qs}`
-                    : `/api/diseases${qs}`;
+                    ? `${API_BASE_URL}/api/diseases/admin${qs}`
+                    : `${API_BASE_URL}/api/diseases${qs}`;
                 const res = await fetch(url, {
                     headers: isAdmin ? { 'Authorization': `Bearer ${token}` } : {}
                 });
-                if (!res.ok) throw new Error(`Server error ${res.status}`);
+                const contentType = res.headers.get('content-type') || '';
+                if (!res.ok || !contentType.includes('application/json')) {
+                    throw new Error(`Server error ${res.status}`);
+                }
                 const data = await res.json();
                 const diseases = Array.isArray(data) ? data : (data.diseases || data.data || []);
                 latestDiseases = diseases;
@@ -286,7 +293,7 @@
 
             try {
                 const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-                const res = await fetch(`/api/diseases/${diseaseId}`, {
+                const res = await fetch(`${API_BASE_URL}/api/diseases/${diseaseId}`, {
                     method: 'DELETE',
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
@@ -337,7 +344,7 @@
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             if (!token) return;
             try {
-                const res = await fetch(`/api/diseases/${id}/publish`, {
+                const res = await fetch(`${API_BASE_URL}/api/diseases/${id}/publish`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
