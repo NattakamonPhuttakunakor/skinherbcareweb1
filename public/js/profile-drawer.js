@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const userRaw = localStorage.getItem('user');
     const user = userRaw ? JSON.parse(userRaw) : null;
+    const ASSET_BASE_URL = window.location.hostname.includes('netlify.app')
+        ? 'https://skinherbcareweb1.onrender.com'
+        : window.location.origin;
 
     const style = document.createElement('style');
     style.textContent = `
@@ -201,13 +204,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return { img, fb, svg };
     };
 
+    const normalizeImageSrc = (src) => {
+        if (!src) return '';
+        const value = String(src).trim();
+        if (!value) return '';
+        if (value.startsWith('data:') || value.startsWith('http://') || value.startsWith('https://')) return value;
+        if (value.startsWith('/uploads/') || value.startsWith('/')) return `${ASSET_BASE_URL}${value}`;
+        return `${ASSET_BASE_URL}/${value}`;
+    };
+
     const applyImage = (src) => {
-        if (src) {
+        const normalized = normalizeImageSrc(src);
+        if (normalized) {
             imgDrawer.onerror = () => {
                 imgDrawer.style.display = 'none';
                 fallbackDrawer.style.display = 'flex';
             };
-            imgDrawer.src = src;
+            imgDrawer.src = normalized;
             imgDrawer.style.display = 'block';
             fallbackDrawer.style.display = 'none';
             if (imgFab && fallbackFab) {
@@ -215,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     imgFab.style.display = 'none';
                     fallbackFab.style.display = 'inline';
                 };
-                imgFab.src = src;
+                imgFab.src = normalized;
                 imgFab.style.display = 'block';
                 fallbackFab.style.display = 'none';
             }
@@ -227,14 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.classList.remove('has-image');
                     if (svg) svg.style.display = '';
                 };
-                img.src = src;
+                img.src = normalized;
                 img.style.display = 'block';
                 fb.style.display = 'none';
                 if (svg) svg.style.display = 'none';
                 el.classList.add('has-image');
             });
             sidebarImgs.forEach((img) => {
-                img.src = src;
+                img.src = normalized;
             });
         } else {
             imgDrawer.style.display = 'none';
