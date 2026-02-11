@@ -1,4 +1,4 @@
-const AUTH_JS_VERSION = '20260211r13';
+const AUTH_JS_VERSION = '20260211r14';
 
 function getAuthSnapshot() {
   const token = localStorage.getItem('token')
@@ -62,24 +62,56 @@ function applyAuthNavState() {
   const host = guestNav || loginLinks[0]?.parentElement;
   if (!host) return;
 
+  const findExistingLogout = () => {
+    const direct =
+      host.querySelector('#guest-logout-inline')
+      || host.querySelector('.logout-btn')
+      || host.querySelector('button[onclick*="logout"]');
+    if (direct) return direct;
+
+    const byText = Array.from(host.querySelectorAll('button, a')).find((el) =>
+      String(el.textContent || '').trim().toLowerCase() === 'log out'
+    );
+    return byText || null;
+  };
+
   let logoutBtn = host.querySelector('[data-auth-logout="true"]');
+  const existingLogout = findExistingLogout();
+
   if (snap.isLoggedIn && !snap.isAdmin) {
-    if (!logoutBtn) {
-      logoutBtn = document.createElement('button');
-      logoutBtn.type = 'button';
-      logoutBtn.textContent = 'Log Out';
-      logoutBtn.setAttribute('data-auth-logout', 'true');
-      logoutBtn.style.border = 'none';
-      logoutBtn.style.background = 'none';
-      logoutBtn.style.cursor = 'pointer';
-      logoutBtn.style.fontWeight = '600';
-      logoutBtn.style.padding = '6px 12px';
-      logoutBtn.style.borderRadius = '8px';
-      logoutBtn.style.color = '#064e3b';
-      logoutBtn.addEventListener('click', logout);
-      host.appendChild(logoutBtn);
+    if (existingLogout && existingLogout !== logoutBtn) {
+      existingLogout.style.display = 'inline-flex';
+      if (existingLogout.tagName === 'BUTTON' && !existingLogout.hasAttribute('data-auth-bound')) {
+        existingLogout.addEventListener('click', (e) => {
+          e.preventDefault();
+          logout();
+        });
+        existingLogout.setAttribute('data-auth-bound', 'true');
+      }
+      if (logoutBtn) {
+        logoutBtn.remove();
+        logoutBtn = null;
+      }
     }
-    logoutBtn.style.display = 'inline-flex';
+
+    if (!logoutBtn) {
+      if (!existingLogout) {
+        logoutBtn = document.createElement('button');
+        logoutBtn.type = 'button';
+        logoutBtn.textContent = 'Log Out';
+        logoutBtn.setAttribute('data-auth-logout', 'true');
+        logoutBtn.style.border = 'none';
+        logoutBtn.style.background = 'none';
+        logoutBtn.style.cursor = 'pointer';
+        logoutBtn.style.fontWeight = '600';
+        logoutBtn.style.padding = '6px 12px';
+        logoutBtn.style.borderRadius = '8px';
+        logoutBtn.style.color = '#064e3b';
+        logoutBtn.addEventListener('click', logout);
+        host.appendChild(logoutBtn);
+      }
+    }
+    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
 
     // Keep user navigation before logout on every user page.
     const userNav =
@@ -88,11 +120,12 @@ function applyAuthNavState() {
       || host.querySelector('a[href="user-dashboard.html"]')
       || host.querySelector('.profile-icon');
 
-    if (userNav && logoutBtn && userNav !== logoutBtn) {
+    const activeLogout = existingLogout || logoutBtn;
+    if (userNav && activeLogout && userNav !== activeLogout) {
       if (userNav.parentElement === host) {
         host.appendChild(userNav);
       }
-      host.appendChild(logoutBtn);
+      if (activeLogout.parentElement === host) host.appendChild(activeLogout);
     }
   } else if (logoutBtn) {
     logoutBtn.remove();
