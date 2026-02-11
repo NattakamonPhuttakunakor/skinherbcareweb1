@@ -139,6 +139,7 @@
         const API_BASE_URL = window.location.hostname.includes('netlify.app')
             ? 'https://skinherbcareweb1.onrender.com'
             : window.location.origin;
+        let latestHerbs = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             const tableBody = document.getElementById('herb-table-body');
@@ -162,7 +163,6 @@
             }
 
             // Fetch herbs from backend (supports optional search query)
-            let latestHerbs = [];
             async function fetchHerbs(query = '') {
                 try {
                     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
@@ -346,41 +346,48 @@
                 confirmButtonText: 'ไปหน้าแก้ไข'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    let herb = null;
+
                     if (typeof idOrIdx === 'number') {
-                        const herb = latestHerbs[idOrIdx];
-                        if (herb && herb._id) {
-                            sessionStorage.setItem('editingHerbData', JSON.stringify({
-                                _id: herb._id || '',
-                                name: herb.name || '',
-                                scientificName: herb.scientificName || herb.engName || '',
-                                description: herb.description || '',
-                                properties: Array.isArray(herb.properties) ? herb.properties : (herb.properties ? [herb.properties] : []),
-                                usage: herb.usage || '',
-                                diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
-                                image: herb.image || '',
-                                published: herb.published === true
-                            }));
-                            sessionStorage.setItem('editingHerbId', herb._id);
+                        herb = latestHerbs[idOrIdx] || null;
+                    } else if (typeof idOrIdx === 'string' && idOrIdx) {
+                        // Support row ids like "herb-0" from table renderer.
+                        const idxMatch = idOrIdx.match(/^herb-(\d+)$/);
+                        if (idxMatch) {
+                            const idx = Number(idxMatch[1]);
+                            herb = Number.isFinite(idx) ? (latestHerbs[idx] || null) : null;
                         }
-                    } else if (idOrIdx) {
-                        const herb = Array.isArray(latestHerbs)
-                            ? latestHerbs.find((h) => String(h._id) === String(idOrIdx))
-                            : null;
-                        if (herb) {
-                            sessionStorage.setItem('editingHerbData', JSON.stringify({
-                                _id: herb._id || '',
-                                name: herb.name || '',
-                                scientificName: herb.scientificName || herb.engName || '',
-                                description: herb.description || '',
-                                properties: Array.isArray(herb.properties) ? herb.properties : (herb.properties ? [herb.properties] : []),
-                                usage: herb.usage || '',
-                                diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
-                                image: herb.image || '',
-                                published: herb.published === true
-                            }));
+                        if (!herb) {
+                            herb = Array.isArray(latestHerbs)
+                                ? latestHerbs.find((h) => String(h._id) === String(idOrIdx))
+                                : null;
                         }
-                        sessionStorage.setItem('editingHerbId', idOrIdx);
                     }
+
+                    if (herb) {
+                        sessionStorage.setItem('editingHerbData', JSON.stringify({
+                            _id: herb._id || '',
+                            name: herb.name || '',
+                            scientificName: herb.scientificName || herb.engName || '',
+                            description: herb.description || '',
+                            properties: Array.isArray(herb.properties) ? herb.properties : (herb.properties ? [herb.properties] : []),
+                            usage: herb.usage || '',
+                            diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
+                            image: herb.image || '',
+                            published: herb.published === true
+                        }));
+                        if (herb._id) {
+                            sessionStorage.setItem('editingHerbId', herb._id);
+                        } else {
+                            sessionStorage.removeItem('editingHerbId');
+                        }
+                    } else {
+                        // Fallback for preview/static rows: keep old data for edit screen.
+                        const preview = localStorage.getItem('previewHerbData');
+                        if (preview) sessionStorage.setItem('editingHerbData', preview);
+                        sessionStorage.removeItem('editingHerbId');
+                    }
+
                     window.location.href = 'add_herb.html';
                 }
             });
