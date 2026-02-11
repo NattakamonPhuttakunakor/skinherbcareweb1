@@ -1,4 +1,4 @@
-const AUTH_JS_VERSION = '20260211r14';
+const AUTH_JS_VERSION = '20260211r15';
 
 function getAuthSnapshot() {
   const token = localStorage.getItem('token')
@@ -113,7 +113,7 @@ function applyAuthNavState() {
     }
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
 
-    // Keep user navigation before logout on every user page.
+    // Keep user navigation ordered as: Home -> Log Out -> Profile.
     const userNav =
       host.querySelector('#profile-btn-guest')
       || host.querySelector('a[href="/user-dashboard.html"]')
@@ -122,10 +122,8 @@ function applyAuthNavState() {
 
     const activeLogout = existingLogout || logoutBtn;
     if (userNav && activeLogout && userNav !== activeLogout) {
-      if (userNav.parentElement === host) {
-        host.appendChild(userNav);
-      }
       if (activeLogout.parentElement === host) host.appendChild(activeLogout);
+      if (userNav.parentElement === host) host.appendChild(userNav);
     }
   } else if (logoutBtn) {
     logoutBtn.remove();

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -30,7 +30,7 @@ body {
   overflow-x: hidden;
 }
 
-/* 🌿 Background decoration */
+/* ðŸŒ¿ Background decoration */
 body::before,
 body::after {
   position: fixed;
@@ -38,21 +38,21 @@ body::after {
   opacity: 0.35;
 }
 body::before {
-  content: "🌿";
+  content: "ðŸŒ¿";
   bottom: -60px;
   left: -60px;
   font-size: 260px;
   transform: rotate(-25deg);
 }
 body::after {
-  content: "🌿";
+  content: "ðŸŒ¿";
   top: -80px;
   right: -80px;
   font-size: 300px;
   transform: rotate(20deg);
 }
 
-/* 🔝 Navbar */
+/* ðŸ” Navbar */
 .top-nav {
   position: sticky;
   top: 0;
@@ -103,11 +103,11 @@ body::after {
   background: rgba(255,255,255,0.6);
 }
 
-/* ปุ่ม Admin พิเศษ */
+/* à¸›à¸¸à¹ˆà¸¡ Admin à¸žà¸´à¹€à¸¨à¸© */
 .admin-btn {
-    background-color: #FFC107 !important; /* สีเหลือง */
+    background-color: #FFC107 !important; /* à¸ªà¸µà¹€à¸«à¸¥à¸·à¸­à¸‡ */
     color: #111C44 !important;
-    display: none; /* ซ่อนไว้ก่อน */
+    display: none; /* à¸‹à¹ˆà¸­à¸™à¹„à¸§à¹‰à¸à¹ˆà¸­à¸™ */
     align-items: center;
     gap: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -211,7 +211,7 @@ body::after {
   pointer-events: auto;
 }
 
-/* 📦 Main layout */
+/* ðŸ“¦ Main layout */
 .container {
   min-height: calc(100vh - 80px);
   display: flex;
@@ -244,7 +244,7 @@ header p {
   color: #374151;
 }
 
-/* 🚀 Feature buttons */
+/* ðŸš€ Feature buttons */
 .features {
   display: grid;
   grid-template-columns: 1fr;
@@ -298,7 +298,7 @@ header p {
   color: #475569;
 }
 
-/* 🌿 Herbal showcase */
+/* ðŸŒ¿ Herbal showcase */
 .showcase-section {
   padding: 60px 20px 90px;
 }
@@ -418,14 +418,14 @@ header p {
   border: 1px dashed rgba(16, 185, 129, 0.2);
 }
 
-/* 📱 Tablet */
+/* ðŸ“± Tablet */
 @media (max-width: 1024px) {
   .main-card {
     max-width: 90%;
   }
 }
 
-/* 📱 Mobile */
+/* ðŸ“± Mobile */
 @media (max-width: 768px) {
   .main-card {
     padding: 25px 20px;
@@ -469,7 +469,7 @@ header p {
   }
 }
 
-/* 📱 Small Mobile */
+/* ðŸ“± Small Mobile */
 @media (max-width: 480px) {
   header h1 {
     font-size: 1.2rem;
@@ -500,7 +500,7 @@ header p {
 
 <script>
   (function fixMojibakeInPage() {
-    const suspiciousPattern = /[ÃÂà]/;
+    const suspiciousPattern = /[ÃƒÃ‚Ã ]/;
     const decodeMojibake = (text) => {
       if (typeof text !== 'string' || !suspiciousPattern.test(text)) return text;
       try {
@@ -541,7 +541,7 @@ header p {
 
 <nav class="top-nav">
   <div class="nav-container">
-    <a href="/" class="logo">🌿 SkinHerbCare</a>
+    <a href="/" class="logo">ðŸŒ¿ SkinHerbCare</a>
     
     <!-- Guest Navigation -->
     <div class="auth-links" id="guest-nav">
@@ -550,7 +550,7 @@ header p {
       <a href="/register.html">Sign Up</a>
       <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
         <img id="profile-img-guest" src="" alt="Profile" style="display:none;">
-        <span id="profile-fallback-guest">👤</span>
+        <span id="profile-fallback-guest">ðŸ‘¤</span>
       </button>
     </div>
 
@@ -558,14 +558,14 @@ header p {
     <div class="auth-links" id="admin-nav" style="display: none;">
       <a href="/">Home</a>
       <a href="/admin-dashboard.html" style="background-color: #FFC107; color: #111C44; border-radius: 8px; padding: 6px 12px; font-weight: 600;">
-        ⚙️ จัดการระบบ
+        âš™ï¸ à¸ˆà¸±à¸”à¸à¸²à¸£à¸£à¸°à¸šà¸š
       </a>
       <button onclick="logout()" style="background: none; border: none; cursor: pointer; text-decoration: none; color: var(--primary-text); font-weight: 600; padding: 6px 12px; border-radius: 8px; font-size: 0.95rem;">
         Log Out
       </button>
       <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
         <img id="profile-img-admin" src="" alt="Profile" style="display:none;">
-        <span id="profile-fallback-admin">👤</span>
+        <span id="profile-fallback-admin">ðŸ‘¤</span>
       </button>
     </div>
   </div>
@@ -574,51 +574,51 @@ header p {
 <div id="profile-backdrop" class="profile-backdrop"></div>
 <aside id="profile-drawer" class="profile-drawer" aria-hidden="true">
   <div class="profile-drawer-header">
-    <h3 style="font-weight:700;color:#0f3d2e;">โปรไฟล์ผู้ใช้</h3>
-    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
+    <h3 style="font-weight:700;color:#0f3d2e;">à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰</h3>
+    <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">à¸›à¸´à¸”</button>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
     <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="Profile" style="display:none;">
-    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">👤</div>
-    <div class="profile-drawer-name" id="profile-drawer-name">ผู้ใช้งาน</div>
+    <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">ðŸ‘¤</div>
+    <div class="profile-drawer-name" id="profile-drawer-name">à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</div>
     <div class="profile-drawer-email" id="profile-drawer-email">-</div>
   </div>
   <div class="profile-drawer-actions">
-    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">เปลี่ยนรูปโปรไฟล์</label>
+    <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸£à¸¹à¸›à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ</label>
     <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
-    <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
+    <button id="profile-logout" class="profile-drawer-btn primary">à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š</button>
   </div>
 </aside>
 
 <div class="container">
   <div class="main-card">
     <header>
-      <h1>ยินดีต้อนรับสู่เว็บไซต์แนะนำสมุนไพรรักษาโรคผิวหนัง</h1>
-      <p>โปรดเลือกประเภทการใช้งาน</p>
+      <h1>à¸¢à¸´à¸™à¸”à¸µà¸•à¹‰à¸­à¸™à¸£à¸±à¸šà¸ªà¸¹à¹ˆà¹€à¸§à¹‡à¸šà¹„à¸‹à¸•à¹Œà¹à¸™à¸°à¸™à¸³à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¸£à¸±à¸à¸©à¸²à¹‚à¸£à¸„à¸œà¸´à¸§à¸«à¸™à¸±à¸‡</h1>
+      <p>à¹‚à¸›à¸£à¸”à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸à¸²à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</p>
     </header>
 
     <div class="features">
       <a href="/analyze-disease.html" class="feature-button">
-        <div class="feature-icon">🔍</div>
+        <div class="feature-icon">ðŸ”</div>
         <div class="feature-content">
-          <h3>วิเคราะห์รูปโรคผิวหนัง</h3>
-          <p>อัปโหลดภาพถ่ายผิวเพื่อรับการวิเคราะห์เบื้องต้น</p>
+          <h3>à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸£à¸¹à¸›à¹‚à¸£à¸„à¸œà¸´à¸§à¸«à¸™à¸±à¸‡</h3>
+          <p>à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ à¸²à¸žà¸–à¹ˆà¸²à¸¢à¸œà¸´à¸§à¹€à¸žà¸·à¹ˆà¸­à¸£à¸±à¸šà¸à¸²à¸£à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹€à¸šà¸·à¹‰à¸­à¸‡à¸•à¹‰à¸™</p>
         </div>
       </a>
 
       <a href="/analyze-herb.html" class="feature-button">
-        <div class="feature-icon">🌱</div>
+        <div class="feature-icon">ðŸŒ±</div>
         <div class="feature-content">
-          <h3>ค้นหาข้อมูลจากรูปสมุนไพร</h3>
-          <p>อัปโหลดภาพสมุนไพรเพื่อค้นหาข้อมูลและสรรพคุณ</p>
+          <h3>à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸£à¸¹à¸›à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</h3>
+          <p>à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ à¸²à¸žà¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¹€à¸žà¸·à¹ˆà¸­à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¸°à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“</p>
         </div>
       </a>
 
       <a href="/analyze-symptoms.html" class="feature-button" onclick="checkLogin(event)">
-        <div class="feature-icon">📝</div>
+        <div class="feature-icon">ðŸ“</div>
         <div class="feature-content">
-          <h3>วิเคราะห์จากอาการที่พิมพ์</h3>
-          <p>บอกอาการของคุณเพื่อรับคำแนะนำสมุนไพร</p>
+          <h3>à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸ˆà¸²à¸à¸­à¸²à¸à¸²à¸£à¸—à¸µà¹ˆà¸žà¸´à¸¡à¸žà¹Œ</h3>
+          <p>à¸šà¸­à¸à¸­à¸²à¸à¸²à¸£à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸žà¸·à¹ˆà¸­à¸£à¸±à¸šà¸„à¸³à¹à¸™à¸°à¸™à¸³à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</p>
         </div>
       </a>
     </div>
@@ -629,13 +629,13 @@ header p {
   <div class="showcase-inner">
     <div class="showcase-header">
       <div>
-        <h2>คลังสมุนไพรแนะนำ</h2>
-        <p>อัปเดตจากฐานข้อมูลล่าสุด</p>
+        <h2>à¸„à¸¥à¸±à¸‡à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£à¹à¸™à¸°à¸™à¸³</h2>
+        <p>à¸­à¸±à¸›à¹€à¸”à¸•à¸ˆà¸²à¸à¸à¸²à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸¥à¹ˆà¸²à¸ªà¸¸à¸”</p>
       </div>
-      <a class="showcase-link" href="/herb_library.html">ดูทั้งหมด</a>
+      <a class="showcase-link" href="/herb_library.html">à¸”à¸¹à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</a>
     </div>
     <div class="showcase-grid" id="herb-showcase-container">
-      <div class="showcase-loading">กำลังโหลดข้อมูลสมุนไพร...</div>
+      <div class="showcase-loading">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£...</div>
     </div>
   </div>
 </section>
@@ -644,12 +644,12 @@ header p {
   <div class="showcase-inner">
     <div class="showcase-header">
       <div>
-        <h2>โรครอบตัวแนะนำ</h2>
-        <p>รายการโรคที่เผยแพร่จากระบบล่าสุด</p>
+        <h2>à¹‚à¸£à¸„à¸£à¸­à¸šà¸•à¸±à¸§à¹à¸™à¸°à¸™à¸³</h2>
+        <p>à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸£à¸„à¸—à¸µà¹ˆà¹€à¸œà¸¢à¹à¸žà¸£à¹ˆà¸ˆà¸²à¸à¸£à¸°à¸šà¸šà¸¥à¹ˆà¸²à¸ªà¸¸à¸”</p>
       </div>
     </div>
     <div class="showcase-grid" id="disease-showcase-container">
-      <div class="showcase-loading">กำลังโหลดข้อมูลโรค...</div>
+      <div class="showcase-loading">à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹‚à¸£à¸„...</div>
     </div>
   </div>
 </section>
@@ -713,7 +713,7 @@ header p {
     }
 
     function logout() {
-        if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
+        if (confirm('â“ à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸šà¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('userRole');
@@ -758,8 +758,8 @@ header p {
         };
 
         const fullName = user
-            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
-            : 'ผู้ใช้งาน';
+            ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™'
+            : 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™';
         const email = user && user.email ? user.email : '-';
 
         nameEl.textContent = fullName;
@@ -849,14 +849,14 @@ header p {
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/herbs`);
-            if (!response.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+            if (!response.ok) throw new Error('à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
             const json = await response.json();
             const herbs = Array.isArray(json)
                 ? json
                 : (json.herbs || json.data || []);
 
             if (!Array.isArray(herbs) || herbs.length === 0) {
-                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลสมุนไพร</div>';
+                container.innerHTML = '<div class="showcase-loading">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</div>';
                 return;
             }
 
@@ -867,7 +867,7 @@ header p {
                     : (herb.properties || '');
                 const shortDesc = propertiesText.length > 90
                     ? `${propertiesText.substring(0, 90)}...`
-                    : (propertiesText || 'ไม่มีข้อมูลสรรพคุณ');
+                    : (propertiesText || 'à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“');
                 const imageSrc = resolveImageSrc(herb.image || '');
                 const herbId = herb._id || herb.id || '';
 
@@ -880,10 +880,10 @@ header p {
                             }
                         </div>
                         <div class="showcase-body">
-                            <h3 class="showcase-title">${herb.name || 'ไม่ระบุชื่อ'}</h3>
+                            <h3 class="showcase-title">${herb.name || 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸Šà¸·à¹ˆà¸­'}</h3>
                             <p class="showcase-desc">${shortDesc}</p>
                             <a class="showcase-btn" href="/herb_detail_public.html?id=${herbId}">
-                                อ่านเพิ่มเติม
+                                à¸­à¹ˆà¸²à¸™à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡
                             </a>
                         </div>
                     </div>
@@ -893,7 +893,7 @@ header p {
             container.innerHTML = herbsHtml;
         } catch (error) {
             console.error('Error:', error);
-            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+            container.innerHTML = '<div class="showcase-loading">à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥</div>';
         }
     }
 
@@ -910,14 +910,14 @@ header p {
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/diseases`);
-            if (!response.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+            if (!response.ok) throw new Error('à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
             const json = await response.json();
             const diseases = Array.isArray(json)
                 ? json
                 : (json.diseases || json.data || []);
 
             if (!Array.isArray(diseases) || diseases.length === 0) {
-                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลโรคที่เผยแพร่</div>';
+                container.innerHTML = '<div class="showcase-loading">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹‚à¸£à¸„à¸—à¸µà¹ˆà¹€à¸œà¸¢à¹à¸žà¸£à¹ˆ</div>';
                 return;
             }
 
@@ -928,7 +928,7 @@ header p {
                     : (disease.symptoms || '');
                 const shortDesc = symptomsText.length > 90
                     ? `${symptomsText.substring(0, 90)}...`
-                    : (symptomsText || disease.description || 'ไม่มีข้อมูลอาการ');
+                    : (symptomsText || disease.description || 'à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸­à¸²à¸à¸²à¸£');
                 const diseaseId = disease._id || disease.id || '';
 
                 return `
@@ -937,10 +937,10 @@ header p {
                             <div class="showcase-image-placeholder">Disease</div>
                         </div>
                         <div class="showcase-body">
-                            <h3 class="showcase-title">${disease.name || 'ไม่ระบุชื่อโรค'}</h3>
+                            <h3 class="showcase-title">${disease.name || 'à¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸Šà¸·à¹ˆà¸­à¹‚à¸£à¸„'}</h3>
                             <p class="showcase-desc">${shortDesc}</p>
                             <a class="showcase-btn" href="#" onclick="return openDiseaseDetailFromShowcase('${diseaseId}')">
-                                อ่านเพิ่มเติม
+                                à¸­à¹ˆà¸²à¸™à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡
                             </a>
                         </div>
                     </div>
@@ -950,7 +950,7 @@ header p {
             container.innerHTML = diseasesHtml;
         } catch (error) {
             console.error('Error:', error);
-            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูลโรค</div>';
+            container.innerHTML = '<div class="showcase-loading">à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹‚à¸£à¸„</div>';
         }
     }
 
@@ -961,7 +961,8 @@ header p {
         loadShowcaseDiseases();
     });
 </script>
-<script src="/js/auth.js?v=20260211r14"></script>
+<script src="/js/auth.js?v=20260211r15"></script>
 
 </body>
 </html>
+
