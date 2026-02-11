@@ -1,313 +1,199 @@
-﻿<!DOCTYPE html>
-<html lang="th">
+<!DOCTYPE html>
+<html class="light" lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkinHerb Care - รายละเอียดโรค</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Kanit', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Disease Detail | SkinHerbCare</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#30e89c",
+            "primary-dark": "#1a8a5b",
+            "primary-light": "#e9f7f0",
+            "background-light": "#f8fdfb"
+          },
+          fontFamily: {
+            display: ["Manrope", "sans-serif"],
+            serif: ["Playfair Display", "serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #30e89c; border-radius: 10px; }
+    .leaf-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0c15 0 30 15 30 30S45 60 30 60 0 45 0 30 15 0 30 0z' fill='%2330e89c' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+  </style>
 </head>
-<body class="bg-[#F4F7FE] flex h-screen overflow-hidden">
+<body class="font-display bg-background-light text-slate-800 antialiased h-screen overflow-hidden relative">
 
-    <aside class="w-64 bg-[#111C44] text-white flex flex-col flex-shrink-0 z-20 hidden lg:flex">
-        <div class="p-6 flex items-center justify-center border-b border-gray-700/30">
-            <div class="text-2xl font-bold tracking-wide">
-                <span class="text-green-400"><i class="fa-solid fa-leaf"></i></span> SKINHERB<span class="font-light">CARE</span>
-            </div>
+  <div class="absolute inset-0 leaf-bg -z-10"></div>
+
+  <a href="/index.html" class="absolute top-6 left-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
+    <span class="material-symbols-outlined text-lg">arrow_back</span>
+    กลับหน้าแรก
+  </a>
+
+  <a href="/index.html#disease-showcase-container" class="absolute top-6 right-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
+    <span class="material-symbols-outlined text-lg">health_and_safety</span>
+    คลังโรค
+  </a>
+
+  <div class="h-full w-full flex items-center justify-center p-4 md:p-8">
+    <div class="relative w-full max-w-7xl h-full max-h-[900px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/50">
+
+      <div class="w-full md:w-5/12 relative h-64 md:h-auto overflow-hidden bg-slate-100 group">
+        <img id="disease-image" alt="Disease Image" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://via.placeholder.com/600?text=Loading..."/>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+        <div class="absolute bottom-8 left-8 text-white">
+          <span class="px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2 inline-block">Skin Disease</span>
+          <h2 id="img-caption-name" class="text-3xl font-serif italic opacity-90">...</h2>
         </div>
-        <div class="flex flex-col items-center mt-6 mb-8">
-            <div class="w-20 h-20 rounded-full border-2 border-yellow-400 p-1 overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jureeporn&backgroundColor=111c44" class="w-full h-full object-cover admin-sidebar-img">
+      </div>
+
+      <div class="w-full md:w-7/12 flex flex-col h-full bg-white relative">
+        <div class="flex-grow overflow-y-auto custom-scrollbar p-8 md:p-12">
+
+          <header class="mb-10 border-b border-slate-100 pb-8">
+            <div class="flex items-baseline gap-3 mb-2">
+              <h1 id="disease-name" class="text-4xl md:text-5xl font-extrabold text-slate-900">กำลังโหลด...</h1>
             </div>
-            <h3 class="mt-3 text-lg font-medium admin-sidebar-name">Jureeporn zz</h3>
-            <p class="text-xs text-gray-400">Admin</p>
-        </div>
-        <nav class="flex-1 px-4 space-y-3">
-            <a href="dashboard.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <div class="w-6 text-center"><i class="fa-solid fa-table-columns"></i></div> <span>Dashboard</span>
-            </a>
-            <a href="herb_list.html" class="flex items-center gap-4 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <div class="w-6 text-center"><i class="fa-solid fa-leaf"></i></div> <span>สมุนไพร</span>
-            </a>
-            <a href="disease_list.html" class="flex items-center gap-4 px-4 py-3 bg-[#FFC107] text-[#111C44] rounded-xl font-semibold shadow-md">
-                <div class="w-6 text-center"><i class="fa-solid fa-virus"></i></div> <span>โรคผิวหนัง</span>
-            </a>
-        </nav>
-        <div class="p-4 mt-auto">
-            <button class="w-full bg-[#FF0000] hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                <i class="fa-solid fa-power-off"></i> <span>Log Out</span>
-            </button>
-        </div>
-    </aside>
+            <p id="disease-eng" class="font-serif italic text-xl text-primary-dark/70 mb-6">Disease Name Loading...</p>
 
-    <main class="flex-1 flex flex-col h-screen relative">
-        <div class="absolute inset-0 bg-gradient-to-b from-[#A5F3BC]/30 to-[#60a5fa]/10 z-0"></div>
-
-        <div class="relative z-10 p-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-[#111C44]" id="disease-title">รายละเอียดโรค</h1>
-                <p class="text-sm text-gray-500">ข้อมูลโรคผิวหนัง</p>
+            <div class="bg-primary-light/50 p-6 rounded-2xl border border-primary/10">
+              <h3 class="text-xs font-bold text-primary-dark uppercase tracking-widest mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg">info</span> อาการเบื้องต้น
+              </h3>
+              <p id="disease-symptoms" class="text-slate-700 text-lg font-medium leading-relaxed">...</p>
             </div>
-            <a href="disease_list.html" class="bg-white hover:bg-gray-50 text-[#111C44] px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium transition-all">
-                <i class="fa-solid fa-arrow-left mr-2"></i> กลับ
-            </a>
+          </header>
+
+          <div class="space-y-8">
+
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">คำอธิบายโรค</h3>
+              <p id="disease-description" class="text-slate-600 leading-relaxed">...</p>
+            </section>
+
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">คำแนะนำการดูแล</h3>
+              <div class="bg-slate-50 p-6 rounded-2xl border-l-4 border-primary">
+                <p id="disease-usage" class="text-slate-600 leading-relaxed">...</p>
+              </div>
+            </section>
+
+            <section>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">สมุนไพรที่เกี่ยวข้อง</h3>
+              <div id="disease-medicines-container" class="flex flex-wrap gap-2">
+                <span class="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-sm">ไม่มีข้อมูล</span>
+              </div>
+            </section>
+
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="relative z-10 flex-1 overflow-y-auto no-scrollbar px-6 pb-20">
-            <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
-                
-                <div class="lg:w-1/3 space-y-6">
-                    <div class="bg-white rounded-3xl shadow-sm p-4 flex flex-col items-center">
-                        <div class="w-full aspect-square rounded-2xl bg-gray-100 overflow-hidden mb-4 border border-gray-200 relative group">
-                            <img id="display-image" src="" class="w-full h-full object-cover hidden">
-                            <div id="img-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                                <i class="fa-regular fa-image text-4xl mb-2"></i>
-                                <span>No Image</span>
-                            </div>
-                        </div>
-                        <h2 id="display-name" class="text-xl font-bold text-[#111C44] text-center w-full">...</h2>
-                        <p id="display-eng" class="text-sm text-gray-500 italic text-center w-full mb-2">...</p>
-                    </div>
+  <script>
+    const API_BASE_URL = window.location.hostname.includes('netlify.app')
+      ? 'https://skinherbcareweb1.onrender.com'
+      : window.location.origin;
 
-                    <div class="bg-white rounded-3xl shadow-sm p-5">
-                        <h3 class="font-bold text-[#111C44] mb-3 border-b pb-2"><i class="fa-solid fa-leaf text-green-500 mr-2"></i>สมุนไพรที่ใช้รักษา</h3>
-                        <div id="medicine-list" class="flex flex-wrap gap-2">
-                            <span class="text-gray-400 text-sm">- ไม่มีข้อมูลสมุนไพร -</span>
-                        </div>
-                    </div>
-                </div>
+    function resolveImageSrc(raw) {
+      if (!raw) return '';
+      const val = String(raw).trim();
+      if (!val) return '';
+      if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+      if (val.startsWith('/uploads/')) return `${API_BASE_URL}${val}`;
+      const normalized = val.replace(/\\/g, '/');
+      const idx = normalized.lastIndexOf('/uploads/');
+      if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
+      if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${API_BASE_URL}/uploads/${val}`;
+      return val;
+    }
 
-                <div class="lg:w-2/3 space-y-6">
-                    
-                    <div class="bg-white rounded-3xl shadow-sm p-6">
-                        <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
-                            <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3"><i class="fa-solid fa-circle-info"></i></span>
-                            คำอธิบาย
-                        </h3>
-                        <p id="display-desc" class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">...</p>
-                    </div>
+    function renderDisease(disease) {
+      const imageSrc = resolveImageSrc(disease.image || '');
+      document.getElementById('disease-image').src = imageSrc || 'https://via.placeholder.com/600?text=No+Image';
+      document.getElementById('img-caption-name').textContent = disease.name || '-';
+      document.getElementById('disease-name').textContent = disease.name || '-';
+      document.getElementById('disease-eng').textContent = disease.engName || '-';
+      document.getElementById('disease-description').textContent = disease.description || 'ไม่มีข้อมูลคำอธิบาย';
+      document.getElementById('disease-usage').textContent = disease.usage || 'ไม่มีข้อมูลคำแนะนำการดูแล';
 
-                    <div class="bg-white rounded-3xl shadow-sm p-6">
-                        <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
-                            <span class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center mr-3"><i class="fa-solid fa-virus"></i></span>
-                            อาการเบื้องต้น
-                        </h3>
-                        <p id="display-symptoms" class="text-gray-600 leading-relaxed text-sm whitespace-pre-line">...</p>
-                    </div>
+      const symptoms = Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '-');
+      document.getElementById('disease-symptoms').textContent = symptoms;
 
-                    <div class="bg-white rounded-3xl shadow-sm p-6">
-                        <h3 class="font-bold text-lg text-[#111C44] mb-3 flex items-center">
-                            <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mr-3"><i class="fa-solid fa-mortar-pestle"></i></span>
-                            วิธีการใช้
-                        </h3>
-                        <div class="bg-yellow-50/50 rounded-xl p-4 border border-yellow-100">
-                            <p id="display-usage" class="text-gray-700 leading-relaxed text-sm whitespace-pre-line">...</p>
-                        </div>
-                    </div>
+      const medicinesContainer = document.getElementById('disease-medicines-container');
+      const medicines = Array.isArray(disease.medicines) ? disease.medicines : [];
+      if (!medicines.length) {
+        medicinesContainer.innerHTML = '<span class="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-sm">ไม่มีข้อมูลสมุนไพร</span>';
+        return;
+      }
+      medicinesContainer.innerHTML = '';
+      medicines.forEach((m) => {
+        const tag = document.createElement('span');
+        tag.className = 'px-4 py-2 bg-primary/10 text-primary-dark font-bold rounded-lg text-sm shadow-sm';
+        tag.textContent = m;
+        medicinesContainer.appendChild(tag);
+      });
+    }
 
-                </div>
-            </div>
+    function renderNotFound() {
+      document.getElementById('disease-name').textContent = 'ไม่พบข้อมูล';
+      document.getElementById('disease-description').textContent = 'ไม่สามารถโหลดข้อมูลโรคได้';
+    }
 
-            <div class="flex gap-4 w-full max-w-6xl mx-auto mt-6">
-                <button onclick="goToEdit()" class="flex-1 bg-white hover:bg-gray-100 text-[#111C44] py-3 rounded-xl font-bold shadow-md border border-gray-200 text-center transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-pen"></i> แก้ไขข้อมูล
-                </button>
-                <button id="confirm-btn" onclick="confirmDisease()" class="flex-1 bg-[#111C44] hover:bg-[#0d1430] text-white py-3 rounded-xl font-bold shadow-lg text-center transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check-circle"></i> ยืนยันและกลับหน้ารายการ
-                </button>
-            </div>
-        </div>
-    </main>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search || '');
+      const diseaseId = params.get('id') || sessionStorage.getItem('viewingDiseaseId');
+      const diseaseName = params.get('name') || sessionStorage.getItem('viewingDiseaseName');
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        let currentDisease = null;
-        const RENDER_BASE_URL = 'https://skinherbcareweb1.onrender.com';
-        const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
-        const isRenderHost = window.location.hostname.includes('onrender.com');
-        const API_BASE_URL = (isLocalHost || isRenderHost) ? window.location.origin : RENDER_BASE_URL;
-        const API_BASES = [...new Set([API_BASE_URL, RENDER_BASE_URL])];
-
-        async function fetchJsonWithFallback(path) {
-            let lastError = null;
-            for (const base of API_BASES) {
-                const url = `${base}${path}`;
-                try {
-                    const res = await fetch(url);
-                    const ct = res.headers.get('content-type') || '';
-                    if (!res.ok || !ct.includes('application/json')) throw new Error(`HTTP ${res.status}`);
-                    return await res.json();
-                } catch (err) {
-                    lastError = err;
-                }
+      try {
+        if (diseaseId) {
+          const res = await fetch(`${API_BASE_URL}/api/diseases/${diseaseId}`);
+          if (res.ok) {
+            const json = await res.json();
+            const disease = json.disease || json.data || json;
+            if (disease) {
+              renderDisease(disease);
+              return;
             }
-            throw lastError || new Error('Request failed');
+          }
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const params = new URLSearchParams(window.location.search || '');
-            const diseaseIdFromQuery = params.get('id');
-            const diseaseNameFromQuery = params.get('name');
-            const diseaseId = sessionStorage.getItem('viewingDiseaseId') || diseaseIdFromQuery;
-            if (diseaseId) {
-                const ok = await loadDiseaseDetailsFromApi(diseaseId);
-                if (ok) return;
+        if (diseaseName) {
+          const res = await fetch(`${API_BASE_URL}/api/diseases?q=${encodeURIComponent(diseaseName)}`);
+          if (res.ok) {
+            const json = await res.json();
+            const list = json.diseases || json.data || [];
+            const found = Array.isArray(list)
+              ? list.find((d) => String(d.name || '').trim().toLowerCase() === String(diseaseName).trim().toLowerCase())
+              : null;
+            if (found) {
+              renderDisease(found);
+              return;
             }
-            const diseaseName = sessionStorage.getItem('viewingDiseaseName') || diseaseNameFromQuery;
-            if (diseaseName) {
-                loadDiseaseDetailsFromLocal(diseaseName);
-            } else {
-                showNotFound();
-            }
-        });
-
-        async function loadDiseaseDetailsFromApi(id) {
-            try {
-                const json = await fetchJsonWithFallback(`/api/diseases/${id}`);
-                const disease = json.disease || json.data || json;
-                currentDisease = {
-                    id: disease._id,
-                    name: disease.name,
-                    engName: disease.engName || '',
-                    description: disease.description || '',
-                    symptoms: Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || ''),
-                    medicines: disease.medicines || [],
-                    usage: disease.usage || '',
-                    image: disease.image || ''
-                };
-                displayDiseaseDetails(currentDisease);
-                return true;
-            } catch (e) {
-                return false;
-            }
+          }
         }
+      } catch (err) {
+        console.error(err);
+      }
 
-        function loadDiseaseDetailsFromLocal(name) {
-            const storedData = localStorage.getItem('diseaseData');
-            if (storedData) {
-                const diseases = JSON.parse(storedData || '[]');
-                currentDisease = diseases.find(d => d.name === name);
-                if (currentDisease) {
-                    displayDiseaseDetails(currentDisease);
-                    return;
-                }
-            }
-            showNotFound();
-        }
-
-        function displayDiseaseDetails(disease) {
-            document.getElementById('disease-title').textContent = disease.name;
-            document.getElementById('display-name').textContent = disease.name;
-            document.getElementById('display-eng').textContent = disease.engName || '-';
-            document.getElementById('display-desc').textContent = disease.description || 'ไม่มีข้อมูล';
-            document.getElementById('display-symptoms').textContent = disease.symptoms || 'ไม่มีข้อมูล';
-            document.getElementById('display-usage').textContent = disease.usage || 'ไม่มีข้อมูล';
-
-            const medicineContainer = document.getElementById('medicine-list');
-            if (disease.medicines && disease.medicines.length > 0) {
-                medicineContainer.innerHTML = '';
-                disease.medicines.forEach(medicine => {
-                    const badge = document.createElement('span');
-                    badge.className = 'px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium border border-green-200 shadow-sm';
-                    badge.innerText = medicine;
-                    medicineContainer.appendChild(badge);
-                });
-            } else {
-                medicineContainer.innerHTML = '<span class="text-gray-400 text-sm">- ไม่มีข้อมูลสมุนไพร -</span>';
-            }
-
-            // แสดงรูปถ้ามี
-            const imgEl = document.getElementById('display-image');
-            const placeholder = document.getElementById('img-placeholder');
-            if (disease.image) {
-                imgEl.src = resolveImageSrc(disease.image);
-                imgEl.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            } else {
-                imgEl.src = '';
-                imgEl.classList.add('hidden');
-                placeholder.classList.remove('hidden');
-            }
-        }
-
-        function resolveImageSrc(raw) {
-            if (!raw) return '';
-            const val = String(raw).trim();
-            if (!val) return '';
-            if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
-            if (val.startsWith('/uploads/')) return `${API_BASE_URL}${val}`;
-            const normalized = val.replace(/\\/g, '/');
-            const idx = normalized.lastIndexOf('/uploads/');
-            if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
-            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${API_BASE_URL}/uploads/${val}`;
-            return val;
-        }
-
-        function showNotFound() {
-            document.getElementById('display-name').textContent = "ไม่พบข้อมูล";
-            document.getElementById('display-desc').textContent = "ไม่สามารถโหลดข้อมูลโรคได้";
-        }
-
-        function confirmDisease() {
-            if (!currentDisease) {
-                Swal.fire('ผิดพลาด', 'ไม่พบข้อมูลที่ต้องการยืนยัน', 'error');
-                return;
-            }
-
-            const confirmBtn = document.getElementById('confirm-btn');
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-                confirmBtn.classList.add('opacity-60', 'cursor-not-allowed');
-            }
-
-            Swal.fire({
-                title: 'ยืนยันการบันทึก?',
-                text: `คุณต้องการยืนยันข้อมูลโรค "${currentDisease.name}" หรือไม่`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#111C44',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ใช่, ยืนยันเลย',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire(
-                        'บันทึกสำเร็จ!',
-                        'กำลังกลับไปยังรายการโรค...',
-                        'success'
-                    ).then(() => {
-                        // remove both id and name keys
-                        sessionStorage.removeItem('viewingDiseaseId');
-                        sessionStorage.removeItem('viewingDiseaseName');
-                        window.location.href = 'disease_list.html';
-                    });
-                } else {
-                    if (confirmBtn) {
-                        confirmBtn.disabled = false;
-                        confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-                    }
-                }
-            }).catch(() => {
-                if (confirmBtn) {
-                    confirmBtn.disabled = false;
-                    confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-                }
-            });
-        }
-
-        function goToEdit() {
-            if (currentDisease && currentDisease.id) {
-                sessionStorage.setItem('editingDiseaseId', currentDisease.id);
-            }
-            window.location.href = 'add_disease.html';
-        }
-    </script>
-    <script src="/js/profile-drawer.js"></script>
+      renderNotFound();
+    });
+  </script>
 </body>
 </html>
