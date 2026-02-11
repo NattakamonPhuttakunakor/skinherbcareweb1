@@ -500,12 +500,19 @@ header p {
 
 <script>
   (function fixMojibakeInPage() {
-    const suspiciousPattern = /[ÃƒÃ‚Ã ]/;
+    const suspiciousPattern = /[ÃÂàâð]/;
     const decodeMojibake = (text) => {
       if (typeof text !== 'string' || !suspiciousPattern.test(text)) return text;
       try {
-        const bytes = Uint8Array.from(text, (ch) => ch.charCodeAt(0));
-        return new TextDecoder('utf-8').decode(bytes);
+        let current = text;
+        for (let i = 0; i < 3; i += 1) {
+          if (!suspiciousPattern.test(current)) break;
+          const bytes = Uint8Array.from(current, (ch) => ch.charCodeAt(0) & 0xff);
+          const decoded = new TextDecoder('utf-8').decode(bytes);
+          if (!decoded || decoded === current) break;
+          current = decoded;
+        }
+        return current;
       } catch (_) {
         return text;
       }
