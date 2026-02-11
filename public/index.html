@@ -684,32 +684,6 @@ header p {
         if (loginLink) loginLink.style.display = isLoggedIn ? 'none' : '';
         if (registerLink) registerLink.style.display = isLoggedIn ? 'none' : '';
 
-        // Fallback when auth.js/cache mismatch: force a logout action for normal logged-in users.
-        if (guestNav) {
-            let logoutBtn = document.getElementById('guest-logout-inline');
-            if (isLoggedIn && !isAdmin) {
-                if (!logoutBtn) {
-                    logoutBtn = document.createElement('button');
-                    logoutBtn.id = 'guest-logout-inline';
-                    logoutBtn.type = 'button';
-                    logoutBtn.textContent = 'Log Out';
-                    logoutBtn.style.background = 'none';
-                    logoutBtn.style.border = 'none';
-                    logoutBtn.style.cursor = 'pointer';
-                    logoutBtn.style.textDecoration = 'none';
-                    logoutBtn.style.color = 'var(--primary-text)';
-                    logoutBtn.style.fontWeight = '600';
-                    logoutBtn.style.padding = '6px 12px';
-                    logoutBtn.style.borderRadius = '8px';
-                    logoutBtn.style.fontSize = '0.95rem';
-                    logoutBtn.addEventListener('click', logout);
-                    guestNav.appendChild(logoutBtn);
-                }
-                logoutBtn.style.display = 'inline-flex';
-            } else if (logoutBtn) {
-                logoutBtn.remove();
-            }
-        }
     }
 
     function logout() {
