@@ -16,12 +16,12 @@
       }
     })();
   </script>
-  <title>à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸£à¸¹à¸›à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£ - SkinHerbCare</title>
+  <title>ค้นหาข้อมูลจากรูปสมุนไพร - SkinHerbCare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* ======= à¸žà¸·à¹‰à¸™à¸à¸²à¸™à¹à¸¥à¸°à¸˜à¸µà¸¡à¸«à¸¥à¸±à¸ ======= */
+    /* ======= พื้นฐานและธีมหลัก ======= */
     @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap");
 
     :root {
@@ -43,9 +43,9 @@
       position: relative;
     }
 
-    /* ======= à¹ƒà¸šà¹„à¸¡à¹‰à¸•à¸à¹à¸•à¹ˆà¸‡à¸žà¸·à¹‰à¸™à¸«à¸¥à¸±à¸‡ ======= */
+    /* ======= ใบไม้ตกแต่งพื้นหลัง ======= */
     body::before {
-      content: "ðŸŒ¿";
+      content: "🌿";
       position: fixed;
       bottom: -50px;
       left: -50px;
@@ -55,7 +55,7 @@
       z-index: -1;
     }
     body::after {
-      content: "ðŸŒ¿";
+      content: "🌿";
       position: fixed;
       top: -80px;
       right: -80px;
@@ -65,7 +65,7 @@
       z-index: -1;
     }
 
-    /* ======= Navbar à¹à¸šà¸šà¹‚à¸›à¸£à¹ˆà¸‡à¹ƒà¸ª glass ======= */
+    /* ======= Navbar แบบโปร่งใส glass ======= */
     .top-nav {
       background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(10px);
@@ -136,7 +136,7 @@
       }
     }
 
-    /* ======= à¸à¸¥à¹ˆà¸­à¸‡à¹à¸ªà¸”à¸‡à¸ à¸²à¸ž ======= */
+    /* ======= กล่องแสดงภาพ ======= */
     .preview-box {
       display: flex;
       align-items: center;
@@ -239,18 +239,18 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        à¸à¸¥à¸±à¸šà¹„à¸›à¸«à¸™à¹‰à¸²à¸«à¸¥à¸±à¸
+        กลับไปหน้าหลัก
       </a>
 
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">à¸„à¹‰à¸™à¸«à¸²à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸£à¸¹à¸›à¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£</h1>
-      <p class="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸ à¸²à¸žà¸ªà¸¡à¸¸à¸™à¹„à¸žà¸£ à¸«à¸£à¸·à¸­à¸–à¹ˆà¸²à¸¢à¸ à¸²à¸žà¸ˆà¸²à¸à¸à¸¥à¹‰à¸­à¸‡à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰ AI à¸Šà¹ˆà¸§à¸¢à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¸°à¸ªà¸£à¸£à¸žà¸„à¸¸à¸“</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">ค้นหาข้อมูลจากรูปสมุนไพร</h1>
+      <p class="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">อัปโหลดภาพสมุนไพร หรือถ่ายภาพจากกล้องเพื่อให้ AI ช่วยวิเคราะห์ข้อมูลและสรรพคุณ</p>
 
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 justify-center">
         <button id="upload-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
-          ðŸ“ à¹€à¸¥à¸·à¸­à¸à¸£à¸¹à¸›à¸ˆà¸²à¸à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡
+          📁 เลือกรูปจากเครื่อง
         </button>
         <button id="camera-btn" class="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition text-sm sm:text-base">
-          ðŸ“· à¹€à¸›à¸´à¸”à¸à¸¥à¹‰à¸­à¸‡
+          📷 เปิดกล้อง
         </button>
       </div>
 
@@ -258,28 +258,28 @@
         <video id="video-stream" width="100%" height="auto" style="border-radius: 12px; background: #000; max-height: 400px;" autoplay playsinline></video>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4 justify-center">
           <button id="capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
-            âœ“ à¸–à¹ˆà¸²à¸¢à¸ à¸²à¸ž
+            ✓ ถ่ายภาพ
           </button>
           <button id="close-camera-btn" class="px-4 sm:px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
-            âœ• à¸›à¸´à¸”à¸à¸¥à¹‰à¸­à¸‡
+            ✕ ปิดกล้อง
           </button>
         </div>
       </div>
 
       <div id="capture-mode" class="hidden mb-4 sm:mb-6">
-        <div id="image-preview-box" class="preview-box"><span>à¸ à¸²à¸žà¸ˆà¸°à¹à¸ªà¸”à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ</span></div>
+        <div id="image-preview-box" class="preview-box"><span>ภาพจะแสดงที่นี่</span></div>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
           <button id="use-capture-btn" class="px-4 sm:px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
-            âœ“ à¹ƒà¸Šà¹‰à¸£à¸¹à¸›à¸™à¸µà¹‰
+            ✓ ใช้รูปนี้
           </button>
           <button id="retake-btn" class="px-4 sm:px-6 py-2 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition text-sm sm:text-base">
-            ðŸ”„ à¸–à¹ˆà¸²à¸¢à¹ƒà¸«à¸¡à¹ˆ
+            🔄 ถ่ายใหม่
           </button>
         </div>
       </div>
 
       <div id="upload-mode" class="mb-4 sm:mb-6">
-        <div id="image-preview-box-upload" class="preview-box"><span>à¸ à¸²à¸žà¸•à¸±à¸§à¸­à¸¢à¹ˆà¸²à¸‡à¸ˆà¸°à¹à¸ªà¸”à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ</span></div>
+        <div id="image-preview-box-upload" class="preview-box"><span>ภาพตัวอย่างจะแสดงที่นี่</span></div>
       </div>
 
       <input
@@ -293,11 +293,11 @@
         id="analyze-herb-btn"
         class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white font-bold text-base sm:text-lg rounded-lg shadow-md hover:bg-green-700 transition active:scale-95"
       >
-        à¸„à¹‰à¸™à¸«à¸²
+        ค้นหา
       </button>
 
       <div id="results-container" class="mt-6 bg-gray-50/80 backdrop-blur-sm p-3 sm:p-4 rounded-lg min-h-[100px] text-sm sm:text-base">
-        <p>à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œà¸ˆà¸°à¹à¸ªà¸”à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ...</p>
+        <p>ผลลัพธ์จะแสดงที่นี่...</p>
       </div>
     </div>
   </main>
@@ -350,8 +350,8 @@
           videoElement.srcObject = stream;
           videoElement.play();
         } catch (err) {
-          console.error('à¸à¸¥à¹‰à¸­à¸‡à¹„à¸¡à¹ˆà¸žà¸£à¹‰à¸­à¸¡:', err);
-          alert('à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¹€à¸‚à¹‰à¸²à¸–à¸¶à¸‡à¸à¸¥à¹‰à¸­à¸‡à¹„à¸”à¹‰ à¸à¸£à¸¸à¸“à¸²à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¸­à¸™à¸¸à¸à¸²à¸•');
+          console.error('กล้องไม่พร้อม:', err);
+          alert('ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต');
           cameraModeDiv.classList.add('hidden');
         }
       }
@@ -450,4 +450,3 @@
 <script src="/js/auth.js?v=20260211r15"></script>
 </body>
 </html>
-
