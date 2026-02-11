@@ -128,6 +128,27 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentDisease = null;
+        const RENDER_BASE_URL = 'https://skinherbcareweb1.onrender.com';
+        const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+        const isRenderHost = window.location.hostname.includes('onrender.com');
+        const API_BASE_URL = (isLocalHost || isRenderHost) ? window.location.origin : RENDER_BASE_URL;
+        const API_BASES = [...new Set([API_BASE_URL, RENDER_BASE_URL])];
+
+        async function fetchJsonWithFallback(path) {
+            let lastError = null;
+            for (const base of API_BASES) {
+                const url = `${base}${path}`;
+                try {
+                    const res = await fetch(url);
+                    const ct = res.headers.get('content-type') || '';
+                    if (!res.ok || !ct.includes('application/json')) throw new Error(`HTTP ${res.status}`);
+                    return await res.json();
+                } catch (err) {
+                    lastError = err;
+                }
+            }
+            throw lastError || new Error('Request failed');
+        }
 
         window.addEventListener('DOMContentLoaded', async () => {
             const diseaseId = sessionStorage.getItem('viewingDiseaseId');
@@ -145,9 +166,7 @@
 
         async function loadDiseaseDetailsFromApi(id) {
             try {
-                const res = await fetch(`/api/diseases/${id}`);
-                if (!res.ok) throw new Error('not found');
-                const json = await res.json();
+                const json = await fetchJsonWithFallback(`/api/diseases/${id}`);
                 const disease = json.disease || json.data || json;
                 currentDisease = {
                     id: disease._id,
@@ -219,11 +238,11 @@
             const val = String(raw).trim();
             if (!val) return '';
             if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
-            if (val.startsWith('/uploads/')) return `${window.location.origin}${val}`;
+            if (val.startsWith('/uploads/')) return `${API_BASE_URL}${val}`;
             const normalized = val.replace(/\\/g, '/');
             const idx = normalized.lastIndexOf('/uploads/');
-            if (idx >= 0) return `${window.location.origin}${normalized.slice(idx)}`;
-            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${window.location.origin}/uploads/${val}`;
+            if (idx >= 0) return `${API_BASE_URL}${normalized.slice(idx)}`;
+            if (/\.(png|jpe?g|gif|webp)$/i.test(val)) return `${API_BASE_URL}/uploads/${val}`;
             return val;
         }
 

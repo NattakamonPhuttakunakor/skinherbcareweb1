@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarNames.forEach((el) => { el.textContent = fullName; });
 
     const sidebarImgs = Array.from(document.querySelectorAll('.admin-sidebar-img'));
+    const sidebarFallback = document.getElementById('profile-sidebar-fallback');
 
     const profileIconEls = Array.from(document.querySelectorAll('.profile-icon'));
     const ensureProfileIcon = (el) => {
@@ -248,7 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = normalized;
+                img.style.display = 'block';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'none';
         } else {
             imgDrawer.style.display = 'none';
             fallbackDrawer.style.display = 'flex';
@@ -265,7 +268,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             sidebarImgs.forEach((img) => {
                 img.src = '';
+                img.style.display = 'none';
             });
+            if (sidebarFallback) sidebarFallback.style.display = 'flex';
         }
     };
     const legacyImage = localStorage.getItem('profileImage');
