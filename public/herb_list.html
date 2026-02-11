@@ -337,7 +337,7 @@
             })
         }
 
-        function editItem(idOrIdx) {
+        window.editItem = function (idOrIdx) {
             Swal.fire({
                 title: 'แก้ไขข้อมูล',
                 text: 'ต้องการแก้ไขข้อมูลนี้ใช่หรือไม่?',
@@ -384,7 +384,7 @@
                     window.location.href = 'add_herb.html';
                 }
             });
-        }
+        };
 
         function viewDetail(btn, rowId, name, isNew) {
             if(isNew) {

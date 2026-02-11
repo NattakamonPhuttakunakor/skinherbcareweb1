@@ -121,7 +121,9 @@
     </div>
 
     <script>
-        const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.location.hostname.includes('netlify.app')
+            ? 'https://skinherbcareweb1.onrender.com'
+            : window.location.origin;
         const step1 = document.getElementById('step-1-content');
         const step2 = document.getElementById('step-2-content');
         const circle1 = document.getElementById('circle-1');
@@ -372,7 +374,7 @@
             const token = localStorage.getItem('token');
             if (!token) return;
             try {
-                const res = await fetch(`/api/herbs/${id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Load failed');
@@ -397,23 +399,35 @@
                 editingHerbId = resolvedId || editingHerbId;
             }
 
-            document.getElementById('input-name').value = herb.name || '';
-            document.getElementById('input-eng').value = herb.scientificName || herb.engName || '';
-            document.getElementById('input-desc').value = herb.description || '';
-            document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
-            document.getElementById('input-usage').value = herb.usage || '';
+            const setIfPresent = (id, value) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (value !== undefined && value !== null && String(value).trim() !== '') {
+                    el.value = value;
+                }
+            };
+
+            setIfPresent('input-name', herb.name);
+            setIfPresent('input-eng', herb.scientificName || herb.engName);
+            setIfPresent('input-desc', herb.description);
+            setIfPresent('input-prop', Array.isArray(herb.properties) ? herb.properties.join(', ') : herb.properties);
+            setIfPresent('input-usage', herb.usage);
             if (document.getElementById('input-published')) {
                 document.getElementById('input-published').checked = herb.published === true;
             }
 
-            const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
-            pendingDiseaseSelections = diseases;
-            document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
-                cb.checked = diseases.includes(cb.value);
-            });
+            if (Array.isArray(herb.diseases) && herb.diseases.length > 0) {
+                const diseases = herb.diseases;
+                pendingDiseaseSelections = diseases;
+                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                    cb.checked = diseases.includes(cb.value);
+                });
+            }
 
-            existingImageUrl = herb.image || '';
-            renderImagePreview(existingImageUrl);
+            if (herb.image && String(herb.image).trim() !== '') {
+                existingImageUrl = herb.image;
+                renderImagePreview(existingImageUrl);
+            }
         }
 
         function resolveImageSrc(raw) {
