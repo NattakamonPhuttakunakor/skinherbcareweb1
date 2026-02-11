@@ -655,17 +655,60 @@ header p {
 </section>
 
 <script>
+    function getActiveToken() {
+        return localStorage.getItem('token')
+            || localStorage.getItem('userToken')
+            || sessionStorage.getItem('token')
+            || sessionStorage.getItem('userToken')
+            || '';
+    }
+
     function checkLoginStatus() {
-        const userRole = localStorage.getItem('userRole');
+        const token = getActiveToken();
+        const userRole = String(
+            localStorage.getItem('userRole')
+            || sessionStorage.getItem('userRole')
+            || ''
+        ).toLowerCase();
+        const isAdmin = Boolean(token) && userRole === 'admin';
+        const isLoggedIn = Boolean(token);
+
         const guestNav = document.getElementById('guest-nav');
         const adminNav = document.getElementById('admin-nav');
 
-        if (userRole === 'admin') {
-            guestNav.style.display = 'none';
-            adminNav.style.display = 'flex';
-        } else {
-            guestNav.style.display = 'flex';
-            adminNav.style.display = 'none';
+        if (guestNav) guestNav.style.display = isAdmin ? 'none' : 'flex';
+        if (adminNav) adminNav.style.display = isAdmin ? 'flex' : 'none';
+
+        const loginLink = guestNav ? guestNav.querySelector('a[href="/login.html"]') : null;
+        const registerLink = guestNav ? guestNav.querySelector('a[href="/register.html"]') : null;
+        if (loginLink) loginLink.style.display = isLoggedIn ? 'none' : '';
+        if (registerLink) registerLink.style.display = isLoggedIn ? 'none' : '';
+
+        // Fallback when auth.js/cache mismatch: force a logout action for normal logged-in users.
+        if (guestNav) {
+            let logoutBtn = document.getElementById('guest-logout-inline');
+            if (isLoggedIn && !isAdmin) {
+                if (!logoutBtn) {
+                    logoutBtn = document.createElement('button');
+                    logoutBtn.id = 'guest-logout-inline';
+                    logoutBtn.type = 'button';
+                    logoutBtn.textContent = 'Log Out';
+                    logoutBtn.style.background = 'none';
+                    logoutBtn.style.border = 'none';
+                    logoutBtn.style.cursor = 'pointer';
+                    logoutBtn.style.textDecoration = 'none';
+                    logoutBtn.style.color = 'var(--primary-text)';
+                    logoutBtn.style.fontWeight = '600';
+                    logoutBtn.style.padding = '6px 12px';
+                    logoutBtn.style.borderRadius = '8px';
+                    logoutBtn.style.fontSize = '0.95rem';
+                    logoutBtn.addEventListener('click', logout);
+                    guestNav.appendChild(logoutBtn);
+                }
+                logoutBtn.style.display = 'inline-flex';
+            } else if (logoutBtn) {
+                logoutBtn.remove();
+            }
         }
     }
 
@@ -679,7 +722,7 @@ header p {
     }
 
     function setupProfilePanel() {
-        const token = localStorage.getItem('token');
+        const token = getActiveToken();
         const userRaw = localStorage.getItem('user');
         const user = userRaw ? JSON.parse(userRaw) : null;
 
@@ -748,7 +791,12 @@ header p {
                 fallbackAdmin.style.display = 'inline';
             }
         };
-        applyImage(savedImage);
+        if (token) {
+            applyImage(savedImage);
+        } else {
+            // Do not show stale profile image when user is logged out.
+            applyImage('');
+        }
 
         if (btnGuest) btnGuest.addEventListener('click', openDrawer);
         if (btnAdmin) btnAdmin.addEventListener('click', openDrawer);
