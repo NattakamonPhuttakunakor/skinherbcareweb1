@@ -1,4 +1,4 @@
-const AUTH_JS_VERSION = '20260211r12';
+const AUTH_JS_VERSION = '20260211r13';
 
 function getAuthSnapshot() {
   const token = localStorage.getItem('token')
@@ -80,6 +80,20 @@ function applyAuthNavState() {
       host.appendChild(logoutBtn);
     }
     logoutBtn.style.display = 'inline-flex';
+
+    // Keep user navigation before logout on every user page.
+    const userNav =
+      host.querySelector('#profile-btn-guest')
+      || host.querySelector('a[href="/user-dashboard.html"]')
+      || host.querySelector('a[href="user-dashboard.html"]')
+      || host.querySelector('.profile-icon');
+
+    if (userNav && logoutBtn && userNav !== logoutBtn) {
+      if (userNav.parentElement === host) {
+        host.appendChild(userNav);
+      }
+      host.appendChild(logoutBtn);
+    }
   } else if (logoutBtn) {
     logoutBtn.remove();
   }

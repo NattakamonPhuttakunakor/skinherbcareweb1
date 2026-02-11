@@ -349,9 +349,36 @@
                     if (typeof idOrIdx === 'number') {
                         const herb = latestHerbs[idOrIdx];
                         if (herb && herb._id) {
+                            sessionStorage.setItem('editingHerbData', JSON.stringify({
+                                _id: herb._id || '',
+                                name: herb.name || '',
+                                scientificName: herb.scientificName || herb.engName || '',
+                                description: herb.description || '',
+                                properties: Array.isArray(herb.properties) ? herb.properties : (herb.properties ? [herb.properties] : []),
+                                usage: herb.usage || '',
+                                diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
+                                image: herb.image || '',
+                                published: herb.published === true
+                            }));
                             sessionStorage.setItem('editingHerbId', herb._id);
                         }
                     } else if (idOrIdx) {
+                        const herb = Array.isArray(latestHerbs)
+                            ? latestHerbs.find((h) => String(h._id) === String(idOrIdx))
+                            : null;
+                        if (herb) {
+                            sessionStorage.setItem('editingHerbData', JSON.stringify({
+                                _id: herb._id || '',
+                                name: herb.name || '',
+                                scientificName: herb.scientificName || herb.engName || '',
+                                description: herb.description || '',
+                                properties: Array.isArray(herb.properties) ? herb.properties : (herb.properties ? [herb.properties] : []),
+                                usage: herb.usage || '',
+                                diseases: Array.isArray(herb.diseases) ? herb.diseases : [],
+                                image: herb.image || '',
+                                published: herb.published === true
+                            }));
+                        }
                         sessionStorage.setItem('editingHerbId', idOrIdx);
                     }
                     window.location.href = 'add_herb.html';

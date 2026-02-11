@@ -181,6 +181,12 @@
             if (editingId) {
                 const section = document.getElementById('disease-management-section');
                 if (section) section.classList.add('hidden');
+                const rawPreview = sessionStorage.getItem('editingDiseaseData');
+                if (rawPreview) {
+                    try {
+                        applyDiseaseToForm(JSON.parse(rawPreview), true);
+                    } catch (_) {}
+                }
                 sessionStorage.removeItem('editingDiseaseId');
                 loadDiseaseForEdit(editingId);
             }
@@ -461,26 +467,10 @@
                 });
                 if (!res.ok) throw new Error('Load failed');
                 const data = await res.json();
-                const disease = data.disease || data;
+                const disease = data.disease || data.data || data;
                 if (!disease) return;
 
-                editingDiseaseId = id;
-                document.getElementById('input-name').value = disease.name || '';
-                document.getElementById('input-eng').value = disease.engName || '';
-                document.getElementById('input-desc').value = disease.description || '';
-                document.getElementById('input-prop').value = Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '');
-                document.getElementById('input-usage').value = disease.usage || '';
-                if (document.getElementById('input-published')) {
-                    document.getElementById('input-published').checked = disease.published === true;
-                }
-
-                // reset herb checkboxes, then set selected
-                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
-                    cb.checked = Array.isArray(disease.medicines) ? disease.medicines.includes(cb.value) : false;
-                });
-
-                existingImageUrl = disease.image || '';
-                renderImagePreview(existingImageUrl);
+                applyDiseaseToForm(disease, false);
 
                 step2.classList.add('hidden');
                 step1.classList.remove('hidden');
@@ -497,6 +487,31 @@
                 console.error(err);
                 Swal.fire('ผิดพลาด', 'ไม่สามารถโหลดข้อมูลเพื่อแก้ไขได้', 'error');
             }
+        }
+
+        function applyDiseaseToForm(disease, keepExistingId = false) {
+            if (!disease || typeof disease !== 'object') return;
+            const resolvedId = disease._id || disease.id || editingDiseaseId;
+            if (!keepExistingId || resolvedId) {
+                editingDiseaseId = resolvedId || editingDiseaseId;
+            }
+
+            document.getElementById('input-name').value = disease.name || '';
+            document.getElementById('input-eng').value = disease.engName || '';
+            document.getElementById('input-desc').value = disease.description || '';
+            document.getElementById('input-prop').value = Array.isArray(disease.symptoms) ? disease.symptoms.join(', ') : (disease.symptoms || '');
+            document.getElementById('input-usage').value = disease.usage || '';
+            if (document.getElementById('input-published')) {
+                document.getElementById('input-published').checked = disease.published === true;
+            }
+
+            const medicines = Array.isArray(disease.medicines) ? disease.medicines : [];
+            document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                cb.checked = medicines.includes(cb.value);
+            });
+
+            existingImageUrl = disease.image || '';
+            renderImagePreview(existingImageUrl);
         }
 
         function viewDisease(id) {

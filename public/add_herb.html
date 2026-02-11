@@ -153,6 +153,11 @@
                     label.innerHTML = `<input type="checkbox" value="${d.name}" class="w-5 h-5 custom-checkbox rounded border-gray-400 text-[#111C44]"><span class="text-gray-700">${d.name}</span>`;
                     listEl.appendChild(label);
                 });
+                if (Array.isArray(pendingDiseaseSelections)) {
+                    document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                        cb.checked = pendingDiseaseSelections.includes(cb.value);
+                    });
+                }
             } catch (e) {
                 listEl.innerHTML = '<div class="text-sm text-gray-500">โหลดรายการโรคไม่สำเร็จ</div>';
             }
@@ -162,6 +167,7 @@
         let uploadedImageFile = null;
         let existingImageUrl = '';
         let editingHerbId = null;
+        let pendingDiseaseSelections = null;
 
         const LAST_IMAGE_KEY = 'lastUploadedHerbImage';
 
@@ -203,6 +209,12 @@
 
             const editingId = sessionStorage.getItem('editingHerbId');
             if (editingId) {
+                const rawPreview = sessionStorage.getItem('editingHerbData');
+                if (rawPreview) {
+                    try {
+                        applyHerbToForm(JSON.parse(rawPreview), true);
+                    } catch (_) {}
+                }
                 sessionStorage.removeItem('editingHerbId');
                 loadHerbForEdit(editingId);
             } else {
@@ -368,24 +380,7 @@
                 const herb = data.herb || data.data || data;
                 if (!herb) return;
 
-                editingHerbId = id;
-                document.getElementById('input-name').value = herb.name || '';
-                document.getElementById('input-eng').value = herb.scientificName || herb.engName || '';
-                document.getElementById('input-desc').value = herb.description || '';
-                document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
-                document.getElementById('input-usage').value = herb.usage || '';
-                if (document.getElementById('input-published')) {
-                    document.getElementById('input-published').checked = herb.published === true;
-                }
-
-                // set diseases checkboxes
-                const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
-                document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
-                    cb.checked = diseases.includes(cb.value);
-                });
-
-                existingImageUrl = herb.image || '';
-                renderImagePreview(existingImageUrl);
+                applyHerbToForm(herb, false);
 
                 step2.classList.add('hidden');
                 step1.classList.remove('hidden');
@@ -393,6 +388,32 @@
             } catch (e) {
                 console.error(e);
             }
+        }
+
+        function applyHerbToForm(herb, keepExistingId = false) {
+            if (!herb || typeof herb !== 'object') return;
+            const resolvedId = herb._id || herb.id || editingHerbId;
+            if (!keepExistingId || resolvedId) {
+                editingHerbId = resolvedId || editingHerbId;
+            }
+
+            document.getElementById('input-name').value = herb.name || '';
+            document.getElementById('input-eng').value = herb.scientificName || herb.engName || '';
+            document.getElementById('input-desc').value = herb.description || '';
+            document.getElementById('input-prop').value = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
+            document.getElementById('input-usage').value = herb.usage || '';
+            if (document.getElementById('input-published')) {
+                document.getElementById('input-published').checked = herb.published === true;
+            }
+
+            const diseases = Array.isArray(herb.diseases) ? herb.diseases : [];
+            pendingDiseaseSelections = diseases;
+            document.querySelectorAll('#disease-list input[type="checkbox"]').forEach((cb) => {
+                cb.checked = diseases.includes(cb.value);
+            });
+
+            existingImageUrl = herb.image || '';
+            renderImagePreview(existingImageUrl);
         }
 
         function resolveImageSrc(raw) {

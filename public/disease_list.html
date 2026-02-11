@@ -323,6 +323,22 @@
                 allowEscapeKey: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    const selected = Array.isArray(latestDiseases)
+                        ? latestDiseases.find((d) => String(d._id) === String(diseaseId))
+                        : null;
+                    if (selected) {
+                        sessionStorage.setItem('editingDiseaseData', JSON.stringify({
+                            _id: selected._id || '',
+                            name: selected.name || '',
+                            engName: selected.engName || '',
+                            description: selected.description || '',
+                            symptoms: Array.isArray(selected.symptoms) ? selected.symptoms : (selected.symptoms ? [selected.symptoms] : []),
+                            medicines: Array.isArray(selected.medicines) ? selected.medicines : [],
+                            usage: selected.usage || '',
+                            image: selected.image || '',
+                            published: selected.published === true
+                        }));
+                    }
                     sessionStorage.setItem('editingDiseaseId', diseaseId);
                     window.location.href = 'add_disease.html';
                 }

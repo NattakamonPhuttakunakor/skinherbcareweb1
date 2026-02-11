@@ -640,6 +640,20 @@ header p {
   </div>
 </section>
 
+<section class="showcase-section">
+  <div class="showcase-inner">
+    <div class="showcase-header">
+      <div>
+        <h2>โรครอบตัวแนะนำ</h2>
+        <p>รายการโรคที่เผยแพร่จากระบบล่าสุด</p>
+      </div>
+    </div>
+    <div class="showcase-grid" id="disease-showcase-container">
+      <div class="showcase-loading">กำลังโหลดข้อมูลโรค...</div>
+    </div>
+  </div>
+</section>
+
 <script>
     function checkLoginStatus() {
         const userRole = localStorage.getItem('userRole');
@@ -835,13 +849,71 @@ header p {
         }
     }
 
+    function openDiseaseDetailFromShowcase(diseaseId) {
+        if (!diseaseId) return false;
+        sessionStorage.setItem('viewingDiseaseId', diseaseId);
+        window.location.href = '/disease_detail.html';
+        return false;
+    }
+
+    async function loadShowcaseDiseases() {
+        const container = document.getElementById('disease-showcase-container');
+        if (!container) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/diseases`);
+            if (!response.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+            const json = await response.json();
+            const diseases = Array.isArray(json)
+                ? json
+                : (json.diseases || json.data || []);
+
+            if (!Array.isArray(diseases) || diseases.length === 0) {
+                container.innerHTML = '<div class="showcase-loading">ยังไม่มีข้อมูลโรคที่เผยแพร่</div>';
+                return;
+            }
+
+            const showcaseDiseases = diseases.slice(0, 4);
+            const diseasesHtml = showcaseDiseases.map((disease) => {
+                const symptomsText = Array.isArray(disease.symptoms)
+                    ? disease.symptoms.join(', ')
+                    : (disease.symptoms || '');
+                const shortDesc = symptomsText.length > 90
+                    ? `${symptomsText.substring(0, 90)}...`
+                    : (symptomsText || disease.description || 'ไม่มีข้อมูลอาการ');
+                const diseaseId = disease._id || disease.id || '';
+
+                return `
+                    <div class="showcase-card">
+                        <div class="showcase-image">
+                            <div class="showcase-image-placeholder">Disease</div>
+                        </div>
+                        <div class="showcase-body">
+                            <h3 class="showcase-title">${disease.name || 'ไม่ระบุชื่อโรค'}</h3>
+                            <p class="showcase-desc">${shortDesc}</p>
+                            <a class="showcase-btn" href="#" onclick="return openDiseaseDetailFromShowcase('${diseaseId}')">
+                                อ่านเพิ่มเติม
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = diseasesHtml;
+        } catch (error) {
+            console.error('Error:', error);
+            container.innerHTML = '<div class="showcase-loading">เกิดข้อผิดพลาดในการโหลดข้อมูลโรค</div>';
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         checkLoginStatus();
         setupProfilePanel();
         loadShowcaseHerbs();
+        loadShowcaseDiseases();
     });
 </script>
-<script src="/js/auth.js?v=20260211r12"></script>
+<script src="/js/auth.js?v=20260211r13"></script>
 
 </body>
 </html>
