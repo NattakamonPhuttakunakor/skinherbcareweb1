@@ -498,6 +498,47 @@ header p {
 
 <body>
 
+<script>
+  (function fixMojibakeInPage() {
+    const suspiciousPattern = /[ÃÂà]/;
+    const decodeMojibake = (text) => {
+      if (typeof text !== 'string' || !suspiciousPattern.test(text)) return text;
+      try {
+        const bytes = Uint8Array.from(text, (ch) => ch.charCodeAt(0));
+        return new TextDecoder('utf-8').decode(bytes);
+      } catch (_) {
+        return text;
+      }
+    };
+
+    const walkAndFix = (root) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      textNodes.forEach((node) => {
+        const fixed = decodeMojibake(node.nodeValue);
+        if (fixed !== node.nodeValue) node.nodeValue = fixed;
+      });
+
+      const elements = root.querySelectorAll('*');
+      elements.forEach((el) => {
+        ['placeholder', 'title', 'aria-label'].forEach((attr) => {
+          const val = el.getAttribute(attr);
+          if (!val) return;
+          const fixed = decodeMojibake(val);
+          if (fixed !== val) el.setAttribute(attr, fixed);
+        });
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => walkAndFix(document.body));
+    } else {
+      walkAndFix(document.body);
+    }
+  })();
+</script>
+
 <nav class="top-nav">
   <div class="nav-container">
     <a href="/" class="logo">🌿 SkinHerbCare</a>
