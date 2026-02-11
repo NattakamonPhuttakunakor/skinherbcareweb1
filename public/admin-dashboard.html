@@ -386,6 +386,9 @@
         });
 
         (function setupProfilePanel() {
+            // profile-drawer.js already manages profile interactions across pages.
+            // Keep this block as fallback only when shared drawer script is not active.
+            if (window.__PROFILE_DRAWER_ACTIVE__) return;
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             const userRaw = localStorage.getItem('user');
             let user = null;

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    window.__PROFILE_DRAWER_ACTIVE__ = true;
     const path = window.location.pathname || '';
     if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
         return;

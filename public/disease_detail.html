@@ -151,12 +151,15 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const diseaseId = sessionStorage.getItem('viewingDiseaseId');
+            const params = new URLSearchParams(window.location.search || '');
+            const diseaseIdFromQuery = params.get('id');
+            const diseaseNameFromQuery = params.get('name');
+            const diseaseId = sessionStorage.getItem('viewingDiseaseId') || diseaseIdFromQuery;
             if (diseaseId) {
                 const ok = await loadDiseaseDetailsFromApi(diseaseId);
                 if (ok) return;
             }
-            const diseaseName = sessionStorage.getItem('viewingDiseaseName');
+            const diseaseName = sessionStorage.getItem('viewingDiseaseName') || diseaseNameFromQuery;
             if (diseaseName) {
                 loadDiseaseDetailsFromLocal(diseaseName);
             } else {
