@@ -101,3 +101,17 @@ export const getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
+
+// @desc    ลืมรหัสผ่าน
+// @route   POST /api/auth/forgot-password
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        // 1. เช็คว่ามีอีเมลนี้ในระบบมั้ย
+        // 2. สร้าง Token ชั่วคราว
+        // 3. ส่งอีเมล (Nodemailer)
+        res.status(200).json({ success: true, message: 'ส่งลิงก์กู้คืนแล้ว' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายใน' });
+    }
+};
