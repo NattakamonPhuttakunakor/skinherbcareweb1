@@ -14,6 +14,7 @@
     const directUrl = window.SKIN_API_URL || '';
     const apiKey = window.SKIN_API_KEY || '';
     const API_URL = directUrl || `${baseUrl}/api/skin/predict`;
+    const RENDER_API_BASE = 'https://skinherbcareweb1.onrender.com';
 
     const setLoading = (isLoading) => {
         analyzeBtn.disabled = isLoading;
@@ -72,6 +73,51 @@
                 `).join('')}
             </div>
         `;
+    };
+
+    const resolveImage = (raw) => {
+        if (!raw) return '';
+        const val = String(raw).trim();
+        if (!val) return '';
+        if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) return val;
+        if (val.startsWith('/uploads/')) return `${RENDER_API_BASE}${val}`;
+        return `${RENDER_API_BASE}/uploads/${val.replace(/^\/+/, '')}`;
+    };
+
+    const fetchRecommendedHerbs = async (diseaseName) => {
+        const herbContainer = document.getElementById('recommended-herbs-container');
+        if (!herbContainer) return;
+
+        herbContainer.innerHTML = '<div class="text-sm text-gray-700">กำลังโหลดสมุนไพรแนะนำ...</div>';
+
+        try {
+            const response = await fetch(`${RENDER_API_BASE}/api/herbs?disease=${encodeURIComponent(diseaseName || '')}`);
+            const data = await response.json();
+            const herbs = (data && (data.herbs || data.data || data)) || [];
+
+            if (Array.isArray(herbs) && herbs.length > 0) {
+                herbContainer.innerHTML = `
+                    <div class="flex gap-2 flex-wrap pt-2">
+                        ${herbs.map((herb) => {
+                            const imgSrc = resolveImage(herb.image || herb.image_url || herb.imageUrl || '');
+                            const props = Array.isArray(herb.properties) ? herb.properties.join(', ') : (herb.properties || '');
+                            return `
+                                <div class="bg-yellow-50 px-4 py-2 rounded-lg border border-yellow-200 shadow-sm flex flex-col justify-center min-w-[100px]">
+                                    ${imgSrc ? `<img src="${imgSrc}" alt="${herb.name || ''}" class="w-10 h-10 rounded-full object-cover mb-1">` : ''}
+                                    <span class="font-bold text-slate-800 text-sm">🌿 ${herb.name || '-'}</span>
+                                    <span class="text-[10px] text-slate-500">${props || '-'}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                herbContainer.innerHTML = '<div class="text-sm text-gray-700">ไม่พบสมุนไพรแนะนำสำหรับโรคนี้</div>';
+            }
+        } catch (error) {
+            console.error('Fetch Herb Error:', error);
+            herbContainer.innerHTML = '<div class="text-sm text-red-600">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+        }
     };
 
     const renderResult = (rawData, diseaseInfo) => {
@@ -159,6 +205,7 @@
             if (Array.isArray(diseases) && diseases.length) {
                 const d = diseases[0];
                 return {
+                    name: d.name || '',
                     symptoms: d.symptoms || '',
                     advice: d.description || '',
                     usage: d.usage || '',
@@ -217,6 +264,7 @@
             console.log('[Skin] Raw API data:', data);
             const diseaseInfo = await fetchDiseaseInfo(data.label_th, data.label_en);
             renderResult(data, diseaseInfo);
+            await fetchRecommendedHerbs((diseaseInfo && diseaseInfo.name) || data.label_th || data.label_en || data.label || '');
         } catch (err) {
             console.error('[Skin] Request failed:', err);
             renderError(err.message || 'ไม่สามารถเชื่อมต่อ API ได้');
