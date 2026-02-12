@@ -350,9 +350,9 @@
             if (isProcessing) return;
             
             isProcessing = true;
-            sessionStorage.setItem('viewingDiseaseId', diseaseId);
+            sessionStorage.setItem('editingDiseaseId', diseaseId);
             setTimeout(() => {
-                window.location.href = 'disease_detail.html';
+                window.location.href = 'add_disease.html';
             }, 300);
         }
 
