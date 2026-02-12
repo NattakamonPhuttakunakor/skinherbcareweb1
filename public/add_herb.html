@@ -138,7 +138,7 @@
             if (!listEl) return;
             const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             try {
-                const res = await fetch('/api/diseases/admin', {
+                const res = await fetch(`${API_BASE_URL}/api/diseases`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
                 if (!res.ok) throw new Error('โหลดโรคไม่สำเร็จ');
@@ -210,13 +210,13 @@
             }
 
             const editingId = sessionStorage.getItem('editingHerbId');
+            const rawPreview = sessionStorage.getItem('editingHerbData');
+            if (rawPreview) {
+                try {
+                    applyHerbToForm(JSON.parse(rawPreview), true);
+                } catch (_) {}
+            }
             if (editingId) {
-                const rawPreview = sessionStorage.getItem('editingHerbData');
-                if (rawPreview) {
-                    try {
-                        applyHerbToForm(JSON.parse(rawPreview), true);
-                    } catch (_) {}
-                }
                 sessionStorage.removeItem('editingHerbId');
                 loadHerbForEdit(editingId);
             } else {
@@ -371,7 +371,7 @@
         }
 
         async function loadHerbForEdit(id) {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
             if (!token) return;
             try {
                 const res = await fetch(`${API_BASE_URL}/api/herbs/${id}`, {

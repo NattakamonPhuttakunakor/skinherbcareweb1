@@ -820,7 +820,9 @@ header p {
                 const shortDesc = propertiesText.length > 90
                     ? `${propertiesText.substring(0, 90)}...`
                     : (propertiesText || 'ไม่มีข้อมูลสรรพคุณ');
-                const imageSrc = resolveImageSrc(herb.image || '');
+                const imageSrc = resolveImageSrc(
+                    herb.image_url || herb.imageUrl || herb.image || herb.photo || ''
+                );
                 const herbId = herb._id || herb.id || '';
 
                 return `
@@ -882,11 +884,17 @@ header p {
                     ? `${symptomsText.substring(0, 90)}...`
                     : (symptomsText || disease.description || 'ไม่มีข้อมูลอาการ');
                 const diseaseId = disease._id || disease.id || '';
+                const diseaseImageSrc = resolveImageSrc(
+                    disease.image_url || disease.imageUrl || disease.image || disease.photo || ''
+                );
 
                 return `
                     <div class="showcase-card">
                         <div class="showcase-image">
-                            <div class="showcase-image-placeholder">Disease</div>
+                            ${diseaseImageSrc
+                                ? `<img src="${diseaseImageSrc}" alt="${disease.name || 'Disease'}">`
+                                : `<div class="showcase-image-placeholder">Disease</div>`
+                            }
                         </div>
                         <div class="showcase-body">
                             <h3 class="showcase-title">${disease.name || 'ไม่ระบุชื่อโรค'}</h3>
