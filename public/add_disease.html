@@ -518,7 +518,7 @@
 
         function viewDisease(id) {
             sessionStorage.setItem('viewingDiseaseId', id);
-            window.location.href = 'disease_detail.html';
+            window.location.href = `disease_detail.html?id=${id}`;
         }
 
         function editDisease(id) {
