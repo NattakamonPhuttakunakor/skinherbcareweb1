@@ -50,16 +50,16 @@ const normalizeText = (value) => {
 };
 
 const seed = async () => {
-  const csvPath = path.join(process.cwd(), 'data.csv');
+  const csvPath = path.join(process.cwd(), 'data2.csv');
   if (!fs.existsSync(csvPath)) {
-    throw new Error(`data.csv not found at ${csvPath}`);
+    throw new Error(`data2.csv not found at ${csvPath}`);
   }
 
   await connectDB();
   console.log('Connected to MongoDB');
 
   const { delimiter, rows } = readCsvFile(csvPath);
-  console.log(`Found ${rows.length} lines in data.csv (delimiter="${delimiter}")`);
+  console.log(`Found ${rows.length} lines in data2.csv (delimiter="${delimiter}")`);
 
   const collection = mongoose.connection.collection('datadiseases');
   const docs = [];
