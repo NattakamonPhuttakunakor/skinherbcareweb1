@@ -179,7 +179,8 @@
 
             fetchDashboardDiseases();
 
-            const editingId = sessionStorage.getItem('editingDiseaseId');
+            const editingIdFromQuery = new URLSearchParams(window.location.search).get('id');
+            const editingId = editingIdFromQuery || sessionStorage.getItem('editingDiseaseId');
             if (editingId) {
                 const section = document.getElementById('disease-management-section');
                 if (section) section.classList.add('hidden');
