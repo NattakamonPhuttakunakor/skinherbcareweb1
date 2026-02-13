@@ -160,7 +160,8 @@ const fallbackAnalyze = async (symptomsText) => {
 export const diagnoseSymptoms = async (req, res) => {
     try {
         const { symptoms } = req.body;
-        const usePython = process.env.USE_PYTHON_ANALYSIS !== 'false';
+        // Force processing from data2 dataset in MongoDB (datadiseases) only.
+        const usePython = false;
 
         // 1. Validate input
         if (!symptoms || typeof symptoms !== "string" || !symptoms.trim()) {
