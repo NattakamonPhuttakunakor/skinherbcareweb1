@@ -1,5 +1,6 @@
 import User from '../models/User.js'; // ตรวจสอบ path ให้ถูกนะครับว่าไฟล์ User.js อยู่ไหน
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 // ฟังก์ชันสร้าง Token
 const generateToken = (id) => {
@@ -101,17 +102,36 @@ export const getUserProfile = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
-
-// @desc    ลืมรหัสผ่าน
+// @desc    Forgot password
 // @route   POST /api/auth/forgot-password
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
-        // 1. เช็คว่ามีอีเมลนี้ในระบบมั้ย
-        // 2. สร้าง Token ชั่วคราว
-        // 3. ส่งอีเมล (Nodemailer)
-        res.status(200).json({ success: true, message: 'ส่งลิงก์กู้คืนแล้ว' });
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            return res.status(500).json({ success: false, message: 'EMAIL_USER/EMAIL_PASS are not configured' });
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const frontendBase = process.env.FRONTEND_URL || 'https://skinherbcareweb1.netlify.app';
+        const resetLink = `${frontendBase}/reset-password.html?email=${encodeURIComponent(email)}`;
+
+        await transporter.sendMail({
+            from: `SkinHerbCare <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Reset your SkinHerbCare password',
+            text: `Click this link to reset your password: ${resetLink}`
+        });
+
+        console.log('Password reset requested for:', email);
+        res.status(200).json({ success: true, message: 'Reset link sent successfully' });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายใน' });
+        res.status(500).json({ success: false, message: 'Failed to send email' });
     }
 };

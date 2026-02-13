@@ -27,7 +27,31 @@ const __dirname = path.dirname(__filename);
 // -------------------------------------------------------------
 // Middleware
 // -------------------------------------------------------------
-app.use(cors());
+const allowedOrigins = [
+    'https://skinherbcareweb2.netlify.app',
+    'https://skinherbcareweb1.onrender.com',
+    'http://localhost:3000',
+    'http://127.0.0.1:5500'
+];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow non-browser requests (no Origin header)
+        if (!origin) return callback(null, true);
+        const isNetlifyPreview = /^https:\/\/.+--skinherbcareweb2\.netlify\.app$/.test(origin);
+        if (allowedOrigins.includes(origin) || isNetlifyPreview) {
+            return callback(null, true);
+        }
+        console.log('Blocked by CORS:', origin);
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // -------------------------------------------------------------
