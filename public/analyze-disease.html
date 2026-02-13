@@ -8,13 +8,21 @@
   <meta http-equiv="Expires" content="0">
   <script>
     (function () {
-      const token = localStorage.getItem('token') || localStorage.getItem('userToken');
-      const userRaw = localStorage.getItem('user');
+      const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('userToken') ||
+        sessionStorage.getItem('token') ||
+        sessionStorage.getItem('userToken');
+      const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
       if (!token || !userRaw) {
         localStorage.removeItem('token');
         localStorage.removeItem('userToken');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('userToken');
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('userRole');
         window.location.replace('/login.html');
       }
     })();
