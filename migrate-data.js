@@ -73,16 +73,16 @@ const buildDescription = (main, locations, cause) => {
 
 // Function to migrate diseases from data.csv (Thai headers)
 const migrateDiseasesFromCsv = async () => {
-  const csvPath = path.join(process.cwd(), 'data.csv');
+  const csvPath = path.join(process.cwd(), 'data2.csv');
   if (!fs.existsSync(csvPath)) {
-    console.log("â„¹ï¸  No data.csv found, skipping CSV import.");
+    console.log("â„¹ï¸  No data2.csv found, skipping CSV import.");
     return;
   }
 
   try {
-    console.log("\nðŸ“‹ Reading diseases from data.csv...");
+    console.log("\nðŸ“‹ Reading diseases from data2.csv...");
     const rows = readCsvFile(csvPath);
-    console.log(`Found ${rows.length} diseases in data.csv`);
+    console.log(`Found ${rows.length} diseases in data2.csv`);
 
     for (const row of rows) {
       try {
@@ -108,7 +108,7 @@ const migrateDiseasesFromCsv = async () => {
         if (usage) update.usage = usage;
 
         if (Object.keys(update).length === 0) {
-          console.log(`â­ï¸  Disease "${name}" has no new data, skipping...`);
+          console.log(`â­ï¸  Disease "${name}" has no new data2, skipping...`);
           continue;
         }
 
@@ -138,16 +138,16 @@ const migrateDiseasesFromCsv = async () => {
 
 // Function to migrate diseases from data.csv into a custom collection
 const migrateDiseasesFromCsvToCollection = async (collectionName) => {
-  const csvPath = path.join(process.cwd(), 'data.csv');
+  const csvPath = path.join(process.cwd(), 'data2.csv');
   if (!fs.existsSync(csvPath)) {
-    console.log("No data.csv found, skipping CSV import.");
+    console.log("No data2.csv found, skipping CSV import.");
     return;
   }
 
   try {
-    console.log(`\nReading diseases from data.csv -> ${collectionName}...`);
+    console.log(`\nReading diseases from data2.csv -> ${collectionName}...`);
     const rows = readCsvFile(csvPath);
-    console.log(`Found ${rows.length} diseases in data.csv`);
+    console.log(`Found ${rows.length} diseases in data2.csv`);
 
     const collection = mongoose.connection.collection(collectionName);
     for (const row of rows) {
