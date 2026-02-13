@@ -11,7 +11,7 @@ const connectDB = async () => {
   if (!uri) {
     throw new Error('Missing MONGODB_URI (or MONGO_URI) in .env');
   }
-  await mongoose.connect(uri);y
+  await mongoose.connect(uri);
 };
 
 const readCsvFile = (fileName) => {
@@ -61,13 +61,15 @@ const seed = async () => {
   const { delimiter, rows } = readCsvFile(csvPath);
   console.log(`Found ${rows.length} lines in data2.csv (delimiter="${delimiter}")`);
 
-  const collection = mongoose.connection.collection('datadiseases');
+  const collection = mongoose.connection.collection('diseases');
   const docs = [];
+  const seenNames = new Set();
 
   const dataRows = rows.slice(1);
   for (const row of dataRows) {
     const name = normalizeText(row[0]);
     if (!name) continue;
+    if (seenNames.has(name)) continue;
 
     const mainSymptoms = row[1] || '';
     const secondary = row[2] || '';
@@ -81,26 +83,30 @@ const seed = async () => {
     const causeText = normalizeText(cause);
     const treatText = normalizeText(treatment);
 
+    const symptoms = [mainText, subText, locText].filter(Boolean);
     docs.push({
       name,
-      symptoms: mainText,
-      subSymptoms: subText,
-      locations: locText,
-      cause: causeText,
-      treatment: treatText,
+      engName: '',
+      description: causeText || treatText || mainText || '-',
+      symptoms,
+      medicines: [],
+      usage: treatText,
+      image: '',
+      published: true,
       createdAt: new Date(),
       updatedAt: new Date()
     });
+    seenNames.add(name);
   }
 
   console.log(`Prepared ${docs.length} docs`);
 
   await collection.deleteMany({});
-  console.log('Cleared old data in datadiseases');
+  console.log('Cleared old data in diseases');
 
   if (docs.length > 0) {
     const result = await collection.insertMany(docs);
-    console.log(`Inserted ${result.insertedCount} docs into datadiseases`);
+    console.log(`Inserted ${result.insertedCount} docs into diseases`);
   } else {
     console.log('No docs to insert.');
   }
