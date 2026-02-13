@@ -21,6 +21,46 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
+    <script>
+      (function fixMojibakeInPage() {
+        const suspiciousPattern = /[ÃÂà]/;
+        const decodeMojibake = (text) => {
+          if (typeof text !== 'string' || !suspiciousPattern.test(text)) return text;
+          try {
+            const bytes = Uint8Array.from(text, (ch) => ch.charCodeAt(0));
+            return new TextDecoder('utf-8').decode(bytes);
+          } catch (_) {
+            return text;
+          }
+        };
+
+        const walkAndFix = (root) => {
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          const textNodes = [];
+          while (walker.nextNode()) textNodes.push(walker.currentNode);
+          textNodes.forEach((node) => {
+            const fixed = decodeMojibake(node.nodeValue);
+            if (fixed !== node.nodeValue) node.nodeValue = fixed;
+          });
+
+          const elements = root.querySelectorAll('*');
+          elements.forEach((el) => {
+            ['placeholder', 'title', 'aria-label'].forEach((attr) => {
+              const val = el.getAttribute(attr);
+              if (!val) return;
+              const fixed = decodeMojibake(val);
+              if (fixed !== val) el.setAttribute(attr, fixed);
+            });
+          });
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => walkAndFix(document.body));
+        } else {
+          walkAndFix(document.body);
+        }
+      })();
+    </script>
 </head>
 <body class="bg-[#F4F7FE] flex h-screen overflow-hidden">
 
