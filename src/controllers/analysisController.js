@@ -127,35 +127,7 @@ const fallbackAnalyze = async (symptomsText) => {
         const tokens = tokenize(symptomsText);
         if (tokens.length === 0) return [];
 
-        const excelRows = loadExcelData();
-        if (Array.isArray(excelRows) && excelRows.length > 0) {
-            const scored = excelRows.map((row) => {
-                const diseaseName = row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '';
-                const main = row['อาการหลัก'] || '';
-                const sub = row['อาการรอง'] || '';
-                const loc = row['ตำแหน่งที่พบบ่อย'] || '';
-                const cause = row['สาเหตุ'] || '';
-                const treat = row['วิธีรักษาเบื้อต้น'] || '';
-                const text = [diseaseName, main, sub, loc, cause, treat].filter(Boolean).join(' ').toLowerCase();
-                let hits = 0;
-                tokens.forEach((t) => {
-                    if (text.includes(t)) hits += 1;
-                });
-                const score = hits / tokens.length;
-                return { row, score };
-            }).filter(item => item.score > 0);
-
-            scored.sort((a, b) => b.score - a.score);
-            return scored.slice(0, 3).map(({ row, score }) => ({
-                disease: row['รายชื่อโรค'] || row['ชื่อโรค'] || row['disease'] || '',
-                confidence: Math.round(score * 100),
-                main_symptoms: row['อาการหลัก'] || '',
-                secondary_symptoms: row['อาการรอง'] || '',
-                recommendation: row['วิธีรักษาเบื้อต้น'] || '',
-                location: row['ตำแหน่งที่พบบ่อย'] || '',
-                cause: row['สาเหตุ'] || ''
-            }));
-        }
+        // Use processing dataset from MongoDB (datadiseases) only.
 
         const diseases = await ProcessingDisease.find({}).lean();
         if (!Array.isArray(diseases) || diseases.length === 0) return [];
@@ -355,3 +327,4 @@ export const diagnoseSymptoms = async (req, res) => {
         });
     }
 };
+
