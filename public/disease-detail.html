@@ -28,6 +28,32 @@
     };
   </script>
   <style>
+    body {
+      background: linear-gradient(160deg, #e0f2f1 0%, #dcfce7 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: -1;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    body::before {
+      content: "🌿";
+      bottom: -60px;
+      left: -60px;
+      font-size: 260px;
+      transform: rotate(-25deg);
+    }
+    body::after {
+      content: "🌿";
+      top: -80px;
+      right: -80px;
+      font-size: 300px;
+      transform: rotate(20deg);
+    }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #30e89c; border-radius: 10px; }
     .leaf-bg {
@@ -127,10 +153,11 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const diseaseId = urlParams.get('id');
+      const diseaseId = urlParams.get('id') || sessionStorage.getItem('viewingDiseaseId');
 
       if (!diseaseId) {
-        window.location.href = 'index.html';
+        document.getElementById('disease-name').innerText = 'ไม่พบรหัสโรค';
+        document.getElementById('disease-cause').innerText = 'กรุณาเลือกโรคจากหน้ารายการก่อน';
         return;
       }
 
