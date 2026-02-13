@@ -27,7 +27,21 @@ const __dirname = path.dirname(__filename);
 // -------------------------------------------------------------
 // Middleware
 // -------------------------------------------------------------
-app.use(cors());
+const corsOptions = {
+    origin: [
+        'https://skinherbcareweb2.netlify.app',
+        'https://skinherbcareweb1.netlify.app',
+        'http://localhost:5000',
+        'http://localhost:3000',
+        'http://127.0.0.1:5000',
+        'http://127.0.0.1:3000'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // -------------------------------------------------------------
