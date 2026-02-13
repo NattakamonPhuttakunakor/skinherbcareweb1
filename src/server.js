@@ -30,12 +30,8 @@ const __dirname = path.dirname(__filename);
 const allowedOrigins = [
     'https://skinherbcareweb2.netlify.app',
     'https://skinherbcareweb1.netlify.app',
-    'http://localhost:5000',
     'http://localhost:3000',
-    'http://localhost:5173',
-    'http://127.0.0.1:5000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5500'
 ];
 
 const corsOptions = {
@@ -46,7 +42,7 @@ const corsOptions = {
         if (allowedOrigins.includes(origin) || isNetlifyPreview) {
             return callback(null, true);
         }
-        return callback(new Error('Not allowed by CORS'));
+        return callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

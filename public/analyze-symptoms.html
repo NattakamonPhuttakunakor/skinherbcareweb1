@@ -58,6 +58,12 @@
         .dark .leaf-bg { opacity: 0.1; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
     
         /* NAVBAR (from index) */
         .top-nav {
@@ -423,11 +429,20 @@ function normalizeResults(data) {
 }
 
 function renderResults(results, headerMessage) {
+    const escapeHtml = (text) => String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
     const itemsHtml = results.map((item) => {
         const name = item.disease || item.name || 'Unknown disease';
         const confidence = (typeof item.confidence === 'number') ? `(ความมั่นใจ: ${item.confidence}%)` : '';
         const symptoms = item.main_symptoms || item.symptoms || '-';
         const treatment = item.recommendation || item.treatment || item.herbs || '-';
+        const treatmentText = String(treatment || '-');
+        const showReadMore = treatmentText.length > 180;
 
         const relatedHerbs = (item.relatedHerbs && item.relatedHerbs.length > 0)
             ? item.relatedHerbs
@@ -475,7 +490,10 @@ function renderResults(results, headerMessage) {
                 
                 <div class=\"mt-3 space-y-2 text-sm text-gray-700\">
                     <p><b>อาการ:</b> ${symptoms}</p>
-                    <p><b>วิธีรักษาเบื้องต้น:</b> ${treatment}</p>
+                    <div class=\"treatment-container\">
+                        <p class=\"line-clamp-3 treatment-content\"><b>วิธีรักษาเบื้องต้น:</b> ${escapeHtml(treatmentText)}</p>
+                        ${showReadMore ? `<button type=\"button\" onclick=\"toggleReadMore(this)\" class=\"text-blue-500 font-bold mt-2\">อ่านเพิ่มเติม...</button>` : ''}
+                    </div>
                 </div>
 
                 ${herbsHtml}
@@ -485,6 +503,18 @@ function renderResults(results, headerMessage) {
 
     const title = headerMessage ? `<div class=\"mb-4 text-center font-medium text-green-800 bg-green-50 py-2 rounded-lg\">${headerMessage}</div>` : '';
     return `${title}<ul class=\"list-none space-y-4\">${itemsHtml}</ul>`;
+}
+
+function toggleReadMore(btn) {
+    const textElement = btn.previousElementSibling;
+    if (!textElement) return;
+    if (textElement.classList.contains('line-clamp-3')) {
+        textElement.classList.remove('line-clamp-3');
+        btn.innerText = 'แสดงน้อยลง';
+    } else {
+        textElement.classList.add('line-clamp-3');
+        btn.innerText = 'อ่านเพิ่มเติม...';
+    }
 }
 
 
