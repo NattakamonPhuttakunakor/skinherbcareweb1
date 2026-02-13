@@ -352,7 +352,7 @@
             isProcessing = true;
             sessionStorage.setItem('editingDiseaseId', diseaseId);
             setTimeout(() => {
-                window.location.href = `add_disease.html?id=${encodeURIComponent(diseaseId)}`;
+                window.location.href = `disease_detail.html?id=${encodeURIComponent(diseaseId)}`;
                 isProcessing = false;
             }, 300);
         }
