@@ -28,7 +28,7 @@ const herbDiseaseMapping = {
       { name: 'เปลือกมังคุดแห้ง', effectiveness: 'ปานกลาง' }
     ]
   },
-  'ลมพิษจากการสัมผัส Contact Urticaria': {
+  'ลมพิษ Urticaria': {
     herbs: [
       { name: 'ว่านหางจระเข้', effectiveness: 'สูง' },
       { name: 'ข่า', effectiveness: 'สูง' },
@@ -36,14 +36,15 @@ const herbDiseaseMapping = {
       { name: 'โหระพา', effectiveness: 'ปานกลาง' }
     ]
   },
-  'Nail psoriasis': {
+  'กลากเกลื้อน Tinea': {
     herbs: [
-      { name: 'ขมิ้นชัน', effectiveness: 'ปานกลาง' },
-      { name: 'พญายอ', effectiveness: 'ปานกลาง' },
-      { name: 'เปลือกมังคุดแห้ง', effectiveness: 'ปานกลาง' }
+      { name: 'กระเทียม', effectiveness: 'ปานกลาง' },
+      { name: 'ข่า', effectiveness: 'ปานกลาง' },
+      { name: 'พลู', effectiveness: 'ปานกลาง' },
+      { name: 'กระเพรา', effectiveness: 'ปานกลาง' }
     ]
   },
-  'Vitiligo': {
+  'ด่างขาว Vitiligo': {
     herbs: [
       { name: 'ข่า', effectiveness: 'ปานกลาง' },
       { name: 'ขมิ้นชัน', effectiveness: 'ปานกลาง' },
@@ -56,6 +57,13 @@ const herbDiseaseMapping = {
       { name: 'กระเทียม', effectiveness: 'สูง' },
       { name: 'พลู', effectiveness: 'ปานกลาง' },
       { name: 'โหระพา', effectiveness: 'ปานกลาง' }
+    ]
+  }
+  'งูสวัด Herpes Zoster': {
+    herbs: [
+      { name: 'พญายอ', effectiveness: 'ปานกลาง' },
+      { name: 'ตำลึง', effectiveness: 'ปานกลาง' },
+      { name: 'ว่านหางจระเข้', effectiveness: 'ปานกลาง' }
     ]
   }
 };
