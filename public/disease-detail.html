@@ -5,8 +5,10 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>รายละเอียดโรค | SkinHerbCare</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Manrope:wght@400;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -19,8 +21,8 @@
             "background-light": "#f8fdfb"
           },
           fontFamily: {
-            display: ["Manrope", "sans-serif"],
-            serif: ["Playfair Display", "serif"]
+            display: ["Sarabun", "Manrope", "sans-serif"],
+            body: ["Sarabun", "sans-serif"]
           }
         }
       }
@@ -35,6 +37,7 @@
   </style>
 </head>
 <body class="font-display bg-background-light text-slate-800 antialiased h-screen overflow-hidden relative">
+
   <div class="absolute inset-0 leaf-bg -z-10"></div>
 
   <a href="index.html" class="absolute top-6 left-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
@@ -42,54 +45,48 @@
     กลับหน้าหลัก
   </a>
 
-  <a href="disease_list.html" class="absolute top-6 right-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-slate-600 font-bold text-sm">
-    <span class="material-symbols-outlined text-lg">dermatology</span>
-    ดูรายชื่อโรคทั้งหมด
-  </a>
-
   <div class="h-full w-full flex items-center justify-center p-4 md:p-8">
     <div class="relative w-full max-w-7xl h-full max-h-[900px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-white/50">
       <div class="w-full md:w-5/12 relative h-64 md:h-auto overflow-hidden bg-slate-100 group">
-        <img id="disease-image" alt="Disease Image" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://via.placeholder.com/600x800?text=No+Image"/>
+        <img id="disease-image" alt="รูปโรค" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://via.placeholder.com/600?text=Loading..."/>
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
         <div class="absolute bottom-8 left-8 text-white">
-          <span class="px-3 py-1 bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2 inline-block">Skin Disease Info</span>
-          <h2 id="img-caption-name" class="text-3xl font-serif italic opacity-90">...</h2>
+          <span class="px-3 py-1 bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2 inline-block">Disease Info</span>
+          <h2 id="img-caption-name" class="text-2xl font-bold opacity-90 drop-shadow-md">...</h2>
         </div>
       </div>
 
       <div class="w-full md:w-7/12 flex flex-col h-full bg-white relative">
         <div class="flex-grow overflow-y-auto custom-scrollbar p-8 md:p-12">
-          <header class="mb-10 border-b border-slate-100 pb-8">
-            <div class="flex items-baseline gap-3 mb-2">
-              <h1 id="disease-name" class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">กำลังโหลด...</h1>
-            </div>
-            <p id="disease-sub-symptoms" class="font-serif italic text-lg text-slate-500 mb-6">...</p>
-            <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
+          <header class="mb-8 border-b border-slate-100 pb-6">
+            <h1 id="disease-name" class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-2">กำลังโหลด...</h1>
+            <p id="disease-sub-symptoms" class="text-lg text-slate-500 font-medium italic mb-6">...</p>
+            
+            <div class="bg-red-50 p-5 rounded-xl border border-red-100">
               <h3 class="text-xs font-bold text-red-600 uppercase tracking-widest mb-2 flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">sick</span> อาการหลัก
               </h3>
-              <p id="disease-symptoms" class="text-slate-700 text-lg font-medium leading-relaxed">...</p>
+              <p id="disease-symptoms" class="text-slate-800 text-lg font-medium leading-relaxed">...</p>
             </div>
           </header>
 
           <div class="space-y-8">
             <section>
-              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">สาเหตุของโรค (Cause)</h3>
-              <p id="disease-cause" class="text-slate-600 leading-relaxed">...</p>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">สาเหตุของโรค (Cause)</h3>
+              <p id="disease-cause" class="text-slate-700 leading-relaxed text-base">...</p>
             </section>
 
             <section>
-              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">วิธีการรักษา (Treatment)</h3>
-              <div class="bg-primary-light/50 p-6 rounded-2xl border-l-4 border-primary">
-                <p id="disease-treatment" class="text-slate-600 leading-relaxed">...</p>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">วิธีรักษา (Treatment)</h3>
+              <div class="bg-green-50 p-5 rounded-xl border-l-4 border-primary">
+                <p id="disease-treatment" class="text-slate-700 leading-relaxed text-base">...</p>
               </div>
             </section>
 
             <section>
-              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">ตำแหน่งที่พบบ่อย</h3>
+              <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">ตำแหน่งที่พบบ่อย</h3>
               <div id="disease-locations-container" class="flex flex-wrap gap-2">
-                <span class="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-sm">กำลังโหลด...</span>
+                <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-md text-sm">...</span>
               </div>
             </section>
           </div>
@@ -106,10 +103,10 @@
     function resolveImageSrc(raw) {
       if (!raw) return "https://via.placeholder.com/600x800?text=No+Image";
       const val = String(raw).trim();
-      if (!val) return "https://via.placeholder.com/600x800?text=No+Image";
-      if (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("data:")) return val;
-      if (val.startsWith("/uploads/")) return `${API_BASE_URL}${val}`;
-      return `${API_BASE_URL}/${val.replace(/^\\/, "").replace(/^\//, "")}`;
+      if (val.startsWith("http")) return val;
+      if (val.startsWith("data:")) return val;
+      const cleanPath = val.replace(/\\/g, "/").replace(/^\//, "");
+      return `${API_BASE_URL}/${cleanPath}`;
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -117,8 +114,7 @@
       const diseaseId = urlParams.get("id");
 
       if (!diseaseId) {
-        alert("ไม่พบรหัสโรค");
-        window.location.href = "disease_list.html";
+        document.getElementById("disease-name").innerText = "ไม่พบ ID โรค";
         return;
       }
 
@@ -127,45 +123,35 @@
         if (!response.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ");
 
         const json = await response.json();
-        const disease = json.disease || json.data || json;
+        const disease = json.data || json;
 
-        const imgEl = document.getElementById("disease-image");
-        imgEl.src = resolveImageSrc(disease.image || disease.imageUrl);
+        document.getElementById("disease-image").src = resolveImageSrc(disease.image || disease.imageUrl);
         document.getElementById("img-caption-name").innerText = disease.name || "";
-
         document.getElementById("disease-name").innerText = disease.name || "ไม่ทราบชื่อโรค";
-        document.getElementById("disease-sub-symptoms").innerText = disease.subSymptoms || "";
-        document.getElementById("disease-symptoms").innerText = Array.isArray(disease.symptoms)
-          ? disease.symptoms.join(", ")
-          : (disease.symptoms || "ไม่มีข้อมูลอาการ");
+        document.getElementById("disease-sub-symptoms").innerText = disease.subSymptoms || "-";
+        document.getElementById("disease-symptoms").innerText = disease.symptoms || "ไม่มีข้อมูลอาการ";
         document.getElementById("disease-cause").innerText = disease.cause || "ไม่ระบุสาเหตุ";
-        document.getElementById("disease-treatment").innerText = disease.treatment || disease.usage || "ไม่ระบุวิธีรักษา";
+        document.getElementById("disease-treatment").innerText = disease.treatment || "ไม่ระบุวิธีรักษา";
 
-        const locationsContainer = document.getElementById("disease-locations-container");
+        const locContainer = document.getElementById("disease-locations-container");
         const locData = disease.locations || [];
-        let locationList = [];
+        const locList = Array.isArray(locData) ? locData : String(locData).split(",");
+        const cleaned = locList.map((s) => s.trim()).filter(Boolean);
 
-        if (Array.isArray(locData)) {
-          locationList = locData;
-        } else if (typeof locData === "string") {
-          locationList = locData.split(",").map((s) => s.trim());
-        }
-
-        if (locationList.length > 0 && locationList[0] !== "") {
-          locationsContainer.innerHTML = "";
-          locationList.forEach((loc) => {
-            const tag = document.createElement("span");
-            tag.className = "px-4 py-2 bg-slate-100 text-slate-600 font-medium rounded-lg text-sm shadow-sm border border-slate-200";
-            tag.innerText = loc;
-            locationsContainer.appendChild(tag);
+        if (cleaned.length > 0) {
+          locContainer.innerHTML = "";
+          cleaned.forEach((loc) => {
+            const span = document.createElement("span");
+            span.className = "px-3 py-1 bg-slate-100 text-slate-700 font-medium rounded-md text-sm border border-slate-200";
+            span.innerText = loc;
+            locContainer.appendChild(span);
           });
         } else {
-          locationsContainer.innerHTML = '<span class="text-slate-400 text-sm">- ไม่ระบุตำแหน่ง -</span>';
+          locContainer.innerHTML = '<span class="text-slate-400 text-sm">- ไม่ระบุ -</span>';
         }
       } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("disease-name").innerText = "ไม่พบข้อมูล";
-        document.getElementById("disease-symptoms").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล หรือ ID ผิดพลาด";
+        console.error(error);
+        document.getElementById("disease-name").innerText = "โหลดข้อมูลผิดพลาด";
       }
     });
   </script>
