@@ -1,6 +1,7 @@
 import User from '../models/User.js'; // ตรวจสอบ path ให้ถูกนะครับว่าไฟล์ User.js อยู่ไหน
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 // ฟังก์ชันสร้าง Token
 const generateToken = (id) => {
@@ -107,9 +108,25 @@ export const getUserProfile = async (req, res) => {
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
             return res.status(500).json({ success: false, message: 'EMAIL_USER/EMAIL_PASS are not configured' });
         }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Email not found' });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+        await user.save();
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -120,7 +137,7 @@ export const forgotPassword = async (req, res) => {
         });
 
         const frontendBase = process.env.FRONTEND_URL || 'https://skinherbcareweb1.netlify.app';
-        const resetLink = `${frontendBase}/reset-password.html?email=${encodeURIComponent(email)}`;
+        const resetLink = `${frontendBase}/reset-password.html?token=${resetToken}`;
 
         await transporter.sendMail({
             from: `SkinHerbCare <${process.env.EMAIL_USER}>`,
@@ -133,5 +150,39 @@ export const forgotPassword = async (req, res) => {
         res.status(200).json({ success: true, message: 'Reset link sent successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to send email' });
+    }
+};
+
+// @desc    Reset password by token
+// @route   POST /api/auth/reset-password
+export const resetPassword = async (req, res) => {
+    const { token, password } = req.body;
+    try {
+        if (!token || !password) {
+            return res.status(400).json({ success: false, message: 'Token and password are required' });
+        }
+
+        if (String(password).length < 6) {
+            return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+        }
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        }).select('+password');
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+        }
+
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        return res.status(200).json({ success: true, message: 'Password reset successful' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Failed to reset password' });
     }
 };

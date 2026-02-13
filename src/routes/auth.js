@@ -1,6 +1,6 @@
 import express from 'express';
 import { check } from 'express-validator';
-import { registerUser, loginUser, getUserProfile, forgotPassword } from '../controllers/authController.js';
+import { registerUser, loginUser, getUserProfile, forgotPassword, resetPassword } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -27,6 +27,7 @@ router.post('/login', [
 // @access  Private (ต้องใช้ Token)
 router.get('/profile', protect, getUserProfile);
 router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;
 
