@@ -672,15 +672,24 @@ header p {
     function logout() {
         if (confirm('❓ ต้องการออกจากระบบหรือไม่?')) {
             localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
             localStorage.removeItem('user');
             localStorage.removeItem('userRole');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('userRole');
             location.reload();
         }
     }
 
     function setupProfilePanel() {
-        const token = localStorage.getItem('token');
-        const userRaw = localStorage.getItem('user');
+        const token =
+            localStorage.getItem('token') ||
+            localStorage.getItem('userToken') ||
+            sessionStorage.getItem('token') ||
+            sessionStorage.getItem('userToken');
+        const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
         const user = userRaw ? JSON.parse(userRaw) : null;
 
         const btnGuest = document.getElementById('profile-btn-guest');
@@ -852,7 +861,7 @@ header p {
     function openDiseaseDetailFromShowcase(diseaseId) {
         if (!diseaseId) return false;
         sessionStorage.setItem('viewingDiseaseId', diseaseId);
-        window.location.href = '/disease_detail.html';
+        window.location.href = '/disease-detail.html';
         return false;
     }
 

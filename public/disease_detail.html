@@ -152,13 +152,15 @@
         }
 
         async function loadDiseaseData() {
-            if (!currentId) {
+            if (!currentDiseaseId) {
                 // ถ้าไม่มี ID ใน URL ให้ลองดึงจาก sessionStorage
-                currentId = sessionStorage.getItem('viewingDiseaseId');
+                currentDiseaseId = sessionStorage.getItem('viewingDiseaseId');
             }
 
+            if (!currentDiseaseId) return;
+
             try {
-                const res = await fetch(`${API_BASE}/api/diseases/${currentId}`);
+                const res = await fetch(`${API_BASE}/api/diseases/${currentDiseaseId}`);
                 const result = await res.json();
                 const data = result.disease || result.data || result;
 
@@ -190,9 +192,9 @@
 
         function goToEdit(event) {
             if (event) event.preventDefault();
-            if (currentId) {
-                sessionStorage.setItem('editingDiseaseId', currentId);
-                window.location.href = `add_disease.html?id=${currentId}`;
+            if (currentDiseaseId) {
+                sessionStorage.setItem('editingDiseaseId', currentDiseaseId);
+                window.location.href = `add_disease.html?id=${currentDiseaseId}`;
             }
         }
 

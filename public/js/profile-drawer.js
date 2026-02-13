@@ -4,8 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
         return;
     }
-    const token = localStorage.getItem('token');
-    const userRaw = localStorage.getItem('user');
+    const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('userToken') ||
+        sessionStorage.getItem('token') ||
+        sessionStorage.getItem('userToken');
+    const userRaw = localStorage.getItem('user') || sessionStorage.getItem('user');
     const user = userRaw ? JSON.parse(userRaw) : null;
     const ASSET_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
@@ -304,8 +308,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!hasAdminSidebar) {
         drawer.querySelector('#profile-logout').addEventListener('click', () => {
             localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
             localStorage.removeItem('user');
             localStorage.removeItem('userRole');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('userRole');
             // keep per-user profile images
             window.location.href = '/login.html';
         });
