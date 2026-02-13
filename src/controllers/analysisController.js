@@ -1,5 +1,6 @@
 // Node v20+ มี fetch ให้แล้ว ไม่ต้อง import
 import Disease from '../models/Disease.js';
+import ProcessingDisease from '../models/ProcessingDisease.js';
 import Herb from '../models/Herb.js';
 import xlsx from 'xlsx';
 import path from 'path';
@@ -53,6 +54,10 @@ const buildDiseaseText = (d) => {
         d.engName,
         d.description,
         Array.isArray(d.symptoms) ? d.symptoms.join(' ') : d.symptoms,
+        d.subSymptoms,
+        d.locations,
+        d.cause,
+        d.treatment,
         Array.isArray(d.medicines) ? d.medicines.join(' ') : d.medicines,
         d.usage
     ].filter(Boolean);
@@ -152,7 +157,7 @@ const fallbackAnalyze = async (symptomsText) => {
             }));
         }
 
-        const diseases = await Disease.find({}).lean();
+        const diseases = await ProcessingDisease.find({}).lean();
         if (!Array.isArray(diseases) || diseases.length === 0) return [];
 
         const scored = diseases.map((d) => {
@@ -170,10 +175,10 @@ const fallbackAnalyze = async (symptomsText) => {
             disease: d.name,
             confidence: Math.round(score * 100),
             main_symptoms: Array.isArray(d.symptoms) ? d.symptoms.join(', ') : (d.symptoms || ''),
-            secondary_symptoms: '',
-            recommendation: d.usage || d.description || '',
-            location: '',
-            cause: ''
+            secondary_symptoms: d.subSymptoms || '',
+            recommendation: d.treatment || d.usage || d.description || '',
+            location: d.locations || '',
+            cause: d.cause || ''
         }));
     } catch (e) {
         return [];

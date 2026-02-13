@@ -61,7 +61,7 @@ const seed = async () => {
   const { delimiter, rows } = readCsvFile(csvPath);
   console.log(`Found ${rows.length} lines in data2.csv (delimiter="${delimiter}")`);
 
-  const collection = mongoose.connection.collection('diseases');
+  const collection = mongoose.connection.collection('datadiseases');
   const docs = [];
   const seenNames = new Set();
 
@@ -83,16 +83,13 @@ const seed = async () => {
     const causeText = normalizeText(cause);
     const treatText = normalizeText(treatment);
 
-    const symptoms = [mainText, subText, locText].filter(Boolean);
     docs.push({
       name,
-      engName: '',
-      description: causeText || treatText || mainText || '-',
-      symptoms,
-      medicines: [],
-      usage: treatText,
-      image: '',
-      published: true,
+      symptoms: mainText,
+      subSymptoms: subText,
+      locations: locText,
+      cause: causeText,
+      treatment: treatText,
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -102,11 +99,11 @@ const seed = async () => {
   console.log(`Prepared ${docs.length} docs`);
 
   await collection.deleteMany({});
-  console.log('Cleared old data in diseases');
+  console.log('Cleared old data in datadiseases');
 
   if (docs.length > 0) {
     const result = await collection.insertMany(docs);
-    console.log(`Inserted ${result.insertedCount} docs into diseases`);
+    console.log(`Inserted ${result.insertedCount} docs into datadiseases`);
   } else {
     console.log('No docs to insert.');
   }
