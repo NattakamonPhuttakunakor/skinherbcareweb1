@@ -63,19 +63,27 @@ const seed = async () => {
 
   const collection = mongoose.connection.collection('datadiseases');
   const docs = [];
-  const seenNames = new Set();
+
+  const headers = (rows[0] || []).map((h) => normalizeText(h));
+  const headerIndex = {
+    name: headers.indexOf('name'),
+    symptoms: headers.indexOf('symptoms'),
+    subSymptoms: headers.indexOf('subSymptoms'),
+    locations: headers.indexOf('locations'),
+    cause: headers.indexOf('cause'),
+    treatment: headers.indexOf('treatment')
+  };
 
   const dataRows = rows.slice(1);
   for (const row of dataRows) {
-    const name = normalizeText(row[0]);
+    const name = normalizeText(row[headerIndex.name]);
     if (!name) continue;
-    if (seenNames.has(name)) continue;
 
-    const mainSymptoms = row[1] || '';
-    const secondary = row[2] || '';
-    const locations = row[3] || '';
-    const cause = row[4] || '';
-    const treatment = row[5] || '';
+    const mainSymptoms = row[headerIndex.symptoms] || '';
+    const secondary = row[headerIndex.subSymptoms] || '';
+    const locations = row[headerIndex.locations] || '';
+    const cause = row[headerIndex.cause] || '';
+    const treatment = row[headerIndex.treatment] || '';
 
     const mainText = normalizeText(mainSymptoms);
     const subText = normalizeText(secondary);
@@ -93,7 +101,6 @@ const seed = async () => {
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    seenNames.add(name);
   }
 
   console.log(`Prepared ${docs.length} docs`);
@@ -115,3 +122,4 @@ seed().catch((err) => {
   mongoose.disconnect();
   process.exit(1);
 });
+

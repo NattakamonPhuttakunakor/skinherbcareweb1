@@ -11,5 +11,5 @@ const diseaseSchema = new mongoose.Schema({
   published: { type: Boolean, default: false }
 }, { timestamps: true });
 
-const Disease = mongoose.model('Disease', diseaseSchema);
+const Disease = mongoose.model('Disease', diseaseSchema, 'diseases');
 export default Disease;
