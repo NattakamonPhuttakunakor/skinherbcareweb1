@@ -110,7 +110,11 @@ export const forgotPassword = async (req, res) => {
         // 1. เช็คว่ามีอีเมลนี้ในระบบมั้ย
         // 2. สร้าง Token ชั่วคราว
         // 3. ส่งอีเมล (Nodemailer)
-        res.status(200).json({ success: true, message: 'ส่งลิงก์กู้คืนแล้ว' });
+        console.log('มีการขอรีเซ็ตรหัสผ่านของ:', email);
+        res.status(200).json({
+            success: true,
+            message: 'ระบบได้รับคำขอแล้ว (ต้องไปเขียนระบบส่งเมลต่อ)'
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายใน' });
     }
