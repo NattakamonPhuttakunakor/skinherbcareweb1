@@ -35,6 +35,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const analyzeBtn = document.getElementById('analyze-symptom-btn');
     const resultsContainer = document.getElementById('results-container');
     const textInput = document.getElementById('symptom-input');
+    const TREATMENT_PREVIEW_LEN = 150;
+
+    const escapeHtml = (text) => String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const truncateText = (text, maxLen = TREATMENT_PREVIEW_LEN) => {
+        const raw = String(text || '').trim();
+        if (raw.length <= maxLen) return raw;
+        return `${raw.substring(0, maxLen)}...`;
+    };
+
+    window.toggleReadMore = (button) => {
+        const contentSpan = button.previousElementSibling;
+        if (!contentSpan) return;
+
+        const fullText = button.getAttribute('data-full-text') || '';
+        if (button.innerText === 'อ่านเพิ่มเติม') {
+            contentSpan.innerText = fullText;
+            button.innerText = 'ย่อกลับ';
+        } else {
+            contentSpan.innerText = truncateText(fullText, TREATMENT_PREVIEW_LEN);
+            button.innerText = 'อ่านเพิ่มเติม';
+        }
+    };
 
     analyzeBtn.addEventListener('click', async () => {
         const symptoms = textInput.value.trim();
@@ -107,6 +135,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const confidenceRaw = typeof result.confidence === 'number' ? result.confidence : 0;
                 const confidencePct = confidenceRaw > 1 ? Math.round(confidenceRaw) : Math.round(confidenceRaw * 100);
                 const advice = result.advice || result.treatment || result.recommendation || '';
+                const adviceText = String(advice || '').trim();
+                const shortAdvice = truncateText(adviceText, TREATMENT_PREVIEW_LEN);
+                const adviceHtml = adviceText
+                    ? `<p>
+                            <strong>วิธีรักษาเบื้องต้น:</strong>
+                            <span class="treatment-content">${escapeHtml(shortAdvice)}</span>
+                            ${adviceText.length > TREATMENT_PREVIEW_LEN
+                                ? `<button type="button" onclick="toggleReadMore(this)" data-full-text="${escapeHtml(adviceText)}" class="text-green-600 font-bold ml-1 hover:underline">อ่านเพิ่มเติม</button>`
+                                : ''}
+                       </p>`
+                    : '';
 
                 const rawHerbs = Array.isArray(result.herbs) ? result.herbs : [];
                 const herbNames = rawHerbs.length
@@ -124,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="mb-4 p-4 border rounded-lg bg-green-50">
                         <p><strong>โรคที่คาดว่าเป็น:</strong> ${disease}</p>
                         <p><strong>ความมั่นใจ:</strong> ${confidencePct}%</p>
-                        ${advice ? `<p><strong>คำแนะนำ:</strong> ${advice}</p>` : ''}
+                        ${adviceHtml}
                     </div>
 
                     <h5 class="text-lg font-bold mb-2 text-green-700">🌿 สมุนไพรที่แนะนำ</h5>
