@@ -100,6 +100,19 @@ body::after {
   background: rgba(255,255,255,0.7);
 }
 
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -294,12 +307,18 @@ body::after {
       <a href="/index.html">Home</a>
       <a href="/login.html">Log In</a>
       <a href="/register.html">Sign Up</a>
+      <button id="profile-btn-guest" class="profile-icon" aria-label="Profile">
+        <span>👤</span>
+      </button>
     </div>
 
     <div class="nav-links" id="admin-nav" style="display:none;">
       <a href="/index.html">Home</a>
       <a href="/admin-dashboard.html">จัดการระบบ</a>
       <button onclick="logout()">Log Out</button>
+      <button id="profile-btn-admin" class="profile-icon" aria-label="Profile">
+        <span>👤</span>
+      </button>
     </div>
   </div>
 </nav>
@@ -483,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadShowcaseDiseases();
 });
 </script>
+<script src="/js/profile-drawer.js?v=20260211r15"></script>
 <script src="/js/auth.js?v=20260211r15"></script>
 </body>
 </html>
