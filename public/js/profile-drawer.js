@@ -1,5 +1,5 @@
+window.__PROFILE_DRAWER_ACTIVE__ = true;
 document.addEventListener('DOMContentLoaded', () => {
-    window.__PROFILE_DRAWER_ACTIVE__ = true;
     const path = window.location.pathname || '';
     if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
         return;
@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const ASSET_BASE_URL = window.location.hostname.includes('netlify.app')
         ? 'https://skinherbcareweb1.onrender.com'
         : window.location.origin;
+    const currentPath = `${window.location.pathname || '/'}${window.location.search || ''}${window.location.hash || ''}`;
+    const loginRedirectUrl = `/login.html?next=${encodeURIComponent(currentPath)}`;
 
     const style = document.createElement('style');
     style.textContent = `
@@ -286,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openDrawer = () => {
         if (!token) {
-            window.location.href = '/login.html';
+            window.location.href = loginRedirectUrl;
             return;
         }
         drawer.classList.add('open');
@@ -301,6 +303,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!hasAdminSidebar) {
         if (fab) fab.addEventListener('click', openDrawer);
+        profileIconEls.forEach((el) => {
+            el.addEventListener('click', (event) => {
+                event.preventDefault();
+                openDrawer();
+            });
+        });
         drawer.querySelector('#profile-close').addEventListener('click', closeDrawer);
         backdrop.addEventListener('click', closeDrawer);
     }
@@ -342,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const openAdminDrawer = () => {
             if (!token) {
-                window.location.href = '/login.html';
+                window.location.href = loginRedirectUrl;
                 return;
             }
             if (adminDrawer && adminBackdrop) {
