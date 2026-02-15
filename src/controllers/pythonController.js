@@ -14,15 +14,22 @@ export const analyzeWithPython = async (req, res) => {
 
         console.log(`File received: ${req.file.originalname} (${req.file.size} bytes)`);
 
-        const pythonUrl = process.env.PYTHON_API_URL || 'https://finalproject-3-uprs.onrender.com/predict';
-        const apiKey = process.env.PYTHON_API_KEY || process.env.API_KEY || '';
+        const pythonUrl =
+            process.env.HERB_MODEL_API_URL ||
+            process.env.PYTHON_API_URL ||
+            'https://paew-herbs-model-api.hf.space/predict';
+        const apiKey =
+            process.env.HERB_MODEL_API_KEY ||
+            process.env.PYTHON_API_KEY ||
+            process.env.API_KEY ||
+            'herbs-model-project-66';
         console.log('Python URL:', pythonUrl);
         console.log('Python API key present:', apiKey ? `${apiKey.slice(0, 4)}***` : '(missing)');
 
         if (!apiKey) {
             return res.status(500).json({
                 success: false,
-                message: 'Missing API key for AI server. Please set PYTHON_API_KEY.'
+                message: 'Missing API key for AI server. Please set HERB_MODEL_API_KEY or PYTHON_API_KEY.'
             });
         }
 

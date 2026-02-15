@@ -1,0 +1,6 @@
+Base URL : https://paew-herbs-model-api.hf.space
+
+GET https://paew-herbs-model-api.hf.space/health
+POST https://paew-herbs-model-api.hf.space/predict
+
+x-api-key: herbs-model-project-66

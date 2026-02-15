@@ -72,7 +72,7 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+            const token = localStorage.getItem('token');
             const userStr = localStorage.getItem('user');
             
             if (!token) {
@@ -80,15 +80,9 @@
                 return;
             }
 
-            let user = {};
-            try {
-                user = JSON.parse(userStr || '{}');
-            } catch (_) {
-                user = {};
-            }
-
-            const userRole = String(user.role || user.userRole || localStorage.getItem('userRole') || '').toLowerCase();
-            if (userRole !== 'admin') {
+            const user = JSON.parse(userStr || '{}');
+            
+            if (user.role !== 'admin') {
                 window.location.href = '/index.html'; // หรือ user-dashboard
                 return;
             }
@@ -359,7 +353,7 @@
                                         <span class="${statusClass} px-2 py-1 rounded text-xs font-bold">${status}</span>
                                     </td>
                                     <td class="p-4 text-center space-x-2">
-                                        <a href="disease-detail.html?id=${d._id || ''}" class="text-blue-500 hover:text-blue-600 text-sm font-semibold">ไปจัดการ</a>
+                                        <a href="disease_list.html" class="text-blue-500 hover:text-blue-600 text-sm font-semibold">ไปจัดการ</a>
                                     </td>
                                 `;
                                 tableBody.appendChild(tr);
@@ -386,17 +380,9 @@
         });
 
         (function setupProfilePanel() {
-            // profile-drawer.js already manages profile interactions across pages.
-            // Keep this block as fallback only when shared drawer script is not active.
-            if (window.__PROFILE_DRAWER_ACTIVE__) return;
-            const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+            const token = localStorage.getItem('token');
             const userRaw = localStorage.getItem('user');
-            let user = null;
-            try {
-                user = userRaw ? JSON.parse(userRaw) : null;
-            } catch (_) {
-                user = null;
-            }
+            const user = userRaw ? JSON.parse(userRaw) : null;
 
             const btn = document.getElementById('profile-btn-admin');
             const drawer = document.getElementById('profile-drawer');
@@ -420,18 +406,6 @@
             if (nameDrawer) nameDrawer.textContent = fullName;
             if (emailDrawer) emailDrawer.textContent = email;
 
-            const API_BASE_URL = window.location.hostname.includes('netlify.app')
-                ? 'https://skinherbcareweb1.onrender.com'
-                : window.location.origin;
-            const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
-
-            const resolveProfileImageUrl = (raw) => {
-                if (!raw) return '';
-                if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')) return raw;
-                if (raw.startsWith('/')) return `${API_BASE_URL}${raw}`;
-                return `${API_BASE_URL}/${raw}`;
-            };
-
             const applyImage = (src) => {
                 if (src) {
                     imgSidebar.src = src;
@@ -447,12 +421,7 @@
                     fallbackDrawer.style.display = 'flex';
                 }
             };
-            const legacyImage = localStorage.getItem('profileImage');
-            if (!localStorage.getItem(storageKey) && legacyImage) {
-                localStorage.setItem(storageKey, legacyImage);
-            }
-            const currentImage = localStorage.getItem(storageKey) || localStorage.getItem('profileImage') || '';
-            applyImage(resolveProfileImageUrl(currentImage));
+            applyImage(localStorage.getItem('profileImage'));
 
             const openDrawer = () => {
                 if (!token) { window.location.href = '/login.html'; return; }

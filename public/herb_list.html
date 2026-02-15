@@ -127,7 +127,7 @@
 
         function fixMojibake(text) {
             if (typeof text !== 'string') return text;
-            if (!/[ÃÂà¸�]/.test(text)) return text;
+            if (!/[\u00C3\u00C2\u00E0]/.test(text)) return text;
             try {
                 const bytes = Uint8Array.from(text, ch => ch.charCodeAt(0));
                 return new TextDecoder('utf-8').decode(bytes);
