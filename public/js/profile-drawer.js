@@ -1,4 +1,4 @@
-window.__PROFILE_DRAWER_ACTIVE__ = true;
+﻿window.__PROFILE_DRAWER_ACTIVE__ = true;
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname || '';
     if (path.endsWith('/login.html') || path.endsWith('/register.html')) {
@@ -149,19 +149,17 @@ document.addEventListener('DOMContentLoaded', () => {
     drawer.setAttribute('aria-hidden', 'true');
     drawer.innerHTML = `
         <div class="flex items-center justify-between mb-4">
-            <h3 style="font-weight:700;color:#0f3d2e;">โปรไฟล์ผู้ใช้</h3>
-            <button id="profile-close" class="profile-drawer-btn ghost" style="width:auto;padding:6px 10px;">ปิด</button>
-        </div>
+            <h3 style="font-weight:700;color:#0f3d2e;">à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰</h3>        </div>
         <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;">
             <img id="profile-drawer-img" class="profile-drawer-avatar" src="" alt="" style="display:none;">
             <div id="profile-drawer-fallback" class="profile-drawer-avatar" style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#10b981;">${DEFAULT_FALLBACK}</div>
-            <div id="profile-drawer-name" style="font-weight:700;color:#0f3d2e;">ผู้ใช้งาน</div>
+            <div id="profile-drawer-name" style="font-weight:700;color:#0f3d2e;">à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</div>
             <div id="profile-drawer-email" style="font-size:0.9rem;color:#6b7280;">-</div>
         </div>
         <div style="margin-top:16px;display:grid;gap:10px;">
-            <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">เปลี่ยนรูปโปรไฟล์</label>
+            <label class="profile-drawer-btn ghost" for="profile-image-input" style="text-align:center;">à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸£à¸¹à¸›à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ</label>
             <input id="profile-image-input" type="file" accept="image/*" style="display:none;">
-            <button id="profile-logout" class="profile-drawer-btn primary">ออกจากระบบ</button>
+            <button id="profile-logout" class="profile-drawer-btn primary">à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š</button>
         </div>
     `;
     if (!hasAdminSidebar) {
@@ -177,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = drawer.querySelector('#profile-image-input');
 
     const fullName = user
-        ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'ผู้ใช้งาน'
-        : 'ผู้ใช้งาน';
+        ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || user.username || 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™'
+        : 'à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸‡à¸²à¸™';
     const email = user && user.email ? user.email : '-';
     const storageKey = email && email !== '-' ? `profileImage:${email}` : 'profileImage:guest';
     nameEl.textContent = fullName;
@@ -309,7 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 openDrawer();
             });
         });
-        drawer.querySelector('#profile-close').addEventListener('click', closeDrawer);
+        const closeBtn = drawer.querySelector('#profile-close');
+        if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
         backdrop.addEventListener('click', closeDrawer);
     }
 
@@ -395,3 +394,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+
