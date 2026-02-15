@@ -228,18 +228,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         return trimmed;
     };
 
+    const herbNameAliases = {
+        alovera: ['aloe vera', 'aloe_vera', 'aloe'],
+        aloevera: ['aloe vera', 'aloe_vera', 'aloe'],
+        holybasil: ['holy basil', 'basil'],
+        gotukola: ['gotu kola'],
+        turmeric: ['curcuma longa']
+    };
+
     const buildNameCandidates = (raw) => {
         if (!raw) return [];
         const base = String(raw).trim();
         if (!base) return [];
         const candidates = new Set();
+        const normalizedBase = normalizeKey(base);
+
         candidates.add(base);
         candidates.add(base.replace(/_/g, ' '));
+        // Split glued latin names from model labels, e.g. "Alovera" -> "Alo vera".
+        candidates.add(base.replace(/([a-z])([A-Z])/g, '$1 $2'));
+        candidates.add(base.replace(/([A-Za-z])([0-9])/g, '$1 $2').replace(/([0-9])([A-Za-z])/g, '$1 $2'));
         if (base.includes('_')) {
             candidates.add(base.split('_')[0]);
         }
         candidates.add(base.replace(/_(peel|leaf|root|seed|flower|bark|stem|fruit)$/i, ''));
         candidates.add(base.replace(/_(peel|leaf|root|seed|flower|bark|stem|fruit)$/i, '').replace(/_/g, ' '));
+
+        const aliasCandidates = herbNameAliases[normalizedBase] || [];
+        aliasCandidates.forEach((name) => candidates.add(name));
+
         return Array.from(candidates).filter(Boolean);
     };
 
