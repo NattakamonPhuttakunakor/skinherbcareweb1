@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Warm up external herb model to reduce first-request cold start timeout.
+    fetch('https://paew-herbs-model-api.hf.space/health', {
+        method: 'GET',
+        mode: 'no-cors'
+    }).catch(() => {});
+
     const token = localStorage.getItem('token') || localStorage.getItem('userToken');
     const userRaw = localStorage.getItem('user');
     const API_BASE_URL = window.location.hostname.includes('netlify.app')
