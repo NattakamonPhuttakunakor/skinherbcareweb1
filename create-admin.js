@@ -1,46 +1,74 @@
-import mongoose from 'mongoose';
+﻿import mongoose from 'mongoose';
 import User from './src/models/User.js';
-import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const createAdmin = async () => {
+const ADMIN_USERS = [
+  {
+    firstName: 'Admin',
+    lastName: 'SkinHerbCare',
+    email: 'admin@skinherbcare.com',
+    password: 'admin123456',
+    age: 30,
+    occupation: 'Administrator',
+    role: 'admin'
+  },
+  {
+    firstName: 'Expert',
+    lastName: 'Disease',
+    email: 'expert.disease@skinherbcare.com',
+    password: 'ExpertDisease@2026',
+    age: 30,
+    occupation: 'Disease Specialist',
+    role: 'admin'
+  },
+  {
+    firstName: 'Expert',
+    lastName: 'Herb',
+    email: 'expert.herb@skinherbcare.com',
+    password: 'ExpertHerb@2026',
+    age: 30,
+    occupation: 'Herb Specialist',
+    role: 'admin'
+  }
+];
+
+const createAdmins = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ เชื่อมต่อ MongoDB สำเร็จ');
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!mongoUri) throw new Error('Missing MONGODB_URI (or MONGO_URI) environment variable');
 
-    // ตรวจสอบ admin ที่มีอยู่แล้ว
-    const existingAdmin = await User.findOne({ email: 'admin@skinherbcare.com' });
-    
-    if (existingAdmin) {
-      console.log('⚠️ Admin มีอยู่แล้ว:', existingAdmin.email);
-      console.log('Email:', existingAdmin.email);
-      console.log('Role:', existingAdmin.role);
-    } else {
-      // สร้าง Admin ใหม่
-      const adminUser = await User.create({
-        firstName: 'Admin',
-        lastName: 'SkinHerbCare',
-        email: 'admin@skinherbcare.com',
-        password: 'admin123456', // ⚠️ เปลี่ยนรหัสผ่านนี้หลังจากสร้างแล้ว!
-        age: 30,
-        occupation: 'Administrator',
-        role: 'admin' // ✅ กำหนดบทบาทเป็น admin
-      });
+    await mongoose.connect(mongoUri);
+    console.log('Connected to MongoDB');
 
-      console.log('✅ สร้าง Admin Account สำเร็จ!');
-      console.log('📧 Email:', adminUser.email);
-      console.log('🔑 Password: admin123456');
-      console.log('⚠️  กรุณาเปลี่ยนรหัสผ่านหลังจากล็อกอินแล้ว');
+    for (const account of ADMIN_USERS) {
+      const existing = await User.findOne({ email: account.email });
+      if (existing) {
+        if (existing.role !== 'admin') {
+          existing.role = 'admin';
+          await existing.save();
+          console.log(`Updated role to admin: ${existing.email}`);
+        } else {
+          console.log(`Already exists: ${existing.email} (role=admin)`);
+        }
+        continue;
+      }
+
+      const created = await User.create(account);
+      console.log(`Created admin: ${created.email}`);
     }
 
-    await mongoose.disconnect();
-    process.exit(0);
+    console.log('\nDefault admin/expert accounts:');
+    ADMIN_USERS.forEach((a) => {
+      console.log(`- ${a.email} / ${a.password}`);
+    });
   } catch (error) {
-    console.error('❌ เกิดข้อผิดพลาด:', error.message);
-    process.exit(1);
+    console.error('Failed to create admin accounts:', error.message);
+    process.exitCode = 1;
+  } finally {
+    await mongoose.disconnect().catch(() => {});
   }
 };
 
-createAdmin();
+createAdmins();
